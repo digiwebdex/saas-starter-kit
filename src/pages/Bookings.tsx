@@ -219,6 +219,14 @@ const Bookings = () => {
                         <div className="flex gap-1">
                           <Button variant="ghost" size="icon" onClick={() => handleEdit(b)}><Pencil className="h-4 w-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => handleDelete(b.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                          <Button variant="ghost" size="icon" title="Send confirmation email" onClick={async () => {
+                            try {
+                              await emailApi.sendBookingConfirmation(b.id);
+                              toast({ title: "Confirmation email sent" });
+                            } catch (err: any) {
+                              toast({ title: "Email failed", description: err.message, variant: "destructive" });
+                            }
+                          }}><Mail className="h-4 w-4 text-primary" /></Button>
                         </div>
                       </TableCell>
                     </TableRow>
