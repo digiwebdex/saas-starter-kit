@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Globe, Trash2, Copy, CheckCircle, AlertCircle, ExternalLink, ShieldCheck, Loader2, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { generateVerificationToken, verifyDomainDns, checkDomainARecord } from "@/lib/domainVerification";
+import { generateVerificationToken, verifyDomainDns, checkDomainARecord, requestSslCertificate, generateSslCommand } from "@/lib/domainVerification";
 
 // DNS check interval in milliseconds (3 minutes)
 const DNS_CHECK_INTERVAL = 3 * 60 * 1000;
