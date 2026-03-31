@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ const mockTenants: TenantRow[] = [
 ];
 
 const AdminTenants = () => {
+  const navigate = useNavigate();
   const [tenants, setTenants] = useState<TenantRow[]>(mockTenants);
   const [search, setSearch] = useState("");
   const [selectedTenant, setSelectedTenant] = useState<TenantRow | null>(null);
@@ -116,7 +118,7 @@ const AdminTenants = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => { setSelectedTenant(t); setDetailOpen(true); }}
+                            onClick={() => navigate(`/admin/tenants/${t.id}`)}
                             title="View details"
                           >
                             <Eye className="h-4 w-4" />
