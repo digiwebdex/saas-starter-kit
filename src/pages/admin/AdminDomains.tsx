@@ -8,8 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Globe, Trash2, Copy, CheckCircle, AlertCircle, ExternalLink } from "lucide-react";
+import { Plus, Globe, Trash2, Copy, CheckCircle, AlertCircle, ExternalLink, ShieldCheck, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { generateVerificationToken, verifyDomainDns } from "@/lib/domainVerification";
 
 interface TenantDomain {
   id: string;
@@ -18,6 +19,8 @@ interface TenantDomain {
   domain: string;
   status: "active" | "pending" | "error";
   sslStatus: "active" | "pending" | "none";
+  verificationStatus: "unverified" | "verifying" | "verified";
+  verificationToken: string;
   addedAt: string;
 }
 
@@ -35,6 +38,8 @@ const mockDomains: TenantDomain[] = [
     domain: "acmetravel.com",
     status: "active",
     sslStatus: "active",
+    verificationStatus: "verified",
+    verificationToken: "tas-verify-abc123def456gh",
     addedAt: "2025-12-01",
   },
   {
@@ -44,6 +49,8 @@ const mockDomains: TenantDomain[] = [
     domain: "globetours.net",
     status: "pending",
     sslStatus: "pending",
+    verificationStatus: "unverified",
+    verificationToken: "tas-verify-xyz789mno012pq",
     addedAt: "2026-03-28",
   },
 ];
@@ -51,7 +58,9 @@ const mockDomains: TenantDomain[] = [
 const AdminDomains = () => {
   const [domains, setDomains] = useState<TenantDomain[]>(mockDomains);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [verifyDialogDomain, setVerifyDialogDomain] = useState<TenantDomain | null>(null);
   const [form, setForm] = useState({ tenantId: "", domain: "" });
+  const [verifying, setVerifying] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleAdd = (e: React.FormEvent) => {
@@ -63,13 +72,13 @@ const AdminDomains = () => {
       return;
     }
 
-    // Check duplicate
     if (domains.some((d) => d.domain === domainClean)) {
       toast({ title: "এই ডোমেইন আগে থেকেই আছে", variant: "destructive" });
       return;
     }
 
     const tenant = mockTenants.find((t) => t.id === form.tenantId);
+    const token = generateVerificationToken();
     const newDomain: TenantDomain = {
       id: crypto.randomUUID(),
       tenantId: form.tenantId,
@@ -77,13 +86,45 @@ const AdminDomains = () => {
       domain: domainClean,
       status: "pending",
       sslStatus: "none",
+      verificationStatus: "unverified",
+      verificationToken: token,
       addedAt: new Date().toISOString().split("T")[0],
     };
 
     setDomains((prev) => [...prev, newDomain]);
-    toast({ title: "ডোমেইন যুক্ত হয়েছে", description: `${domainClean} → ${tenant?.name}` });
+    setVerifyDialogDomain(newDomain);
+    toast({ title: "ডোমেইন যুক্ত হয়েছে", description: `DNS TXT রেকর্ড যুক্ত করে ভেরিফাই করুন` });
     setForm({ tenantId: "", domain: "" });
     setDialogOpen(false);
+  };
+
+  const handleVerify = async (id: string) => {
+    const domain = domains.find((d) => d.id === id);
+    if (!domain) return;
+
+    setVerifying(id);
+    setDomains((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, verificationStatus: "verifying" as const } : d))
+    );
+
+    const result = await verifyDomainDns(domain.domain, domain.verificationToken);
+
+    if (result.verified) {
+      setDomains((prev) =>
+        prev.map((d) => (d.id === id ? { ...d, verificationStatus: "verified" as const } : d))
+      );
+      toast({ title: "✅ ডোমেইন ভেরিফাইড!", description: `${domain.domain} সফলভাবে যাচাই হয়েছে` });
+    } else {
+      setDomains((prev) =>
+        prev.map((d) => (d.id === id ? { ...d, verificationStatus: "unverified" as const } : d))
+      );
+      toast({
+        title: "❌ ভেরিফিকেশন ব্যর্থ",
+        description: result.error || "DNS TXT রেকর্ড মিলছে না",
+        variant: "destructive",
+      });
+    }
+    setVerifying(null);
   };
 
   const handleRemove = (id: string) => {
@@ -122,7 +163,24 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
     toast({ title: "কমান্ড কপি হয়েছে", description: "VPS টার্মিনালে পেস্ট করুন" });
   };
 
+  const copyToken = (token: string) => {
+    navigator.clipboard.writeText(token);
+    toast({ title: "টোকেন কপি হয়েছে" });
+  };
+
   const toggleStatus = (id: string) => {
+    const domain = domains.find((d) => d.id === id);
+    if (!domain) return;
+
+    if (domain.verificationStatus !== "verified" && domain.status !== "active") {
+      toast({
+        title: "ভেরিফিকেশন প্রয়োজন",
+        description: "Active করতে হলে আগে ডোমেইন ভেরিফাই করুন",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setDomains((prev) =>
       prev.map((d) => {
         if (d.id !== id) return d;
@@ -132,6 +190,29 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
       })
     );
     toast({ title: "স্ট্যাটাস আপডেট হয়েছে" });
+  };
+
+  const getVerificationBadge = (status: TenantDomain["verificationStatus"]) => {
+    switch (status) {
+      case "verified":
+        return (
+          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+            <ShieldCheck className="mr-1 h-3 w-3" />Verified
+          </Badge>
+        );
+      case "verifying":
+        return (
+          <Badge variant="secondary">
+            <Loader2 className="mr-1 h-3 w-3 animate-spin" />Checking...
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="outline" className="text-amber-700 border-amber-300 dark:text-amber-400">
+            <AlertCircle className="mr-1 h-3 w-3" />Unverified
+          </Badge>
+        );
+    }
   };
 
   return (
@@ -190,27 +271,86 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
           </Dialog>
         </div>
 
-        {/* Setup Instructions */}
+        {/* Verification Instructions */}
         <Card className="border-dashed">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-primary" />
-              ডোমেইন সেটআপ নির্দেশনা
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              ডোমেইন ভেরিফিকেশন নির্দেশনা
             </CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground space-y-3">
-            <p className="font-semibold text-foreground">Cloudflare DNS সেটআপ:</p>
-            <p><strong>১.</strong> Cloudflare DNS-এ যান → <strong>A Record</strong> যুক্ত করুন: <code className="bg-muted px-1 rounded">Name: @</code> → <code className="bg-muted px-1 rounded">Value: আপনার VPS IP</code></p>
-            <p><strong>২.</strong> <strong>CNAME Record</strong> যুক্ত করুন: <code className="bg-muted px-1 rounded">Name: www</code> → <code className="bg-muted px-1 rounded">Value: yourdomain.com</code></p>
-            <p><strong>৩.</strong> Proxy <strong>বন্ধ</strong> করুন (DNS Only / ধূসর মেঘ আইকন) — SSL আমরা Certbot দিয়ে করবো</p>
-            <p><strong>৪.</strong> ৫–১০ মিনিট অপেক্ষা করুন DNS propagation-এর জন্য</p>
-            <p className="font-semibold text-foreground mt-2">সার্ভার সেটআপ:</p>
-            <p><strong>৫.</strong> নিচের টেবিলে "Copy Setup" বাটনে ক্লিক করে Nginx কমান্ড কপি করুন</p>
-            <p><strong>৬.</strong> VPS টার্মিনালে পেস্ট করে রান করুন (SSL সহ)</p>
-            <p><strong>৭.</strong> ব্যাকেন্ড ডাটাবেসে টেন্যান্টের <code className="bg-muted px-1 rounded">customDomain</code> আপডেট করুন</p>
-            <p><strong>৮.</strong> স্ট্যাটাস "Active" করুন</p>
+            <p className="font-semibold text-foreground">ধাপ ১: DNS TXT রেকর্ড যুক্ত করুন</p>
+            <p>আপনার DNS প্রোভাইডারে (Cloudflare / Namecheap / GoDaddy) একটি <strong>TXT Record</strong> যুক্ত করুন:</p>
+            <div className="bg-muted/50 rounded-lg p-3 space-y-1 font-mono text-xs">
+              <p><strong>Type:</strong> TXT</p>
+              <p><strong>Name:</strong> _verify</p>
+              <p><strong>Value:</strong> (নিচের টেবিলে প্রতিটি ডোমেইনের জন্য আলাদা টোকেন দেখুন)</p>
+            </div>
+            <p className="font-semibold text-foreground mt-2">ধাপ ২: ভেরিফাই করুন</p>
+            <p>"Verify" বাটনে ক্লিক করুন। সিস্টেম DNS চেক করে ভেরিফাই করবে।</p>
+            <p className="font-semibold text-foreground mt-2">ধাপ ৩: সার্ভার সেটআপ</p>
+            <p>ভেরিফিকেশন সফল হলে Nginx কমান্ড কপি করে VPS-এ রান করুন, তারপর "Active" করুন।</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+              ⚠️ DNS propagation-এ ৫–১০ মিনিট সময় লাগতে পারে। ভেরিফাই না হলে কিছুক্ষণ পর আবার চেষ্টা করুন।
+            </p>
           </CardContent>
         </Card>
+
+        {/* Verification Detail Dialog */}
+        <Dialog open={!!verifyDialogDomain} onOpenChange={(open) => !open && setVerifyDialogDomain(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                ডোমেইন ভেরিফিকেশন
+              </DialogTitle>
+            </DialogHeader>
+            {verifyDialogDomain && (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  <strong>{verifyDialogDomain.domain}</strong> ভেরিফাই করতে নিচের DNS TXT রেকর্ড যুক্ত করুন:
+                </p>
+                <div className="bg-muted rounded-lg p-4 space-y-2 font-mono text-sm">
+                  <div className="flex justify-between items-center">
+                    <span><strong>Type:</strong> TXT</span>
+                  </div>
+                  <div><strong>Name:</strong> _verify</div>
+                  <div className="flex items-center gap-2">
+                    <span className="break-all"><strong>Value:</strong> {verifyDialogDomain.verificationToken}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0"
+                      onClick={() => copyToken(verifyDialogDomain.verificationToken)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  অর্থাৎ, <code className="bg-muted px-1 rounded">_verify.{verifyDialogDomain.domain}</code> → <code className="bg-muted px-1 rounded">{verifyDialogDomain.verificationToken}</code>
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => handleVerify(verifyDialogDomain.id)}
+                    disabled={verifying === verifyDialogDomain.id}
+                    className="flex-1"
+                  >
+                    {verifying === verifyDialogDomain.id ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Checking DNS...</>
+                    ) : (
+                      <><ShieldCheck className="mr-2 h-4 w-4" />Verify Domain</>
+                    )}
+                  </Button>
+                  <DialogClose asChild>
+                    <Button variant="outline">Close</Button>
+                  </DialogClose>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Domains Table */}
         <Card>
@@ -224,16 +364,17 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                 <TableRow>
                   <TableHead>Domain</TableHead>
                   <TableHead>Company</TableHead>
+                  <TableHead>Verification</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>SSL</TableHead>
                   <TableHead>Added</TableHead>
-                  <TableHead className="w-[180px]">Actions</TableHead>
+                  <TableHead className="w-[220px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {domains.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                       কোনো ডোমেইন যুক্ত হয়নি। "Add Domain" ক্লিক করুন।
                     </TableCell>
                   </TableRow>
@@ -250,6 +391,7 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground">{d.tenantName}</TableCell>
+                      <TableCell>{getVerificationBadge(d.verificationStatus)}</TableCell>
                       <TableCell>
                         {d.status === "active" ? (
                           <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
@@ -278,6 +420,14 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                           <Button
                             variant="ghost"
                             size="icon"
+                            title="Verify domain"
+                            onClick={() => setVerifyDialogDomain(d)}
+                          >
+                            <ShieldCheck className={`h-4 w-4 ${d.verificationStatus === "verified" ? "text-green-600" : "text-amber-500"}`} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             title="Copy Nginx setup command"
                             onClick={() => copyNginxCommand(d.domain)}
                           >
@@ -288,6 +438,7 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                             size="icon"
                             title={d.status === "active" ? "Mark pending" : "Mark active"}
                             onClick={() => toggleStatus(d.id)}
+                            disabled={d.verificationStatus !== "verified" && d.status !== "active"}
                           >
                             <CheckCircle className={`h-4 w-4 ${d.status === "active" ? "text-green-600" : "text-muted-foreground"}`} />
                           </Button>
