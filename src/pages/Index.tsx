@@ -75,7 +75,7 @@ const Index = () => {
         password: form.password,
         tenantName: form.companyName,
       });
-      toast({ title: "Registration Successful!", description: `Welcome to Globex Connect — ${plans.find(p => p.id === selectedPlan)?.name} plan` });
+      toast({ title: "Registration Successful!", description: `Welcome to Globex Connect — ${PLANS.find(p => p.id === selectedPlan)?.name} plan` });
       setDialogOpen(false);
       navigate("/dashboard");
     } catch (err: any) {
