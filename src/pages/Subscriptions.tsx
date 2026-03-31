@@ -162,7 +162,7 @@ const Subscription_Page = () => {
                   <p.icon className="mx-auto h-8 w-8 text-primary mb-2" />
                   <CardTitle>{p.name}</CardTitle>
                   <CardDescription>
-                    <span className="text-3xl font-bold text-foreground">${p.price}</span>
+                    <span className="text-3xl font-bold text-foreground">৳{p.price}</span>
                     {p.price > 0 && <span className="text-muted-foreground">/mo</span>}
                   </CardDescription>
                 </CardHeader>
