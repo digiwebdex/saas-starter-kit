@@ -8,8 +8,8 @@ interface AuthContextType {
   currentPlan: PlanType;
   isSubscriptionExpired: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (data: { name: string; email: string; password: string; tenantName: string }) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (data: { name: string; email: string; password: string; tenantName: string }) => Promise<User>;
   logout: () => void;
   refreshTenant: () => Promise<void>;
 }
@@ -72,6 +72,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem("token", res.token);
     setUser(res.user);
     fetchTenant();
+    return res.user;
   }, []);
 
   const register = useCallback(
@@ -80,6 +81,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.setItem("token", res.token);
       setUser(res.user);
       fetchTenant();
+      return res.user;
     },
     []
   );
