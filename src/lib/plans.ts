@@ -70,6 +70,7 @@ export const PLANS: PlanConfig[] = [
     maxClients: -1,
     maxBookings: -1,
     maxUsers: 5,
+    maxDomains: 0,
     features: [
       "Unlimited clients",
       "Unlimited bookings",
