@@ -132,3 +132,16 @@ export interface Task {
   tenantId: string;
   createdAt: string;
 }
+
+export interface Booking {
+  id: string;
+  type: "tour" | "ticket" | "hotel" | "visa";
+  clientId: string;
+  agentId: string;
+  amount: number;
+  cost: number;
+  profit: number;
+  status: "pending" | "confirmed" | "completed" | "cancelled";
+  tenantId: string;
+  createdAt: string;
+}
