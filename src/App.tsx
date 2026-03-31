@@ -1,8 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useInRouterContext } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { WebsiteProvider } from "@/contexts/WebsiteContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
@@ -53,59 +54,75 @@ const A = ({ children }: { children: React.ReactNode }) => (
   <AdminRoute>{children}</AdminRoute>
 );
 
-const App = () => (
+const AppContent = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <Routes>
-        {/* Main landing page */}
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/onboarding" element={<P><Onboarding /></P>} />
+      <AuthProvider>
+        <Toaster />
+        <Sonner />
+        <Routes>
+          {/* Main landing page */}
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/onboarding" element={<P><Onboarding /></P>} />
 
-            {/* Public website (no auth required) */}
-            <Route path="/site" element={<WebsiteProvider><SiteHome /></WebsiteProvider>} />
-            <Route path="/site/about" element={<WebsiteProvider><SiteAbout /></WebsiteProvider>} />
-            <Route path="/site/packages" element={<WebsiteProvider><SitePackages /></WebsiteProvider>} />
-            <Route path="/site/contact" element={<WebsiteProvider><SiteContact /></WebsiteProvider>} />
-            <Route path="/site/pricing" element={<SitePricing />} />
+              {/* Public website (no auth required) */}
+              <Route path="/site" element={<WebsiteProvider><SiteHome /></WebsiteProvider>} />
+              <Route path="/site/about" element={<WebsiteProvider><SiteAbout /></WebsiteProvider>} />
+              <Route path="/site/packages" element={<WebsiteProvider><SitePackages /></WebsiteProvider>} />
+              <Route path="/site/contact" element={<WebsiteProvider><SiteContact /></WebsiteProvider>} />
+              <Route path="/site/pricing" element={<SitePricing />} />
 
-            {/* App routes (protected) */}
-            <Route path="/dashboard" element={<P><Dashboard /></P>} />
-            <Route path="/clients" element={<P><Clients /></P>} />
-            <Route path="/agents" element={<P><Agents /></P>} />
-            <Route path="/vendors" element={<P><Vendors /></P>} />
-            <Route path="/leads" element={<P><Leads /></P>} />
-            <Route path="/tasks" element={<P><Tasks /></P>} />
-            <Route path="/bookings" element={<P><Bookings /></P>} />
-            <Route path="/invoices" element={<P><Invoices /></P>} />
-            <Route path="/accounts" element={<P><Accounts /></P>} />
-            <Route path="/reports" element={<P><Reports /></P>} />
-            <Route path="/hajj-umrah" element={<P><HajjUmrah /></P>} />
-            <Route path="/subscription" element={<P><Subscriptions /></P>} />
-            <Route path="/payment/callback" element={<P><PaymentCallback /></P>} />
-            <Route path="/team" element={<P><Team /></P>} />
-            <Route path="/organization" element={<P><Organization /></P>} />
-            <Route path="/settings" element={<P><SettingsPage /></P>} />
-            <Route path="/website" element={<P><WebsiteCustomizer /></P>} />
+              {/* App routes (protected) */}
+              <Route path="/dashboard" element={<P><Dashboard /></P>} />
+              <Route path="/clients" element={<P><Clients /></P>} />
+              <Route path="/agents" element={<P><Agents /></P>} />
+              <Route path="/vendors" element={<P><Vendors /></P>} />
+              <Route path="/leads" element={<P><Leads /></P>} />
+              <Route path="/tasks" element={<P><Tasks /></P>} />
+              <Route path="/bookings" element={<P><Bookings /></P>} />
+              <Route path="/invoices" element={<P><Invoices /></P>} />
+              <Route path="/accounts" element={<P><Accounts /></P>} />
+              <Route path="/reports" element={<P><Reports /></P>} />
+              <Route path="/hajj-umrah" element={<P><HajjUmrah /></P>} />
+              <Route path="/subscription" element={<P><Subscriptions /></P>} />
+              <Route path="/payment/callback" element={<P><PaymentCallback /></P>} />
+              <Route path="/team" element={<P><Team /></P>} />
+              <Route path="/organization" element={<P><Organization /></P>} />
+              <Route path="/settings" element={<P><SettingsPage /></P>} />
+              <Route path="/website" element={<P><WebsiteCustomizer /></P>} />
 
-            {/* Admin routes */}
-            <Route path="/admin" element={<A><AdminDashboard /></A>} />
-            <Route path="/admin/tenants" element={<A><AdminTenants /></A>} />
-            <Route path="/admin/tenants/:tenantId" element={<A><AdminTenantDetails /></A>} />
-            <Route path="/admin/payments" element={<A><AdminPayments /></A>} />
-            <Route path="/admin/plans" element={<A><AdminPlans /></A>} />
-            <Route path="/admin/domains" element={<A><AdminDomains /></A>} />
-            <Route path="/admin/subscriptions" element={<A><AdminSubscriptions /></A>} />
-            <Route path="/admin/settings" element={<A><AdminSettings /></A>} />
-            <Route path="/admin/features" element={<A><AdminFeatures /></A>} />
+              {/* Admin routes */}
+              <Route path="/admin" element={<A><AdminDashboard /></A>} />
+              <Route path="/admin/tenants" element={<A><AdminTenants /></A>} />
+              <Route path="/admin/tenants/:tenantId" element={<A><AdminTenantDetails /></A>} />
+              <Route path="/admin/payments" element={<A><AdminPayments /></A>} />
+              <Route path="/admin/plans" element={<A><AdminPlans /></A>} />
+              <Route path="/admin/domains" element={<A><AdminDomains /></A>} />
+              <Route path="/admin/subscriptions" element={<A><AdminSubscriptions /></A>} />
+              <Route path="/admin/settings" element={<A><AdminSettings /></A>} />
+              <Route path="/admin/features" element={<A><AdminFeatures /></A>} />
 
-            <Route path="*" element={<NotFound />} />
-      </Routes>
+              <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
+
+const App = () => {
+  const inRouterContext = useInRouterContext();
+
+  if (inRouterContext) {
+    return <AppContent />;
+  }
+
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  );
+};
 
 export default App;
