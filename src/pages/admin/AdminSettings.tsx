@@ -549,6 +549,106 @@ const AdminSettings = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* ════════ SMS ════════ */}
+          <TabsContent value="sms">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-primary" /> SMS Gateway Settings
+                </CardTitle>
+                <CardDescription>Configure SMS provider for sending notifications and OTPs</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between rounded-lg border p-4">
+                  <div>
+                    <p className="font-medium">Enable SMS System</p>
+                    <p className="text-sm text-muted-foreground">Allow sending SMS from the platform</p>
+                  </div>
+                  <Switch checked={sms.enabled} onCheckedChange={(v) => setSms({ ...sms, enabled: v })} />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>SMS Provider</Label>
+                    <Select value={sms.provider} onValueChange={(v: "sslwireless" | "bulksms") => setSms({ ...sms, provider: v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sslwireless">SSL Wireless</SelectItem>
+                        <SelectItem value="bulksms">BulkSMS BD</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sender ID</Label>
+                    <Input
+                      placeholder="e.g. GLOBEX"
+                      value={sms.senderId}
+                      onChange={(e) => setSms({ ...sms, senderId: e.target.value })}
+                    />
+                    <p className="text-xs text-muted-foreground">Approved sender ID from your provider</p>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>API Key</Label>
+                    <div className="relative">
+                      <Input
+                        type={showPasswords.smsApi ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={sms.apiKey}
+                        onChange={(e) => setSms({ ...sms, apiKey: e.target.value })}
+                      />
+                      <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => togglePass("smsApi")}>
+                        {showPasswords.smsApi ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Base URL</Label>
+                    <Input
+                      placeholder={sms.provider === "sslwireless" ? "https://smsplus.sslwireless.com/api/v3" : "https://bulksmsbd.net/api"}
+                      value={sms.baseUrl}
+                      onChange={(e) => setSms({ ...sms, baseUrl: e.target.value })}
+                    />
+                    <p className="text-xs text-muted-foreground">Provider API endpoint URL</p>
+                  </div>
+                </div>
+
+                <Button onClick={() => handleSave("SMS")} disabled={saving}>
+                  {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                  Save SMS Settings
+                </Button>
+
+                {/* Test SMS */}
+                <div className="pt-4 border-t">
+                  <h4 className="text-sm font-semibold mb-3">Send Test SMS</h4>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="01XXXXXXXXX"
+                      type="tel"
+                      value={testPhone}
+                      onChange={(e) => setTestPhone(e.target.value)}
+                      className="max-w-xs"
+                    />
+                    <Button variant="outline" onClick={async () => {
+                      if (!testPhone) return;
+                      try {
+                        const res = await smsApi.testSms(testPhone);
+                        toast({ title: "Test SMS sent!", description: res.message });
+                        setTestPhone("");
+                      } catch (err: any) {
+                        toast({ title: "Test failed", description: err.message, variant: "destructive" });
+                      }
+                    }} disabled={!testPhone}>
+                      <Send className="mr-2 h-4 w-4" /> Send Test
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </AdminLayout>
