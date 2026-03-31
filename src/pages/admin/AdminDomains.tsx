@@ -8,9 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Globe, Trash2, Copy, CheckCircle, AlertCircle, ExternalLink, ShieldCheck, Loader2, RefreshCw } from "lucide-react";
+import { Plus, Globe, Trash2, Copy, CheckCircle, AlertCircle, ExternalLink, ShieldCheck, Loader2, RefreshCw, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { generateVerificationToken, verifyDomainDns, checkDomainARecord } from "@/lib/domainVerification";
+import { generateVerificationToken, verifyDomainDns, checkDomainARecord, requestSslCertificate, generateSslCommand } from "@/lib/domainVerification";
 
 // DNS check interval in milliseconds (3 minutes)
 const DNS_CHECK_INTERVAL = 3 * 60 * 1000;
@@ -68,6 +68,9 @@ const AdminDomains = () => {
   const [verifyDialogDomain, setVerifyDialogDomain] = useState<TenantDomain | null>(null);
   const [form, setForm] = useState({ tenantId: "", domain: "" });
   const [verifying, setVerifying] = useState<string | null>(null);
+  const [sslDialogDomain, setSslDialogDomain] = useState<TenantDomain | null>(null);
+  const [sslGenerating, setSslGenerating] = useState(false);
+  const [sslFallbackCommand, setSslFallbackCommand] = useState<string | null>(null);
   const [autoChecking, setAutoChecking] = useState(false);
   const [lastAutoCheck, setLastAutoCheck] = useState<string | null>(null);
   const domainsRef = useRef(domains);
@@ -256,6 +259,60 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
   const copyToken = (token: string) => {
     navigator.clipboard.writeText(token);
     toast({ title: "টোকেন কপি হয়েছে" });
+  };
+
+  const handleSslGenerate = async (domain: TenantDomain) => {
+    if (domain.verificationStatus !== "verified") {
+      toast({
+        title: "আগে ডোমেইন ভেরিফাই করুন",
+        description: "SSL সার্টিফিকেট তৈরি করতে ডোমেইন ভেরিফাইড হতে হবে",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSslGenerating(true);
+    setSslFallbackCommand(null);
+
+    const result = await requestSslCertificate(domain.id, domain.domain);
+
+    if (result.success && result.method === "api") {
+      // API successfully triggered certbot
+      setDomains((prev) =>
+        prev.map((d) =>
+          d.id === domain.id ? { ...d, sslStatus: "active" as const } : d
+        )
+      );
+      toast({ title: "✅ SSL সার্টিফিকেট তৈরি হয়েছে!", description: domain.domain });
+      setSslDialogDomain(null);
+    } else {
+      // Fallback — show command
+      setSslFallbackCommand(result.command || generateSslCommand(domain.domain));
+      // Mark as pending
+      setDomains((prev) =>
+        prev.map((d) =>
+          d.id === domain.id ? { ...d, sslStatus: "pending" as const } : d
+        )
+      );
+    }
+
+    setSslGenerating(false);
+  };
+
+  const copySslCommand = (domain: string) => {
+    const cmd = generateSslCommand(domain);
+    navigator.clipboard.writeText(cmd);
+    toast({ title: "SSL কমান্ড কপি হয়েছে", description: "VPS টার্মিনালে পেস্ট করে রান করুন" });
+  };
+
+  const markSslActive = (id: string) => {
+    setDomains((prev) =>
+      prev.map((d) =>
+        d.id === id ? { ...d, sslStatus: "active" as const } : d
+      )
+    );
+    toast({ title: "SSL স্ট্যাটাস Active করা হয়েছে" });
+    setSslDialogDomain(null);
   };
 
   const toggleStatus = (id: string) => {
@@ -457,6 +514,84 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
           </DialogContent>
         </Dialog>
 
+        {/* SSL Generation Dialog */}
+        <Dialog open={!!sslDialogDomain} onOpenChange={(open) => { if (!open) { setSslDialogDomain(null); setSslFallbackCommand(null); } }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-primary" />
+                SSL Certificate — {sslDialogDomain?.domain}
+              </DialogTitle>
+            </DialogHeader>
+            {sslDialogDomain && (
+              <div className="space-y-4">
+                {sslDialogDomain.sslStatus === "active" ? (
+                  <div className="text-center py-4">
+                    <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-2" />
+                    <p className="font-medium">SSL ইতিমধ্যে Active আছে</p>
+                    <p className="text-sm text-muted-foreground">{sslDialogDomain.domain}</p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      সিস্টেম প্রথমে API দিয়ে SSL তৈরি করার চেষ্টা করবে। ব্যর্থ হলে ম্যানুয়াল কমান্ড দেখাবে।
+                    </p>
+
+                    {sslFallbackCommand ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                          <AlertCircle className="h-4 w-4" />
+                          <span className="text-sm font-medium">API unavailable — ম্যানুয়াল কমান্ড ব্যবহার করুন</span>
+                        </div>
+                        <pre className="bg-muted rounded-lg p-3 text-xs overflow-x-auto whitespace-pre-wrap max-h-48">
+                          {sslFallbackCommand}
+                        </pre>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            onClick={() => {
+                              navigator.clipboard.writeText(sslFallbackCommand);
+                              toast({ title: "কমান্ড কপি হয়েছে" });
+                            }}
+                          >
+                            <Copy className="mr-2 h-4 w-4" />Copy Command
+                          </Button>
+                          <Button
+                            variant="default"
+                            className="flex-1"
+                            onClick={() => markSslActive(sslDialogDomain.id)}
+                          >
+                            <CheckCircle className="mr-2 h-4 w-4" />Mark SSL Active
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          VPS-এ কমান্ড সফলভাবে রান করার পর "Mark SSL Active" ক্লিক করুন
+                        </p>
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={() => handleSslGenerate(sslDialogDomain)}
+                        disabled={sslGenerating}
+                        className="w-full"
+                      >
+                        {sslGenerating ? (
+                          <><Loader2 className="mr-2 h-4 w-4 animate-spin" />SSL তৈরি হচ্ছে...</>
+                        ) : (
+                          <><Lock className="mr-2 h-4 w-4" />Generate SSL Certificate</>
+                        )}
+                      </Button>
+                    )}
+                  </>
+                )}
+                <DialogClose asChild>
+                  <Button variant="outline" className="w-full">Close</Button>
+                </DialogClose>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
         {/* Domains Table */}
         <Card>
           <CardHeader>
@@ -529,6 +664,15 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                             onClick={() => setVerifyDialogDomain(d)}
                           >
                             <ShieldCheck className={`h-4 w-4 ${d.verificationStatus === "verified" ? "text-green-600" : "text-amber-500"}`} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="SSL Certificate"
+                            onClick={() => { setSslFallbackCommand(null); setSslDialogDomain(d); }}
+                            disabled={d.verificationStatus !== "verified"}
+                          >
+                            <Lock className={`h-4 w-4 ${d.sslStatus === "active" ? "text-green-600" : "text-muted-foreground"}`} />
                           </Button>
                           <Button
                             variant="ghost"
