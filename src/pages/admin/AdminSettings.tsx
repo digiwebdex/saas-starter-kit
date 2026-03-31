@@ -61,6 +61,14 @@ interface DomainSettings {
   defaultSubdomain: string;
 }
 
+interface SmsSettings {
+  provider: "sslwireless" | "bulksms";
+  apiKey: string;
+  senderId: string;
+  baseUrl: string;
+  enabled: boolean;
+}
+
 // ── Defaults ──
 const defaultGeneral: GeneralSettings = {
   appName: "GLOBEX Travel SaaS",
