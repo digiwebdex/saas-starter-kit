@@ -62,6 +62,20 @@ export const tenantApi = {
     request<void>(`/tenants/me/members/${userId}`, { method: "DELETE" }),
 };
 
+// ── Dashboard Stats ──
+export interface DashboardStats {
+  totalUsers: number;
+  totalClients: number;
+  totalBookings: number;
+  totalRevenue: number;
+  recentBookings: Booking[];
+  recentPayments: Payment[];
+}
+
+export const dashboardApi = {
+  getStats: () => request<DashboardStats>("/dashboard/stats"),
+};
+
 // ── Resource APIs ──
 export const clientApi = createCrudApi<Client>("clients");
 export const agentApi = createCrudApi<Agent>("agents");
