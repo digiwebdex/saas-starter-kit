@@ -1,12 +1,17 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { authApi, type User } from "@/lib/api";
+import { authApi, tenantApi, type User, type Tenant } from "@/lib/api";
+import type { PlanType } from "@/lib/plans";
 
 interface AuthContextType {
   user: User | null;
+  tenant: Tenant | null;
+  currentPlan: PlanType;
+  isSubscriptionExpired: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: { name: string; email: string; password: string; tenantName: string }) => Promise<void>;
   logout: () => void;
+  refreshTenant: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -19,7 +24,33 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [tenant, setTenant] = useState<Tenant | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const currentPlan: PlanType = (tenant?.subscriptionPlan as PlanType) || "free";
+
+  const isSubscriptionExpired = (() => {
+    if (!tenant) return false;
+    if (currentPlan === "free") return false; // Free never expires
+    if (tenant.subscriptionStatus === "expired" || tenant.subscriptionStatus === "cancelled") return true;
+    if (tenant.subscriptionExpiry) {
+      return new Date(tenant.subscriptionExpiry) < new Date();
+    }
+    return false;
+  })();
+
+  const fetchTenant = async () => {
+    try {
+      const t = await tenantApi.get();
+      setTenant(t);
+    } catch {
+      // Tenant fetch failed, use defaults
+    }
+  };
+
+  const refreshTenant = useCallback(async () => {
+    await fetchTenant();
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -27,17 +58,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
       return;
     }
-    authApi
-      .me()
-      .then(setUser)
-      .catch(() => localStorage.removeItem("token"))
-      .finally(() => setLoading(false));
+    Promise.all([
+      authApi.me().catch(() => { localStorage.removeItem("token"); return null; }),
+      tenantApi.get().catch(() => null),
+    ]).then(([u, t]) => {
+      if (u) setUser(u);
+      if (t) setTenant(t);
+    }).finally(() => setLoading(false));
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await authApi.login(email, password);
     localStorage.setItem("token", res.token);
     setUser(res.user);
+    fetchTenant();
   }, []);
 
   const register = useCallback(
@@ -45,6 +79,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const res = await authApi.register(data);
       localStorage.setItem("token", res.token);
       setUser(res.user);
+      fetchTenant();
     },
     []
   );
@@ -52,10 +87,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = useCallback(() => {
     localStorage.removeItem("token");
     setUser(null);
+    setTenant(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, tenant, currentPlan, isSubscriptionExpired, loading, login, register, logout, refreshTenant }}>
       {children}
     </AuthContext.Provider>
   );

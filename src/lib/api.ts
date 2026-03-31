@@ -104,7 +104,9 @@ export interface Tenant {
   id: string;
   name: string;
   ownerId: string;
-  subscriptionPlan: "free" | "pro" | "enterprise";
+  subscriptionPlan: "free" | "basic" | "pro" | "business" | "enterprise";
+  subscriptionExpiry?: string;
+  subscriptionStatus?: "active" | "expired" | "cancelled" | "pending";
   createdAt: string;
 }
 
