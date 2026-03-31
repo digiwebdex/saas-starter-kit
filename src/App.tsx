@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminRoute from "@/components/AdminRoute";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -20,12 +21,20 @@ import Bookings from "./pages/Bookings";
 import Invoices from "./pages/Invoices";
 import Accounts from "./pages/Accounts";
 import Subscriptions from "./pages/Subscriptions";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminTenants from "./pages/admin/AdminTenants";
+import AdminPayments from "./pages/admin/AdminPayments";
+import AdminPlans from "./pages/admin/AdminPlans";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const P = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute>{children}</ProtectedRoute>
+);
+
+const A = ({ children }: { children: React.ReactNode }) => (
+  <AdminRoute>{children}</AdminRoute>
 );
 
 const App = () => (
@@ -39,6 +48,7 @@ const App = () => (
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            {/* App routes */}
             <Route path="/dashboard" element={<P><Dashboard /></P>} />
             <Route path="/clients" element={<P><Clients /></P>} />
             <Route path="/agents" element={<P><Agents /></P>} />
@@ -52,6 +62,11 @@ const App = () => (
             <Route path="/team" element={<P><Team /></P>} />
             <Route path="/organization" element={<P><Organization /></P>} />
             <Route path="/settings" element={<P><SettingsPage /></P>} />
+            {/* Admin routes */}
+            <Route path="/admin" element={<A><AdminDashboard /></A>} />
+            <Route path="/admin/tenants" element={<A><AdminTenants /></A>} />
+            <Route path="/admin/payments" element={<A><AdminPayments /></A>} />
+            <Route path="/admin/plans" element={<A><AdminPlans /></A>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
