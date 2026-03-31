@@ -879,7 +879,7 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                             variant="ghost"
                             size="icon"
                             title="Copy Nginx setup command"
-                            onClick={() => copyNginxCommand(d.domain)}
+                            onClick={() => copyNginxCommand(d.domain, d.wwwRedirect)}
                           >
                             <Copy className="h-4 w-4" />
                           </Button>
