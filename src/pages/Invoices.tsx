@@ -274,7 +274,7 @@ const Invoices = () => {
               <div className="mb-2 rounded-md border p-3 space-y-1">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Total:</span>
-                  <span className="font-medium">{selectedInvoice.totalAmount.toFixed(2)}</span>
+                  <span className="font-medium">৳{selectedInvoice.totalAmount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Paid so far:</span>
