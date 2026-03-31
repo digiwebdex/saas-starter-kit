@@ -70,7 +70,7 @@ const AdminDomains = () => {
   const [domains, setDomains] = useState<TenantDomain[]>(mockDomains);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [verifyDialogDomain, setVerifyDialogDomain] = useState<TenantDomain | null>(null);
-  const [form, setForm] = useState({ tenantId: "", domain: "" });
+  const [form, setForm] = useState({ tenantId: "", domain: "", wwwRedirect: "www-to-root" as TenantDomain["wwwRedirect"] });
   const [verifying, setVerifying] = useState<string | null>(null);
   const [sslDialogDomain, setSslDialogDomain] = useState<TenantDomain | null>(null);
   const [sslGenerating, setSslGenerating] = useState(false);
