@@ -22,6 +22,7 @@ const adminItems = [
   { title: "Domains", url: "/admin/domains", icon: Globe },
   { title: "Payment Requests", url: "/admin/payments", icon: CreditCard },
   { title: "Manage Plans", url: "/admin/plans", icon: Crown },
+  { title: "Subscriptions", url: "/admin/subscriptions", icon: ListChecks },
 ];
 
 export function AdminSidebar() {
