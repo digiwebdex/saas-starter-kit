@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Globe, Trash2, Copy, CheckCircle, AlertCircle, ExternalLink, ShieldCheck, Loader2 } from "lucide-react";
+import { Plus, Globe, Trash2, Copy, CheckCircle, AlertCircle, ExternalLink, ShieldCheck, Loader2, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { generateVerificationToken, verifyDomainDns } from "@/lib/domainVerification";
+import { generateVerificationToken, verifyDomainDns, checkDomainARecord } from "@/lib/domainVerification";
+
+// DNS check interval in milliseconds (3 minutes)
+const DNS_CHECK_INTERVAL = 3 * 60 * 1000;
+
+// VPS IP — in production, fetch from admin settings API
+const VPS_IP = import.meta.env.VITE_VPS_IP || "";
 
 interface TenantDomain {
   id: string;
@@ -21,6 +27,7 @@ interface TenantDomain {
   sslStatus: "active" | "pending" | "none";
   verificationStatus: "unverified" | "verifying" | "verified";
   verificationToken: string;
+  lastDnsCheck?: string;
   addedAt: string;
 }
 
@@ -61,7 +68,90 @@ const AdminDomains = () => {
   const [verifyDialogDomain, setVerifyDialogDomain] = useState<TenantDomain | null>(null);
   const [form, setForm] = useState({ tenantId: "", domain: "" });
   const [verifying, setVerifying] = useState<string | null>(null);
+  const [autoChecking, setAutoChecking] = useState(false);
+  const [lastAutoCheck, setLastAutoCheck] = useState<string | null>(null);
+  const domainsRef = useRef(domains);
+  domainsRef.current = domains;
   const { toast } = useToast();
+
+  // Auto-check DNS A records for all verified domains
+  const runDnsStatusCheck = useCallback(async (silent = true) => {
+    if (!VPS_IP) {
+      if (!silent) {
+        toast({
+          title: "VPS IP সেট করা হয়নি",
+          description: "VITE_VPS_IP env variable সেট করুন",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    setAutoChecking(true);
+    const currentDomains = domainsRef.current;
+    const verifiedDomains = currentDomains.filter((d) => d.verificationStatus === "verified");
+
+    if (verifiedDomains.length === 0) {
+      setAutoChecking(false);
+      return;
+    }
+
+    const results = await Promise.allSettled(
+      verifiedDomains.map(async (d) => {
+        const result = await checkDomainARecord(d.domain, VPS_IP);
+        return { id: d.id, domain: d.domain, ...result };
+      })
+    );
+
+    const now = new Date().toLocaleTimeString("bn-BD");
+    let changed = 0;
+
+    setDomains((prev) =>
+      prev.map((d) => {
+        const check = results.find(
+          (r) => r.status === "fulfilled" && r.value.id === d.id
+        );
+        if (!check || check.status !== "fulfilled") return d;
+
+        const { pointing } = check.value;
+        const newStatus = pointing ? "active" : "pending";
+        const newSsl = pointing ? "active" : d.sslStatus;
+
+        if (d.status !== newStatus) changed++;
+
+        return {
+          ...d,
+          status: newStatus as TenantDomain["status"],
+          sslStatus: newSsl as TenantDomain["sslStatus"],
+          lastDnsCheck: now,
+        };
+      })
+    );
+
+    setLastAutoCheck(now);
+    setAutoChecking(false);
+
+    if (!silent && changed > 0) {
+      toast({ title: `${changed}টি ডোমেইনের স্ট্যাটাস আপডেট হয়েছে` });
+    } else if (!silent && changed === 0) {
+      toast({ title: "সব ডোমেইনের স্ট্যাটাস আগের মতোই আছে" });
+    }
+  }, [toast]);
+
+  // Set up interval for auto-checking
+  useEffect(() => {
+    // Initial check after 5 seconds
+    const initialTimeout = setTimeout(() => runDnsStatusCheck(true), 5000);
+
+    const interval = setInterval(() => {
+      runDnsStatusCheck(true);
+    }, DNS_CHECK_INTERVAL);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, [runDnsStatusCheck]);
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,12 +311,26 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Domain Management</h1>
-            <p className="text-muted-foreground">টেন্যান্টদের কাস্টম ডোমেইন ম্যানেজ করুন</p>
+            <p className="text-muted-foreground">
+              টেন্যান্টদের কাস্টম ডোমেইন ম্যানেজ করুন
+              {lastAutoCheck && (
+                <span className="ml-2 text-xs">• শেষ চেক: {lastAutoCheck}</span>
+              )}
+            </p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" />Add Domain</Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => runDnsStatusCheck(false)}
+              disabled={autoChecking}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${autoChecking ? "animate-spin" : ""}`} />
+              {autoChecking ? "Checking..." : "Check DNS Now"}
+            </Button>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button><Plus className="mr-2 h-4 w-4" />Add Domain</Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>নতুন ডোমেইন যুক্ত করুন</DialogTitle>
@@ -269,6 +373,7 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Verification Instructions */}
