@@ -242,6 +242,7 @@ const Invoices = () => {
                             >
                               <Mail className="h-4 w-4 text-primary" />
                             </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
