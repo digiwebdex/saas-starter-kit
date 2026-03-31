@@ -18,6 +18,7 @@ import Leads from "./pages/Leads";
 import Tasks from "./pages/Tasks";
 import Bookings from "./pages/Bookings";
 import Invoices from "./pages/Invoices";
+import Accounts from "./pages/Accounts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
