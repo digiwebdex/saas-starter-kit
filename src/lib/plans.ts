@@ -11,6 +11,7 @@ export interface PlanConfig {
   maxClients: number; // -1 = unlimited
   maxBookings: number; // -1 = unlimited
   maxUsers: number; // -1 = unlimited
+  maxDomains: number; // 0 = no domain, -1 = unlimited
   features: string[];
   restrictions: string[];
   paymentGateways: ("manual" | "sslcommerz" | "bkash" | "custom")[];
