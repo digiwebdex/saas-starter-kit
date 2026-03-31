@@ -74,6 +74,13 @@ const AdminDomains = () => {
   const [sslFallbackCommand, setSslFallbackCommand] = useState<string | null>(null);
   const [autoChecking, setAutoChecking] = useState(false);
   const [lastAutoCheck, setLastAutoCheck] = useState<string | null>(null);
+  const [diagDomain, setDiagDomain] = useState<TenantDomain | null>(null);
+  const [diagRunning, setDiagRunning] = useState(false);
+  const [diagResult, setDiagResult] = useState<{
+    aRecord: { found: boolean; ips: string[]; error?: string };
+    ipMatch: boolean;
+    ssl: { active: boolean; error?: string };
+  } | null>(null);
   const domainsRef = useRef(domains);
   domainsRef.current = domains;
   const { toast } = useToast();
