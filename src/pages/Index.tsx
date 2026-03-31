@@ -69,7 +69,7 @@ const Index = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await register({
+      const newUser = await register({
         name: form.ownerName,
         email: form.email,
         password: form.password,
@@ -77,7 +77,7 @@ const Index = () => {
       });
       toast({ title: "Registration Successful!", description: `Welcome to Globex Connect — ${PLANS.find(p => p.id === selectedPlan)?.name} plan` });
       setDialogOpen(false);
-      navigate("/dashboard");
+      navigate(newUser.role === "owner" ? "/admin" : "/dashboard");
     } catch (err: any) {
       toast({ variant: "destructive", title: "Registration Failed", description: err.message });
     } finally {
