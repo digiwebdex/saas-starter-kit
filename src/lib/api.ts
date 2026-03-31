@@ -148,9 +148,12 @@ export interface Lead {
 
 export interface Task {
   id: string;
-  name: string;
-  phone: string;
-  email: string;
+  title: string;
+  description: string;
+  status: "todo" | "in_progress" | "done";
+  priority: "low" | "medium" | "high";
+  dueDate?: string;
+  assignedTo?: string;
   tenantId: string;
   createdAt: string;
 }

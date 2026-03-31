@@ -75,11 +75,19 @@ const Bookings = () => {
       profit: form.amount - form.cost,
     };
     if (editingId) {
-      setItems((prev) => prev.map((b) => b.id === editingId ? { ...b, ...booking } : b));
-      toast({ title: "Booking updated" });
+      bookingApi.update(editingId, booking).then((updated) => {
+        setItems((prev) => prev.map((b) => b.id === editingId ? { ...b, ...booking } : b));
+        toast({ title: "Booking updated" });
+      }).catch((err: any) => {
+        toast({ title: "Update failed", description: err.message, variant: "destructive" });
+      });
     } else {
-      setItems((prev) => [...prev, { ...booking, id: crypto.randomUUID(), createdAt: new Date().toISOString() }]);
-      toast({ title: "Booking created" });
+      bookingApi.create(booking).then((created: any) => {
+        setItems((prev) => [...prev, created]);
+        toast({ title: "Booking created" });
+      }).catch((err: any) => {
+        toast({ title: "Create failed", description: err.message, variant: "destructive" });
+      });
     }
     resetForm();
     setDialogOpen(false);
@@ -92,8 +100,12 @@ const Bookings = () => {
   };
 
   const handleDelete = (id: string) => {
-    setItems((prev) => prev.filter((b) => b.id !== id));
-    toast({ title: "Booking deleted", variant: "destructive" });
+    bookingApi.delete(id).then(() => {
+      setItems((prev) => prev.filter((b) => b.id !== id));
+      toast({ title: "Booking deleted", variant: "destructive" });
+    }).catch((err: any) => {
+      toast({ title: "Delete failed", description: err.message, variant: "destructive" });
+    });
   };
 
   const totals = useMemo(() => {
