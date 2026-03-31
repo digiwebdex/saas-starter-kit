@@ -63,9 +63,9 @@ export default function HajjUmrahTemplate({ config }: { config: WebsiteConfig })
               {config.socialLinks && (
                 <div className="flex items-center gap-3 mt-6">
                   <span className="text-sm opacity-40">Follow us:</span>
-                  {config.socialLinks.facebook && <a href={config.socialLinks.facebook} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-100 transition-opacity"><Facebook className="h-5 w-5" /></a>}
-                  {config.socialLinks.instagram && <a href={config.socialLinks.instagram} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-100 transition-opacity"><Instagram className="h-5 w-5" /></a>}
-                  {config.socialLinks.youtube && <a href={config.socialLinks.youtube} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-100 transition-opacity"><Youtube className="h-5 w-5" /></a>}
+                  {config.socialLinks.facebook && <a href={config.socialLinks.facebook} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-100 transition-opacity text-xs font-semibold border border-white/20 rounded-full w-8 h-8 flex items-center justify-center">f</a>}
+                  {config.socialLinks.instagram && <a href={config.socialLinks.instagram} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-100 transition-opacity text-xs font-semibold border border-white/20 rounded-full w-8 h-8 flex items-center justify-center">ig</a>}
+                  {config.socialLinks.youtube && <a href={config.socialLinks.youtube} target="_blank" rel="noreferrer" className="opacity-40 hover:opacity-100 transition-opacity text-xs font-semibold border border-white/20 rounded-full w-8 h-8 flex items-center justify-center">yt</a>}
                 </div>
               )}
             </div>
