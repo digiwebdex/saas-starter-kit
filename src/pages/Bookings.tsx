@@ -171,7 +171,7 @@ const Bookings = () => {
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Profit</CardTitle></CardHeader>
-            <CardContent><div className={`text-2xl font-bold ${totals.profit >= 0 ? "text-green-600" : "text-destructive"}`}>{totals.profit.toFixed(2)}</div></CardContent>
+            <CardContent><div className={`text-2xl font-bold ${totals.profit >= 0 ? "text-green-600" : "text-destructive"}`}>৳{totals.profit.toFixed(2)}</div></CardContent>
           </Card>
         </div>
 
