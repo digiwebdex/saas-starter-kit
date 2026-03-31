@@ -10,10 +10,12 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { PLANS, FEATURE_COMPARISON, type PlanType } from "@/lib/plans";
 import {
   Plane, Globe, Users, CreditCard, BarChart3, Shield, Moon, Receipt,
-  Check, ArrowRight, Star, Zap, Building2, Phone, Mail, MapPin,
+  Check, X, ArrowRight, Star, Zap, Building2, Phone, Mail, MapPin, Crown, Rocket, Gem,
 } from "lucide-react";
 
 /* ───── Plans ───── */
