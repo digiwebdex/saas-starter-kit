@@ -45,7 +45,24 @@ const Bookings = () => {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const fetchBookings = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await bookingApi.list();
+      setItems(data as any);
+    } catch (err: any) {
+      setError(err.message || "Failed to load bookings");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchBookings(); }, [fetchBookings]);
 
   const profit = useMemo(() => form.amount - form.cost, [form.amount, form.cost]);
 
