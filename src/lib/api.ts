@@ -68,6 +68,7 @@ export const agentApi = createCrudApi<Agent>("agents");
 export const vendorApi = createCrudApi<Vendor>("vendors");
 export const leadApi = createCrudApi<Lead>("leads");
 export const taskApi = createCrudApi<Task>("tasks");
+export const bookingApi = createCrudApi<Booking>("bookings");
 
 // ── Types ──
 export interface User {
