@@ -216,10 +216,24 @@ const Bookings = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.length === 0 ? (
+                {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                      No bookings yet. Click "New Booking" to get started.
+                    <TableCell colSpan={8}><LoadingState rows={3} /></TableCell>
+                  </TableRow>
+                ) : error ? (
+                  <TableRow>
+                    <TableCell colSpan={8}><ErrorState message={error} onRetry={fetchBookings} /></TableCell>
+                  </TableRow>
+                ) : items.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8}>
+                      <EmptyState
+                        icon={Plane}
+                        title="No bookings yet"
+                        description="Create your first booking to start tracking tours, tickets, hotels, and visas."
+                        actionLabel="New Booking"
+                        onAction={() => setDialogOpen(true)}
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (
