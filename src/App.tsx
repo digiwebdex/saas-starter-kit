@@ -36,6 +36,7 @@ import AdminTenantDetails from "./pages/admin/AdminTenantDetails";
 import AdminDomains from "./pages/admin/AdminDomains";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminFeatures from "./pages/admin/AdminFeatures";
+import AdminSmsTemplates from "./pages/admin/AdminSmsTemplates";
 import SiteHome from "./pages/site/SiteHome";
 import SiteAbout from "./pages/site/SiteAbout";
 import SitePackages from "./pages/site/SitePackages";
