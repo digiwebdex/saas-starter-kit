@@ -90,7 +90,7 @@ const AdminPlans = () => {
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>Price ($/mo)</Label>
+                    <Label>Price (৳/mo)</Label>
                     <Input type="number" min={0} step={1} value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: parseFloat(e.target.value) || 0 }))} />
                   </div>
                   <div className="space-y-2">
