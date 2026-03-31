@@ -36,6 +36,7 @@ import SiteAbout from "./pages/site/SiteAbout";
 import SitePackages from "./pages/site/SitePackages";
 import SiteContact from "./pages/site/SiteContact";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
