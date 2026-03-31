@@ -228,7 +228,7 @@ const Accounts = () => {
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><DollarSign className="h-4 w-4" />Net Balance</CardTitle></CardHeader>
-            <CardContent><div className={`text-2xl font-bold ${totals.balance >= 0 ? "text-green-600" : "text-destructive"}`}>{totals.balance.toFixed(2)}</div></CardContent>
+            <CardContent><CardContent><div className={`text-2xl font-bold ${totals.balance >= 0 ? "text-green-600" : "text-destructive"}`}>৳{totals.balance.toFixed(2)}</div></CardContent></CardContent>
           </Card>
         </div>
 
