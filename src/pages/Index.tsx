@@ -14,7 +14,6 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Plane, Globe, Users, CreditCard, BarChart3, Shield, Moon, Receipt,
   Check, ArrowRight, Star, Zap, Building2, Phone, Mail, MapPin,
-  Facebook, Instagram, Twitter,
 } from "lucide-react";
 
 /* ───── Plans ───── */
