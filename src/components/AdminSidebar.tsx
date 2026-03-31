@@ -1,4 +1,4 @@
-import { LayoutDashboard, Building2, CreditCard, Crown, Ban, LogOut, ArrowLeft, Globe, ListChecks } from "lucide-react";
+import { LayoutDashboard, Building2, CreditCard, Crown, Ban, LogOut, ArrowLeft, Globe, ListChecks, Settings } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
@@ -23,6 +23,7 @@ const adminItems = [
   { title: "Payment Requests", url: "/admin/payments", icon: CreditCard },
   { title: "Manage Plans", url: "/admin/plans", icon: Crown },
   { title: "Subscriptions", url: "/admin/subscriptions", icon: ListChecks },
+  { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebar() {
