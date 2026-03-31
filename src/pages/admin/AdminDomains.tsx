@@ -212,6 +212,7 @@ const AdminDomains = () => {
       tenantId: form.tenantId,
       tenantName: tenant?.name || "",
       domain: domainClean,
+      wwwRedirect: form.wwwRedirect,
       status: "pending",
       sslStatus: "none",
       verificationStatus: "unverified",
@@ -221,8 +222,8 @@ const AdminDomains = () => {
 
     setDomains((prev) => [...prev, newDomain]);
     setVerifyDialogDomain(newDomain);
-    toast({ title: "ডোমেইন যুক্ত হয়েছে", description: `DNS TXT রেকর্ড যুক্ত করে ভেরিফাই করুন` });
-    setForm({ tenantId: "", domain: "" });
+    toast({ title: "ডোমেইন যুক্ত হয়েছে", description: `${domainClean} + www.${domainClean} উভয়ই সাপোর্ট করবে` });
+    setForm({ tenantId: "", domain: "", wwwRedirect: "www-to-root" });
     setDialogOpen(false);
   };
 
