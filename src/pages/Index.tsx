@@ -18,59 +18,14 @@ import {
   Check, X, ArrowRight, Star, Zap, Building2, Phone, Mail, MapPin, Crown, Rocket, Gem,
 } from "lucide-react";
 
-/* ───── Plans ───── */
-const plans = [
-  {
-    id: "basic",
-    name: "Basic",
-    price: 999,
-    period: "/month",
-    desc: "Small agencies getting started",
-    features: [
-      "Up to 5 team members",
-      "100 bookings/month",
-      "CRM & client management",
-      "Invoice generation",
-      "Email support",
-    ],
-    popular: false,
-  },
-  {
-    id: "pro",
-    name: "Professional",
-    price: 2499,
-    period: "/month",
-    desc: "Growing travel agencies",
-    features: [
-      "Up to 20 team members",
-      "Unlimited bookings",
-      "CRM, leads & tasks",
-      "Reports & analytics",
-      "Hajj/Umrah module",
-      "Custom website",
-      "Priority support",
-    ],
-    popular: true,
-  },
-  {
-    id: "business",
-    name: "Business",
-    price: 4999,
-    period: "/month",
-    desc: "Large agencies & enterprises",
-    features: [
-      "Unlimited team members",
-      "Unlimited bookings",
-      "All modules included",
-      "Custom domain",
-      "White-label website",
-      "API access",
-      "Dedicated account manager",
-      "WhatsApp integration",
-    ],
-    popular: false,
-  },
-];
+/* ───── Plan Icons ───── */
+const planIcons: Record<string, React.ElementType> = {
+  free: Star,
+  basic: Zap,
+  pro: Crown,
+  business: Rocket,
+  enterprise: Gem,
+};
 
 /* ───── Features ───── */
 const features = [
