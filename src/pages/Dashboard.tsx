@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, UserCheck, Plane, DollarSign, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { dashboardApi, type DashboardStats, clientApi, bookingApi, paymentApi, tenantApi } from "@/lib/api";
+import { dashboardApi, type DashboardStats, type Booking, type Payment, type Client, type User as ApiUser, clientApi, bookingApi, paymentApi, tenantApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 const statusColors: Record<string, string> = {
