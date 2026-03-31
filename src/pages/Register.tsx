@@ -23,6 +23,9 @@ const Register = () => {
     setLoading(true);
     try {
       await register({ name, email, password, tenantName });
+      // Seed demo data in background (don't block navigation)
+      seedDemoData().catch(() => {});
+      toast({ title: "Account created!", description: "Demo data has been added to your dashboard." });
       navigate("/dashboard");
     } catch (err: any) {
       toast({ variant: "destructive", title: "Registration failed", description: err.message });
