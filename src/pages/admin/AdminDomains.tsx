@@ -517,6 +517,20 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                     শুধু ডোমেইন নাম লিখুন, http:// বা www ছাড়া
                   </p>
                 </div>
+                <div className="space-y-2">
+                  <Label>WWW Redirect</Label>
+                  <Select value={form.wwwRedirect} onValueChange={(v) => setForm((f) => ({ ...f, wwwRedirect: v as TenantDomain["wwwRedirect"] }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="www-to-root">www → root (www.example.com → example.com)</SelectItem>
+                      <SelectItem value="root-to-www">root → www (example.com → www.example.com)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    উভয় ভার্সন (www ও non-www) অটোমেটিক সাপোর্ট হবে, একটি থেকে অন্যটিতে redirect হবে
+                  </p>
                 <div className="flex gap-2">
                   <Button type="submit" className="flex-1">
                     <Globe className="mr-2 h-4 w-4" />Add Domain
