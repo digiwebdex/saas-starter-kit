@@ -282,7 +282,7 @@ const Invoices = () => {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Remaining due:</span>
-                  <span className="text-destructive font-semibold">{selectedInvoice.dueAmount.toFixed(2)}</span>
+                  <span className="text-destructive font-semibold">৳{selectedInvoice.dueAmount.toFixed(2)}</span>
                 </div>
               </div>
             )}
