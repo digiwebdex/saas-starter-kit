@@ -261,6 +261,60 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
     toast({ title: "টোকেন কপি হয়েছে" });
   };
 
+  const handleSslGenerate = async (domain: TenantDomain) => {
+    if (domain.verificationStatus !== "verified") {
+      toast({
+        title: "আগে ডোমেইন ভেরিফাই করুন",
+        description: "SSL সার্টিফিকেট তৈরি করতে ডোমেইন ভেরিফাইড হতে হবে",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSslGenerating(true);
+    setSslFallbackCommand(null);
+
+    const result = await requestSslCertificate(domain.id, domain.domain);
+
+    if (result.success && result.method === "api") {
+      // API successfully triggered certbot
+      setDomains((prev) =>
+        prev.map((d) =>
+          d.id === domain.id ? { ...d, sslStatus: "active" as const } : d
+        )
+      );
+      toast({ title: "✅ SSL সার্টিফিকেট তৈরি হয়েছে!", description: domain.domain });
+      setSslDialogDomain(null);
+    } else {
+      // Fallback — show command
+      setSslFallbackCommand(result.command || generateSslCommand(domain.domain));
+      // Mark as pending
+      setDomains((prev) =>
+        prev.map((d) =>
+          d.id === domain.id ? { ...d, sslStatus: "pending" as const } : d
+        )
+      );
+    }
+
+    setSslGenerating(false);
+  };
+
+  const copySslCommand = (domain: string) => {
+    const cmd = generateSslCommand(domain);
+    navigator.clipboard.writeText(cmd);
+    toast({ title: "SSL কমান্ড কপি হয়েছে", description: "VPS টার্মিনালে পেস্ট করে রান করুন" });
+  };
+
+  const markSslActive = (id: string) => {
+    setDomains((prev) =>
+      prev.map((d) =>
+        d.id === id ? { ...d, sslStatus: "active" as const } : d
+      )
+    );
+    toast({ title: "SSL স্ট্যাটাস Active করা হয়েছে" });
+    setSslDialogDomain(null);
+  };
+
   const toggleStatus = (id: string) => {
     const domain = domains.find((d) => d.id === id);
     if (!domain) return;
