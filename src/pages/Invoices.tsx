@@ -154,15 +154,15 @@ const Invoices = () => {
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Invoiced</CardTitle></CardHeader>
-            <CardContent><div className="text-2xl font-bold">{totals.total.toFixed(2)}</div></CardContent>
+            <CardContent><CardContent><div className="text-2xl font-bold">৳{totals.total.toFixed(2)}</div></CardContent></CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Paid</CardTitle></CardHeader>
-            <CardContent><div className="text-2xl font-bold text-green-600">{totals.paid.toFixed(2)}</div></CardContent>
+            <CardContent><CardContent><div className="text-2xl font-bold text-green-600">৳{totals.paid.toFixed(2)}</div></CardContent></CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Due</CardTitle></CardHeader>
-            <CardContent><div className="text-2xl font-bold text-destructive">{totals.due.toFixed(2)}</div></CardContent>
+            <CardContent><CardContent><div className="text-2xl font-bold text-destructive">৳{totals.due.toFixed(2)}</div></CardContent></CardContent>
           </Card>
         </div>
 
@@ -197,9 +197,9 @@ const Invoices = () => {
                       <TableRow key={inv.id}>
                         <TableCell className="font-mono text-xs">{inv.id.slice(0, 8)}</TableCell>
                         <TableCell className="text-muted-foreground text-xs">{inv.bookingId.slice(0, 8)}</TableCell>
-                        <TableCell className="text-right">{inv.totalAmount.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-green-600">{inv.paidAmount.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-destructive font-semibold">{inv.dueAmount.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">৳{inv.totalAmount.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-green-600">৳{inv.paidAmount.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-destructive font-semibold">৳{inv.dueAmount.toFixed(2)}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2 min-w-[100px]">
                             <Progress value={pct} className="h-2 flex-1" />
@@ -274,15 +274,15 @@ const Invoices = () => {
               <div className="mb-2 rounded-md border p-3 space-y-1">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Total:</span>
-                  <span className="font-medium">{selectedInvoice.totalAmount.toFixed(2)}</span>
+                  <span className="font-medium">৳{selectedInvoice.totalAmount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Paid so far:</span>
-                  <span className="text-green-600 font-medium">{selectedInvoice.paidAmount.toFixed(2)}</span>
+                  <span className="text-green-600 font-medium">৳{selectedInvoice.paidAmount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Remaining due:</span>
-                  <span className="text-destructive font-semibold">{selectedInvoice.dueAmount.toFixed(2)}</span>
+                  <span className="text-destructive font-semibold">৳{selectedInvoice.dueAmount.toFixed(2)}</span>
                 </div>
               </div>
             )}
@@ -336,7 +336,7 @@ const Invoices = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Total / Paid / Due:</span>
-                    <span>{selectedInvoice.totalAmount.toFixed(2)} / <span className="text-green-600">{selectedInvoice.paidAmount.toFixed(2)}</span> / <span className="text-destructive">{selectedInvoice.dueAmount.toFixed(2)}</span></span>
+                    <span>৳{selectedInvoice.totalAmount.toFixed(2)} / <span className="text-green-600">৳{selectedInvoice.paidAmount.toFixed(2)}</span> / <span className="text-destructive">৳{selectedInvoice.dueAmount.toFixed(2)}</span></span>
                   </div>
                 </div>
                 <Table>
@@ -356,7 +356,7 @@ const Invoices = () => {
                       invoicePayments.map((p) => (
                         <TableRow key={p.id}>
                           <TableCell>{p.date}</TableCell>
-                          <TableCell className="text-right font-medium">{p.amount.toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-medium">৳{p.amount.toFixed(2)}</TableCell>
                           <TableCell className="capitalize">{p.method}</TableCell>
                         </TableRow>
                       ))

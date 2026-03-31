@@ -163,15 +163,15 @@ const Bookings = () => {
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Amount</CardTitle></CardHeader>
-            <CardContent><div className="text-2xl font-bold">{totals.amount.toFixed(2)}</div></CardContent>
+            <CardContent><div className="text-2xl font-bold">৳{totals.amount.toFixed(2)}</div></CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Cost</CardTitle></CardHeader>
-            <CardContent><div className="text-2xl font-bold">{totals.cost.toFixed(2)}</div></CardContent>
+            <CardContent><div className="text-2xl font-bold">৳{totals.cost.toFixed(2)}</div></CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Profit</CardTitle></CardHeader>
-            <CardContent><div className={`text-2xl font-bold ${totals.profit >= 0 ? "text-green-600" : "text-destructive"}`}>{totals.profit.toFixed(2)}</div></CardContent>
+            <CardContent><div className={`text-2xl font-bold ${totals.profit >= 0 ? "text-green-600" : "text-destructive"}`}>৳{totals.profit.toFixed(2)}</div></CardContent>
           </Card>
         </div>
 
@@ -207,9 +207,9 @@ const Bookings = () => {
                       <TableCell className="capitalize font-medium">{b.type}</TableCell>
                       <TableCell className="text-muted-foreground text-xs">{b.clientId.slice(0, 8)}</TableCell>
                       <TableCell className="text-muted-foreground text-xs">{b.agentId.slice(0, 8)}</TableCell>
-                      <TableCell className="text-right">{b.amount.toFixed(2)}</TableCell>
-                      <TableCell className="text-right">{b.cost.toFixed(2)}</TableCell>
-                      <TableCell className={`text-right font-semibold ${b.profit >= 0 ? "text-green-600" : "text-destructive"}`}>{b.profit.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">৳{b.amount.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">৳{b.cost.toFixed(2)}</TableCell>
+                      <TableCell className={`text-right font-semibold ${b.profit >= 0 ? "text-green-600" : "text-destructive"}`}>৳{b.profit.toFixed(2)}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusColors[b.status]}`}>
                           {b.status}

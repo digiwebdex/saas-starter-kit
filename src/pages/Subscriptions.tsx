@@ -162,7 +162,7 @@ const Subscription_Page = () => {
                   <p.icon className="mx-auto h-8 w-8 text-primary mb-2" />
                   <CardTitle>{p.name}</CardTitle>
                   <CardDescription>
-                    <span className="text-3xl font-bold text-foreground">${p.price}</span>
+                    <span className="text-3xl font-bold text-foreground">৳{p.price}</span>
                     {p.price > 0 && <span className="text-muted-foreground">/mo</span>}
                   </CardDescription>
                 </CardHeader>
@@ -221,7 +221,7 @@ const Subscription_Page = () => {
                     <TableRow key={req.id}>
                       <TableCell>{new Date(req.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell className="capitalize font-medium">{req.plan}</TableCell>
-                      <TableCell className="text-right">${req.amount.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">৳{req.amount.toFixed(2)}</TableCell>
                       <TableCell className="font-mono text-xs">{req.trxId}</TableCell>
                       <TableCell>{statusBadge(req.status)}</TableCell>
                       {isAdmin && (
@@ -256,7 +256,7 @@ const Subscription_Page = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Amount:</span>
-                  <span className="font-bold">${selectedPlanInfo.price.toFixed(2)}/mo</span>
+                  <span className="font-bold">৳{selectedPlanInfo.price.toFixed(2)}/mo</span>
                 </div>
                 <p className="text-xs text-muted-foreground pt-2">
                   Transfer the amount to the company bank account, then enter your transaction ID below.

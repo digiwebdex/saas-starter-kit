@@ -75,7 +75,7 @@ const AdminPayments = () => {
                     <TableRow key={r.id}>
                       <TableCell className="font-medium">{r.tenantName}</TableCell>
                       <TableCell><Badge variant="secondary" className="capitalize">{r.plan}</Badge></TableCell>
-                      <TableCell className="text-right font-semibold">${r.amount.toFixed(2)}</TableCell>
+                      <TableCell className="text-right font-semibold">৳{r.amount.toFixed(2)}</TableCell>
                       <TableCell className="font-mono text-xs">{r.trxId}</TableCell>
                       <TableCell className="text-muted-foreground">{r.submittedAt}</TableCell>
                       <TableCell>
@@ -117,7 +117,7 @@ const AdminPayments = () => {
                     <TableRow key={r.id}>
                       <TableCell className="font-medium">{r.tenantName}</TableCell>
                       <TableCell><Badge variant="secondary" className="capitalize">{r.plan}</Badge></TableCell>
-                      <TableCell className="text-right">${r.amount.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">৳{r.amount.toFixed(2)}</TableCell>
                       <TableCell className="font-mono text-xs">{r.trxId}</TableCell>
                       <TableCell>
                         {r.status === "approved" ? (

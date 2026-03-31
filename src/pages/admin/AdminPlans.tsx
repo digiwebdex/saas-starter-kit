@@ -90,7 +90,7 @@ const AdminPlans = () => {
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>Price ($/mo)</Label>
+                    <Label>Price (৳/mo)</Label>
                     <Input type="number" min={0} step={1} value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: parseFloat(e.target.value) || 0 }))} />
                   </div>
                   <div className="space-y-2">
@@ -140,7 +140,7 @@ const AdminPlans = () => {
                   <TableRow key={p.id} className={!p.active ? "opacity-50" : ""}>
                     <TableCell className="font-medium">{p.name}</TableCell>
                     <TableCell className="font-mono text-xs">{p.slug}</TableCell>
-                    <TableCell className="text-right font-semibold">${p.price}</TableCell>
+                    <TableCell className="text-right font-semibold">৳{p.price}</TableCell>
                     <TableCell className="text-center">{p.maxBookings === -1 ? "∞" : p.maxBookings}</TableCell>
                     <TableCell className="text-center">{p.maxUsers === -1 ? "∞" : p.maxUsers}</TableCell>
                     <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{p.features}</TableCell>
