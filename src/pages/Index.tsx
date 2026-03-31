@@ -10,65 +10,22 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { PLANS, FEATURE_COMPARISON, type PlanType } from "@/lib/plans";
 import {
   Plane, Globe, Users, CreditCard, BarChart3, Shield, Moon, Receipt,
-  Check, ArrowRight, Star, Zap, Building2, Phone, Mail, MapPin,
+  Check, X, ArrowRight, Star, Zap, Building2, Phone, Mail, MapPin, Crown, Rocket, Gem,
 } from "lucide-react";
 
-/* ───── Plans ───── */
-const plans = [
-  {
-    id: "basic",
-    name: "Basic",
-    price: 999,
-    period: "/month",
-    desc: "Small agencies getting started",
-    features: [
-      "Up to 5 team members",
-      "100 bookings/month",
-      "CRM & client management",
-      "Invoice generation",
-      "Email support",
-    ],
-    popular: false,
-  },
-  {
-    id: "pro",
-    name: "Professional",
-    price: 2499,
-    period: "/month",
-    desc: "Growing travel agencies",
-    features: [
-      "Up to 20 team members",
-      "Unlimited bookings",
-      "CRM, leads & tasks",
-      "Reports & analytics",
-      "Hajj/Umrah module",
-      "Custom website",
-      "Priority support",
-    ],
-    popular: true,
-  },
-  {
-    id: "business",
-    name: "Business",
-    price: 4999,
-    period: "/month",
-    desc: "Large agencies & enterprises",
-    features: [
-      "Unlimited team members",
-      "Unlimited bookings",
-      "All modules included",
-      "Custom domain",
-      "White-label website",
-      "API access",
-      "Dedicated account manager",
-      "WhatsApp integration",
-    ],
-    popular: false,
-  },
-];
+/* ───── Plan Icons ───── */
+const planIcons: Record<string, React.ElementType> = {
+  free: Star,
+  basic: Zap,
+  pro: Crown,
+  business: Rocket,
+  enterprise: Gem,
+};
 
 /* ───── Features ───── */
 const features = [
@@ -118,7 +75,7 @@ const Index = () => {
         password: form.password,
         tenantName: form.companyName,
       });
-      toast({ title: "Registration Successful!", description: `Welcome to Globex Connect — ${plans.find(p => p.id === selectedPlan)?.name} plan` });
+      toast({ title: "Registration Successful!", description: `Welcome to Globex Connect — ${PLANS.find(p => p.id === selectedPlan)?.name} plan` });
       setDialogOpen(false);
       navigate("/dashboard");
     } catch (err: any) {
@@ -238,54 +195,136 @@ const Index = () => {
             <Badge className="mb-4 bg-cyan-400/10 text-cyan-400 border-cyan-400/30">Pricing</Badge>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
             <p className="text-white/50 max-w-2xl mx-auto">
-              Choose the plan that fits your agency. All plans include a 14-day free trial.
+              Choose the plan that fits your agency. All prices in BDT. 14-day free trial on all paid plans.
             </p>
           </div>
-          <div className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto">
-            {plans.map((plan) => (
-              <Card
-                key={plan.id}
-                className={`relative overflow-hidden bg-white/5 border-white/10 text-white ${
-                  plan.popular ? "ring-2 ring-cyan-400 border-cyan-400/50 scale-105" : "hover:border-white/20"
-                } transition-all`}
-              >
-                {plan.popular && (
-                  <div className="absolute top-0 right-0 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold px-4 py-1 rounded-bl-xl">
-                    MOST POPULAR
-                  </div>
-                )}
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xl">{plan.name}</CardTitle>
-                  <CardDescription className="text-white/50">{plan.desc}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <span className="text-4xl font-extrabold text-cyan-400">৳{plan.price.toLocaleString()}</span>
-                    <span className="text-white/50 ml-1">{plan.period}</span>
-                  </div>
-                  <Separator className="bg-white/10" />
-                  <ul className="space-y-3">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-sm">
-                        <Check className="h-4 w-4 text-cyan-400 mt-0.5 shrink-0" />
-                        <span className="text-white/70">{f}</span>
-                      </li>
+
+          {/* Plan Cards */}
+          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-5 max-w-7xl mx-auto mb-20">
+            {PLANS.map((plan) => {
+              const Icon = planIcons[plan.id] || Star;
+              const isHighlighted = plan.badge === "Most Popular" || plan.badge === "Best Value";
+              return (
+                <Card
+                  key={plan.id}
+                  className={`relative overflow-hidden bg-white/5 border-white/10 text-white ${
+                    isHighlighted ? "ring-2 ring-cyan-400 border-cyan-400/50 md:scale-105 z-10" : "hover:border-white/20"
+                  } transition-all`}
+                >
+                  {plan.badge && (
+                    <div className={`absolute top-0 right-0 text-white text-xs font-bold px-3 py-1 rounded-bl-xl ${
+                      plan.badge === "Most Popular" ? "bg-gradient-to-r from-cyan-500 to-blue-500" : "bg-gradient-to-r from-emerald-500 to-teal-500"
+                    }`}>
+                      {plan.badge.toUpperCase()}
+                    </div>
+                  )}
+                  <CardHeader className="pb-2 text-center">
+                    <Icon className="mx-auto h-8 w-8 text-cyan-400 mb-2" />
+                    <CardTitle className="text-lg">{plan.name}</CardTitle>
+                    <CardDescription className="text-white/50 text-xs">{plan.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="text-center">
+                      {plan.price === -1 ? (
+                        <span className="text-2xl font-extrabold text-cyan-400">Custom</span>
+                      ) : (
+                        <>
+                          <span className="text-3xl font-extrabold text-cyan-400">৳{plan.price.toLocaleString()}</span>
+                          <span className="text-white/50 text-sm ml-1">/মাস</span>
+                        </>
+                      )}
+                    </div>
+                    <Separator className="bg-white/10" />
+                    <ul className="space-y-2">
+                      {plan.features.slice(0, 5).map((f) => (
+                        <li key={f} className="flex items-start gap-2 text-xs">
+                          <Check className="h-3.5 w-3.5 text-cyan-400 mt-0.5 shrink-0" />
+                          <span className="text-white/70">{f}</span>
+                        </li>
+                      ))}
+                      {plan.features.length > 5 && (
+                        <li className="text-xs text-white/40">+{plan.features.length - 5} more features</li>
+                      )}
+                    </ul>
+                    {plan.restrictions.length > 0 && (
+                      <ul className="space-y-1 pt-1 border-t border-white/5">
+                        {plan.restrictions.slice(0, 2).map((r) => (
+                          <li key={r} className="flex items-start gap-2 text-xs">
+                            <X className="h-3.5 w-3.5 text-red-400/60 mt-0.5 shrink-0" />
+                            <span className="text-white/40">{r}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <Button
+                      className={`w-full h-10 text-sm ${
+                        isHighlighted
+                          ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white"
+                          : plan.price === -1
+                          ? "bg-white/10 hover:bg-white/15 text-white"
+                          : "bg-white/10 hover:bg-white/15 text-white"
+                      }`}
+                      onClick={() => handleSelectPlan(plan.id)}
+                    >
+                      {plan.price === -1 ? "Contact Us" : plan.price === 0 ? "Start Free" : "Subscribe Now"}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* Feature Comparison Table */}
+          <div className="max-w-7xl mx-auto">
+            <h3 className="text-2xl font-bold text-center mb-8">Feature Comparison</h3>
+            <div className="overflow-x-auto rounded-xl border border-white/10">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white/10 bg-white/5">
+                    <TableHead className="text-white/70 min-w-[200px]">Feature</TableHead>
+                    {PLANS.map((p) => (
+                      <TableHead key={p.id} className="text-center text-white/70 min-w-[100px]">
+                        <div className="font-semibold">{p.name}</div>
+                        <div className="text-xs text-cyan-400 font-normal">
+                          {p.price === -1 ? "Custom" : p.price === 0 ? "Free" : `৳${p.price}`}
+                        </div>
+                      </TableHead>
                     ))}
-                  </ul>
-                  <Button
-                    className={`w-full h-11 ${
-                      plan.popular
-                        ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white"
-                        : "bg-white/10 hover:bg-white/15 text-white"
-                    }`}
-                    onClick={() => handleSelectPlan(plan.id)}
-                  >
-                    Subscribe Now
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {FEATURE_COMPARISON.map((cat) => (
+                    <>
+                      <TableRow key={cat.category} className="border-white/10 bg-white/[0.03]">
+                        <TableCell colSpan={6} className="font-semibold text-cyan-400 text-sm py-2">
+                          {cat.category}
+                        </TableCell>
+                      </TableRow>
+                      {cat.features.map((feat) => (
+                        <TableRow key={feat.name} className="border-white/10 hover:bg-white/5">
+                          <TableCell className="text-sm text-white/70">{feat.name}</TableCell>
+                          {(["free", "basic", "pro", "business", "enterprise"] as const).map((planId) => {
+                            const val = feat[planId];
+                            return (
+                              <TableCell key={planId} className="text-center">
+                                {val === true ? (
+                                  <Check className="h-4 w-4 text-green-400 mx-auto" />
+                                ) : val === false ? (
+                                  <X className="h-4 w-4 text-white/20 mx-auto" />
+                                ) : (
+                                  <span className="text-xs text-white/60">{val}</span>
+                                )}
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      ))}
+                    </>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </div>
       </section>
@@ -372,7 +411,7 @@ const Index = () => {
             <DialogTitle className="text-xl">
               Subscribe to{" "}
               <span className="text-cyan-400">
-                {plans.find((p) => p.id === selectedPlan)?.name}
+                {PLANS.find((p) => p.id === selectedPlan)?.name}
               </span>{" "}
               Plan
             </DialogTitle>
@@ -385,10 +424,13 @@ const Index = () => {
             {/* Plan summary */}
             <div className="p-3 rounded-lg bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-between">
               <span className="text-sm font-medium">
-                {plans.find((p) => p.id === selectedPlan)?.name} Plan
+                {PLANS.find((p) => p.id === selectedPlan)?.name} Plan
               </span>
               <span className="font-bold text-cyan-400">
-                ৳{plans.find((p) => p.id === selectedPlan)?.price.toLocaleString()}/month
+                {(() => {
+                  const p = PLANS.find((p) => p.id === selectedPlan);
+                  return p?.price === -1 ? "Custom Pricing" : `৳${p?.price.toLocaleString()}/month`;
+                })()}
               </span>
             </div>
 
