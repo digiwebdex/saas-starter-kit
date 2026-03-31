@@ -7,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
-import { Plus, Receipt, CreditCard, Eye, Mail } from "lucide-react";
+import { Plus, Receipt, CreditCard, Eye, Mail, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { emailApi } from "@/lib/emailApi";
+import PaymentGatewayDialog from "@/components/PaymentGatewayDialog";
 import { Progress } from "@/components/ui/progress";
 
 type PaymentMethod = "cash" | "bank";
@@ -48,6 +49,8 @@ const Invoices = () => {
   const [paymentForm, setPaymentForm] = useState({ amount: 0, method: "cash" as PaymentMethod, date: new Date().toISOString().split("T")[0] });
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [payDialogOpen, setPayDialogOpen] = useState(false);
+  const [payGatewayOpen, setPayGatewayOpen] = useState(false);
+  const [payGatewayInvoice, setPayGatewayInvoice] = useState<{ id: string; amount: number } | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -242,6 +245,16 @@ const Invoices = () => {
                             >
                               <Mail className="h-4 w-4 text-primary" />
                             </Button>
+                            {inv.status !== "paid" && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                title="Pay Now (Online)"
+                                onClick={() => { setPayGatewayInvoice({ id: inv.id, amount: inv.dueAmount }); setPayGatewayOpen(true); }}
+                              >
+                                <Wallet className="h-4 w-4 text-primary" />
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -354,6 +367,16 @@ const Invoices = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Online Payment Gateway Dialog */}
+        {payGatewayInvoice && (
+          <PaymentGatewayDialog
+            open={payGatewayOpen}
+            onOpenChange={(v) => { setPayGatewayOpen(v); if (!v) setPayGatewayInvoice(null); }}
+            invoiceId={payGatewayInvoice.id}
+            amount={payGatewayInvoice.amount}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
