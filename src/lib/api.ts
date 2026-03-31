@@ -68,6 +68,7 @@ export const agentApi = createCrudApi<Agent>("agents");
 export const vendorApi = createCrudApi<Vendor>("vendors");
 export const leadApi = createCrudApi<Lead>("leads");
 export const taskApi = createCrudApi<Task>("tasks");
+export const bookingApi = createCrudApi<Booking>("bookings");
 
 // ── Types ──
 export interface User {
@@ -128,6 +129,19 @@ export interface Task {
   name: string;
   phone: string;
   email: string;
+  tenantId: string;
+  createdAt: string;
+}
+
+export interface Booking {
+  id: string;
+  type: "tour" | "ticket" | "hotel" | "visa";
+  clientId: string;
+  agentId: string;
+  amount: number;
+  cost: number;
+  profit: number;
+  status: "pending" | "confirmed" | "completed" | "cancelled";
   tenantId: string;
   createdAt: string;
 }
