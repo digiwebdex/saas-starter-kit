@@ -11,9 +11,34 @@ export interface DomainResolution {
 const APP_DOMAIN = import.meta.env.VITE_APP_DOMAIN || "";
 
 /**
+ * Generate subdomain URL for a tenant slug.
+ */
+export function getSubdomainUrl(slug: string): string {
+  const domain = APP_DOMAIN || "yourapp.com";
+  return `${slug}.${domain}`;
+}
+
+/**
+ * Extract slug from a subdomain hostname.
+ * e.g. "acme-travel.yourapp.com" → "acme-travel"
+ */
+export function extractSlugFromHostname(hostname: string): string | null {
+  if (!APP_DOMAIN) return null;
+  const bare = hostname.toLowerCase().replace(/^www\./, "");
+  const bareDomain = APP_DOMAIN.replace(/^www\./, "");
+  if (bare.endsWith(`.${bareDomain}`)) {
+    const slug = bare.replace(`.${bareDomain}`, "");
+    if (slug && !slug.includes(".") && slug !== "www") {
+      return slug;
+    }
+  }
+  return null;
+}
+
+/**
  * Resolve tenant identity from the current hostname.
  * Supports:
- *   - Subdomains: {slug}.yourdomain.com
+ *   - Subdomains: {slug}.yourdomain.com (wildcard DNS)
  *   - Root domain: yourdomain.com (main app)
  *   - www subdomain: www.yourdomain.com (main app)
  *   - Custom domains: example.com → lookup by domain
@@ -36,12 +61,10 @@ export function resolveHostname(): DomainResolution {
     return { type: "main-app", hostname };
   }
 
-  // Subdomain of app domain → extract slug
-  if (bare.endsWith(`.${bareDomain}`)) {
-    const slug = bare.replace(`.${bareDomain}`, "");
-    if (slug && !slug.includes(".")) {
-      return { type: "slug", slug, hostname };
-    }
+  // Subdomain of app domain → extract slug (wildcard DNS: *.yourapp.com)
+  const slug = extractSlugFromHostname(hostname);
+  if (slug) {
+    return { type: "slug", slug, hostname };
   }
 
   // Everything else → custom domain (strip www for matching)

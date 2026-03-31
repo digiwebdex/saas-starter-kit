@@ -935,6 +935,124 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
             </Table>
           </CardContent>
         </Card>
+
+        {/* Subdomain System */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Link2 className="h-5 w-5" />
+              Subdomain System
+            </CardTitle>
+            <CardDescription>
+              প্রতিটি টেন্যান্ট অটোমেটিক সাবডোমেইন পায়: <code className="bg-muted px-1.5 py-0.5 rounded text-xs">company.{import.meta.env.VITE_APP_DOMAIN || "yourapp.com"}</code>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+              <p className="text-sm font-semibold text-foreground">Wildcard DNS Setup</p>
+              <p className="text-sm text-muted-foreground">
+                VPS-এ সব সাবডোমেইন পয়েন্ট করতে Cloudflare/DNS-এ একটি wildcard A record যুক্ত করুন:
+              </p>
+              <div className="bg-background rounded-lg p-3 font-mono text-xs space-y-1 border">
+                <p><strong>Type:</strong> A</p>
+                <p><strong>Name:</strong> *</p>
+                <p><strong>Value:</strong> {VPS_IP || "(VITE_VPS_IP সেট করুন)"}</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(`*.${import.meta.env.VITE_APP_DOMAIN || "yourapp.com"} → ${VPS_IP || "YOUR_VPS_IP"} (A Record)`);
+                  toast({ title: "DNS তথ্য কপি হয়েছে" });
+                }}
+              >
+                <Copy className="mr-2 h-3 w-3" />Copy DNS Info
+              </Button>
+            </div>
+
+            <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+              <p className="text-sm font-semibold text-foreground">Nginx Wildcard Config</p>
+              <pre className="bg-background rounded-lg p-3 font-mono text-xs overflow-x-auto whitespace-pre-wrap border">{`# Wildcard subdomain config for Nginx
+server {
+    listen 80;
+    server_name *.${import.meta.env.VITE_APP_DOMAIN || "yourapp.com"};
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:4001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    root /var/www/tas-saas-frontend/dist;
+    index index.html;
+    location / { try_files $uri $uri/ /index.html; }
+}
+
+# SSL: sudo certbot --nginx -d *.${import.meta.env.VITE_APP_DOMAIN || "yourapp.com"}`}</pre>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const appDomain = import.meta.env.VITE_APP_DOMAIN || "yourapp.com";
+                  const cmd = `cat > /etc/nginx/sites-available/wildcard-${appDomain} << 'EOF'\nserver {\n    listen 80;\n    server_name *.${appDomain};\n\n    location /api/ {\n        proxy_pass http://127.0.0.1:4001;\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n    }\n\n    root /var/www/tas-saas-frontend/dist;\n    index index.html;\n    location / { try_files $uri $uri/ /index.html; }\n}\nEOF\nln -sf /etc/nginx/sites-available/wildcard-${appDomain} /etc/nginx/sites-enabled/\nnginx -t && systemctl reload nginx`;
+                  navigator.clipboard.writeText(cmd);
+                  toast({ title: "Nginx কমান্ড কপি হয়েছে" });
+                }}
+              >
+                <Copy className="mr-2 h-3 w-3" />Copy Nginx Command
+              </Button>
+            </div>
+
+            {/* Tenant Subdomains Table */}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Company</TableHead>
+                  <TableHead>Subdomain</TableHead>
+                  <TableHead>Plan</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mockTenants.map((t) => {
+                  const subdomain = getSubdomainUrl(t.slug);
+                  const plan = getPlan(t.plan);
+                  return (
+                    <TableRow key={t.id}>
+                      <TableCell className="font-medium">{t.name}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <code className="bg-muted px-2 py-0.5 rounded text-xs">{subdomain}</code>
+                          <a href={`https://${subdomain}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{plan.name}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Copy subdomain URL"
+                          onClick={() => {
+                            navigator.clipboard.writeText(`https://${subdomain}`);
+                            toast({ title: "সাবডোমেইন URL কপি হয়েছে" });
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     </AdminLayout>
   );
