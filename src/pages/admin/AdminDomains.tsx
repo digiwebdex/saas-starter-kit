@@ -169,7 +169,7 @@ const AdminDomains = () => {
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    const domainClean = form.domain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/$/, "");
+    const domainClean = form.domain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/$/, "");
 
     if (!form.tenantId || !domainClean) {
       toast({ title: "সব ফিল্ড পূরণ করুন", variant: "destructive" });
