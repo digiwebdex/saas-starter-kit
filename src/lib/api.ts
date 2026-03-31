@@ -71,6 +71,8 @@ export const taskApi = createCrudApi<Task>("tasks");
 export const bookingApi = createCrudApi<Booking>("bookings");
 export const invoiceApi = createCrudApi<Invoice>("invoices");
 export const paymentApi = createCrudApi<Payment>("payments");
+export const accountApi = createCrudApi<Account>("accounts");
+export const transactionApi = createCrudApi<Transaction>("transactions");
 
 // ── Types ──
 export interface User {
