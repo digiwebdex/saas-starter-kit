@@ -356,7 +356,7 @@ const Invoices = () => {
                       invoicePayments.map((p) => (
                         <TableRow key={p.id}>
                           <TableCell>{p.date}</TableCell>
-                          <TableCell className="text-right font-medium">{p.amount.toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-medium">৳{p.amount.toFixed(2)}</TableCell>
                           <TableCell className="capitalize">{p.method}</TableCell>
                         </TableRow>
                       ))

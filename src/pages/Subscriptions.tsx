@@ -256,7 +256,7 @@ const Subscription_Page = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Amount:</span>
-                  <span className="font-bold">${selectedPlanInfo.price.toFixed(2)}/mo</span>
+                  <span className="font-bold">৳{selectedPlanInfo.price.toFixed(2)}/mo</span>
                 </div>
                 <p className="text-xs text-muted-foreground pt-2">
                   Transfer the amount to the company bank account, then enter your transaction ID below.

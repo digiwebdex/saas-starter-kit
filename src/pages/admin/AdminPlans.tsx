@@ -140,7 +140,7 @@ const AdminPlans = () => {
                   <TableRow key={p.id} className={!p.active ? "opacity-50" : ""}>
                     <TableCell className="font-medium">{p.name}</TableCell>
                     <TableCell className="font-mono text-xs">{p.slug}</TableCell>
-                    <TableCell className="text-right font-semibold">${p.price}</TableCell>
+                    <TableCell className="text-right font-semibold">৳{p.price}</TableCell>
                     <TableCell className="text-center">{p.maxBookings === -1 ? "∞" : p.maxBookings}</TableCell>
                     <TableCell className="text-center">{p.maxUsers === -1 ? "∞" : p.maxUsers}</TableCell>
                     <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{p.features}</TableCell>

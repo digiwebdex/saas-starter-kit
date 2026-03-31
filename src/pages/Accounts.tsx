@@ -296,7 +296,7 @@ const Accounts = () => {
                       <TableCell className="text-muted-foreground">{tx.description}</TableCell>
                       <TableCell>{getAccountName(tx.accountId)}</TableCell>
                       <TableCell className={`text-right font-semibold ${tx.type === "income" ? "text-green-600" : "text-destructive"}`}>
-                        {tx.type === "income" ? "+" : "−"}{tx.amount.toFixed(2)}
+                        {tx.type === "income" ? "+" : "−"}৳{tx.amount.toFixed(2)}
                       </TableCell>
                     </TableRow>
                   ))
