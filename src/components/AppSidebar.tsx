@@ -79,6 +79,23 @@ export function AppSidebar() {
         <NavGroup label="Overview" items={mainItems} collapsed={collapsed} />
         <NavGroup label="CRM" items={crmItems} collapsed={collapsed} />
         <NavGroup label="Management" items={managementItems} collapsed={collapsed} />
+        {user?.role === "owner" && (
+          <SidebarGroup>
+            <SidebarGroupLabel>{!collapsed ? "Admin" : ""}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/admin" className="hover:bg-sidebar-accent/50 text-destructive" activeClassName="bg-sidebar-accent font-medium">
+                      <Shield className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>Admin Panel</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter>
         {!collapsed && user && (
