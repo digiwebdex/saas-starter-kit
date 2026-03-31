@@ -198,12 +198,17 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
               ডোমেইন সেটআপ নির্দেশনা
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground space-y-2">
-            <p><strong>১.</strong> টেন্যান্ট তাদের ডোমেইনের DNS-এ <strong>A Record</strong> যুক্ত করবে → আপনার VPS IP-তে পয়েন্ট করবে</p>
-            <p><strong>২.</strong> নিচের টেবিলে "Copy Setup" বাটনে ক্লিক করে Nginx কমান্ড কপি করুন</p>
-            <p><strong>৩.</strong> VPS টার্মিনালে পেস্ট করে রান করুন (SSL সহ)</p>
-            <p><strong>৪.</strong> ব্যাকেন্ড ডাটাবেসে টেন্যান্টের <code className="bg-muted px-1 rounded">customDomain</code> আপডেট করুন</p>
-            <p><strong>৫.</strong> স্ট্যাটাস "Active" করুন</p>
+          <CardContent className="text-sm text-muted-foreground space-y-3">
+            <p className="font-semibold text-foreground">Cloudflare DNS সেটআপ:</p>
+            <p><strong>১.</strong> Cloudflare DNS-এ যান → <strong>A Record</strong> যুক্ত করুন: <code className="bg-muted px-1 rounded">Name: @</code> → <code className="bg-muted px-1 rounded">Value: আপনার VPS IP</code></p>
+            <p><strong>২.</strong> <strong>CNAME Record</strong> যুক্ত করুন: <code className="bg-muted px-1 rounded">Name: www</code> → <code className="bg-muted px-1 rounded">Value: yourdomain.com</code></p>
+            <p><strong>৩.</strong> Proxy <strong>বন্ধ</strong> করুন (DNS Only / ধূসর মেঘ আইকন) — SSL আমরা Certbot দিয়ে করবো</p>
+            <p><strong>৪.</strong> ৫–১০ মিনিট অপেক্ষা করুন DNS propagation-এর জন্য</p>
+            <p className="font-semibold text-foreground mt-2">সার্ভার সেটআপ:</p>
+            <p><strong>৫.</strong> নিচের টেবিলে "Copy Setup" বাটনে ক্লিক করে Nginx কমান্ড কপি করুন</p>
+            <p><strong>৬.</strong> VPS টার্মিনালে পেস্ট করে রান করুন (SSL সহ)</p>
+            <p><strong>৭.</strong> ব্যাকেন্ড ডাটাবেসে টেন্যান্টের <code className="bg-muted px-1 rounded">customDomain</code> আপডেট করুন</p>
+            <p><strong>৮.</strong> স্ট্যাটাস "Active" করুন</p>
           </CardContent>
         </Card>
 
