@@ -30,6 +30,7 @@ const crmItems = [
   { title: "Invoices", url: "/invoices", icon: Receipt },
   { title: "Accounts", url: "/accounts", icon: Wallet },
   { title: "Reports", url: "/reports", icon: BarChart3 },
+  { title: "Hajj/Umrah", url: "/hajj-umrah", icon: Moon },
 ];
 
 const managementItems = [
