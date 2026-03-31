@@ -171,3 +171,25 @@ export interface Payment {
   tenantId: string;
   createdAt: string;
 }
+
+export interface Account {
+  id: string;
+  name: string;
+  type: "cash" | "bank";
+  balance: number;
+  tenantId: string;
+  createdAt: string;
+}
+
+export interface Transaction {
+  id: string;
+  accountId: string;
+  type: "income" | "expense";
+  category: string;
+  description: string;
+  amount: number;
+  referenceId: string;
+  date: string;
+  tenantId: string;
+  createdAt: string;
+}
