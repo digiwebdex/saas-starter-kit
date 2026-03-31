@@ -202,6 +202,14 @@ export function getPlan(planId: PlanType): PlanConfig {
   return PLANS.find((p) => p.id === planId) || PLANS[0];
 }
 
+/** Get domain limit label for display */
+export function getDomainLimitLabel(planId: PlanType): string {
+  const plan = getPlan(planId);
+  if (plan.maxDomains === 0) return "কোনো ডোমেইন নেই";
+  if (plan.maxDomains === -1) return "আনলিমিটেড";
+  return `সর্বোচ্চ ${plan.maxDomains}টি`;
+}
+
 // Feature comparison table structure
 export const FEATURE_COMPARISON = [
   { category: "Core", features: [
