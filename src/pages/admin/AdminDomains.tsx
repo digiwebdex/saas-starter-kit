@@ -347,6 +347,38 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
     setSslDialogDomain(null);
   };
 
+  const runDiagnostic = async (domain: TenantDomain) => {
+    setDiagDomain(domain);
+    setDiagRunning(true);
+    setDiagResult(null);
+
+    try {
+      // Check A record
+      const aResult = await checkDomainARecord(domain.domain, VPS_IP || "0.0.0.0");
+      const aRecord = { found: aResult.resolvedIps.length > 0, ips: aResult.resolvedIps, error: aResult.error };
+      const ipMatch = aResult.pointing;
+
+      // Check SSL by attempting HTTPS fetch
+      let ssl = { active: false, error: undefined as string | undefined };
+      try {
+        const sslRes = await fetch(`https://${domain.domain}`, { method: "HEAD", mode: "no-cors" });
+        ssl = { active: true, error: undefined };
+      } catch {
+        ssl = { active: false, error: "HTTPS connection failed" };
+      }
+
+      setDiagResult({ aRecord, ipMatch, ssl });
+    } catch (err: any) {
+      setDiagResult({
+        aRecord: { found: false, ips: [], error: err.message },
+        ipMatch: false,
+        ssl: { active: false, error: "Check failed" },
+      });
+    }
+
+    setDiagRunning(false);
+  };
+
   const toggleStatus = (id: string) => {
     const domain = domains.find((d) => d.id === id);
     if (!domain) return;
