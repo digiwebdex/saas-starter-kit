@@ -262,12 +262,23 @@ const AdminDomains = () => {
     toast({ title: "ডোমেইন সরানো হয়েছে", description: d?.domain });
   };
 
-  const copyNginxCommand = (domain: string) => {
-    const cmd = `# 1. Nginx config তৈরি করুন
+  const copyNginxCommand = (domain: string, wwwRedirect: TenantDomain["wwwRedirect"]) => {
+    const primary = wwwRedirect === "root-to-www" ? `www.${domain}` : domain;
+    const redirect = wwwRedirect === "root-to-www" ? domain : `www.${domain}`;
+
+    const cmd = `# 1. Nginx config তৈরি করুন (www ↔ root redirect সহ)
 cat > /etc/nginx/sites-available/${domain} << 'EOF'
+# Redirect ${redirect} → ${primary}
 server {
     listen 80;
-    server_name ${domain} www.${domain};
+    server_name ${redirect};
+    return 301 https://${primary}$request_uri;
+}
+
+# Main server block
+server {
+    listen 80;
+    server_name ${primary};
 
     location /api/ {
         proxy_pass http://127.0.0.1:4001;
@@ -283,13 +294,13 @@ server {
 }
 EOF
 
-# 2. Enable & SSL
-ln -s /etc/nginx/sites-available/${domain} /etc/nginx/sites-enabled/
+# 2. Enable & SSL (both domains)
+ln -sf /etc/nginx/sites-available/${domain} /etc/nginx/sites-enabled/
 nginx -t && systemctl reload nginx
 sudo certbot --nginx -d ${domain} -d www.${domain}`;
 
     navigator.clipboard.writeText(cmd);
-    toast({ title: "কমান্ড কপি হয়েছে", description: "VPS টার্মিনালে পেস্ট করুন" });
+    toast({ title: "কমান্ড কপি হয়েছে", description: `${redirect} → ${primary} redirect সহ` });
   };
 
   const copyToken = (token: string) => {
