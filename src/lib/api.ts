@@ -69,6 +69,8 @@ export const vendorApi = createCrudApi<Vendor>("vendors");
 export const leadApi = createCrudApi<Lead>("leads");
 export const taskApi = createCrudApi<Task>("tasks");
 export const bookingApi = createCrudApi<Booking>("bookings");
+export const invoiceApi = createCrudApi<Invoice>("invoices");
+export const paymentApi = createCrudApi<Payment>("payments");
 
 // ── Types ──
 export interface User {
@@ -142,6 +144,28 @@ export interface Booking {
   cost: number;
   profit: number;
   status: "pending" | "confirmed" | "completed" | "cancelled";
+  tenantId: string;
+  createdAt: string;
+}
+
+export interface Invoice {
+  id: string;
+  bookingId: string;
+  totalAmount: number;
+  paidAmount: number;
+  dueAmount: number;
+  status: "unpaid" | "partial" | "paid";
+  tenantId: string;
+  createdAt: string;
+}
+
+export interface Payment {
+  id: string;
+  invoiceId: string;
+  bookingId: string;
+  amount: number;
+  method: "cash" | "bank";
+  date: string;
   tenantId: string;
   createdAt: string;
 }
