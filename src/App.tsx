@@ -30,6 +30,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
 import AdminPayments from "./pages/admin/AdminPayments";
 import AdminPlans from "./pages/admin/AdminPlans";
+import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminDomains from "./pages/admin/AdminDomains";
 import SiteHome from "./pages/site/SiteHome";
 import SiteAbout from "./pages/site/SiteAbout";
