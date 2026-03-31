@@ -247,7 +247,7 @@ const Accounts = () => {
                       <Badge variant="secondary" className="capitalize mt-1">{acc.type}</Badge>
                     </div>
                     <div className={`text-lg font-bold ${acc.balance >= 0 ? "text-green-600" : "text-destructive"}`}>
-                      {acc.balance.toFixed(2)}
+                      ৳{acc.balance.toFixed(2)}
                     </div>
                   </div>
                 ))}
