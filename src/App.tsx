@@ -19,6 +19,7 @@ import Tasks from "./pages/Tasks";
 import Bookings from "./pages/Bookings";
 import Invoices from "./pages/Invoices";
 import Accounts from "./pages/Accounts";
+import Subscriptions from "./pages/Subscriptions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
