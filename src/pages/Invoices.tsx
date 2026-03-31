@@ -227,7 +227,21 @@ const Invoices = () => {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                          </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="Send invoice email"
+                              onClick={async () => {
+                                try {
+                                  await emailApi.sendInvoice(inv.id);
+                                  toast({ title: "Invoice email sent" });
+                                } catch (err: any) {
+                                  toast({ title: "Email failed", description: err.message, variant: "destructive" });
+                                }
+                              }}
+                            >
+                              <Mail className="h-4 w-4 text-primary" />
+                            </Button>
                         </TableCell>
                       </TableRow>
                     );
