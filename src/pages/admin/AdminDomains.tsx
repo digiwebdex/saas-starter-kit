@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Globe, Trash2, Copy, CheckCircle, AlertCircle, ExternalLink, ShieldCheck, Loader2, RefreshCw, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generateVerificationToken, verifyDomainDns, checkDomainARecord, requestSslCertificate, generateSslCommand } from "@/lib/domainVerification";
+import { getPlan, getDomainLimitLabel, type PlanType } from "@/lib/plans";
 
 // DNS check interval in milliseconds (3 minutes)
 const DNS_CHECK_INTERVAL = 3 * 60 * 1000;
@@ -32,9 +33,9 @@ interface TenantDomain {
 }
 
 const mockTenants = [
-  { id: "t1", name: "Acme Travel" },
-  { id: "t2", name: "Globe Tours" },
-  { id: "t3", name: "Star Holidays" },
+  { id: "t1", name: "Acme Travel", plan: "pro" as PlanType },
+  { id: "t2", name: "Globe Tours", plan: "business" as PlanType },
+  { id: "t3", name: "Star Holidays", plan: "basic" as PlanType },
 ];
 
 const mockDomains: TenantDomain[] = [
@@ -171,6 +172,30 @@ const AdminDomains = () => {
     }
 
     const tenant = mockTenants.find((t) => t.id === form.tenantId);
+    if (!tenant) return;
+
+    // Check plan domain limit
+    const plan = getPlan(tenant.plan);
+    if (plan.maxDomains === 0) {
+      toast({
+        title: "ডোমেইন সাপোর্ট নেই",
+        description: `${tenant.name} এর "${plan.name}" প্ল্যানে কাস্টম ডোমেইন সাপোর্ট নেই। Pro বা তার উপরের প্ল্যানে আপগ্রেড করুন।`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (plan.maxDomains > 0) {
+      const tenantDomainCount = domains.filter((d) => d.tenantId === form.tenantId).length;
+      if (tenantDomainCount >= plan.maxDomains) {
+        toast({
+          title: "ডোমেইন লিমিট পূর্ণ",
+          description: `${tenant.name} এর "${plan.name}" প্ল্যানে সর্বোচ্চ ${plan.maxDomains}টি ডোমেইন যুক্ত করা যায়। আরো ডোমেইন যুক্ত করতে Business প্ল্যানে আপগ্রেড করুন।`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     const token = generateVerificationToken();
     const newDomain: TenantDomain = {
       id: crypto.randomUUID(),
@@ -400,11 +425,30 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                       <SelectValue placeholder="কোম্পানি সিলেক্ট করুন" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockTenants.map((t) => (
-                        <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                      ))}
+                      {mockTenants.map((t) => {
+                        const p = getPlan(t.plan);
+                        return (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.name} <span className="text-muted-foreground">({p.name} — {getDomainLimitLabel(t.plan)})</span>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
+                  {form.tenantId && (() => {
+                    const selectedTenant = mockTenants.find((t) => t.id === form.tenantId);
+                    if (!selectedTenant) return null;
+                    const plan = getPlan(selectedTenant.plan);
+                    const currentCount = domains.filter((d) => d.tenantId === form.tenantId).length;
+                    const canAdd = plan.maxDomains === -1 || currentCount < plan.maxDomains;
+                    return (
+                      <p className={`text-xs ${canAdd ? "text-muted-foreground" : "text-destructive"}`}>
+                        {plan.name} প্ল্যান: {getDomainLimitLabel(selectedTenant.plan)}
+                        {plan.maxDomains > 0 && ` (ব্যবহৃত: ${currentCount}/${plan.maxDomains})`}
+                        {plan.maxDomains === 0 && " — আপগ্রেড প্রয়োজন"}
+                      </p>
+                    );
+                  })()}
                 </div>
                 <div className="space-y-2">
                   <Label>ডোমেইন</Label>

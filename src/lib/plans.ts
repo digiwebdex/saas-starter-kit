@@ -11,6 +11,7 @@ export interface PlanConfig {
   maxClients: number; // -1 = unlimited
   maxBookings: number; // -1 = unlimited
   maxUsers: number; // -1 = unlimited
+  maxDomains: number; // 0 = no domain, -1 = unlimited
   features: string[];
   restrictions: string[];
   paymentGateways: ("manual" | "sslcommerz" | "bkash" | "custom")[];
@@ -35,6 +36,7 @@ export const PLANS: PlanConfig[] = [
     maxClients: 50,
     maxBookings: 50,
     maxUsers: 1,
+    maxDomains: 0,
     features: [
       "Dashboard",
       "CRM (50 clients limit)",
@@ -68,6 +70,7 @@ export const PLANS: PlanConfig[] = [
     maxClients: -1,
     maxBookings: -1,
     maxUsers: 5,
+    maxDomains: 0,
     features: [
       "Unlimited clients",
       "Unlimited bookings",
@@ -102,6 +105,7 @@ export const PLANS: PlanConfig[] = [
     maxClients: -1,
     maxBookings: -1,
     maxUsers: 20,
+    maxDomains: 1,
     features: [
       "Everything in Basic",
       "Custom domain support",
@@ -136,6 +140,7 @@ export const PLANS: PlanConfig[] = [
     maxClients: -1,
     maxBookings: -1,
     maxUsers: -1,
+    maxDomains: -1,
     features: [
       "Everything in Pro",
       "WhatsApp integration",
@@ -167,6 +172,7 @@ export const PLANS: PlanConfig[] = [
     maxClients: -1,
     maxBookings: -1,
     maxUsers: -1,
+    maxDomains: -1,
     features: [
       "All features unlocked",
       "Custom website design",
@@ -196,6 +202,14 @@ export function getPlan(planId: PlanType): PlanConfig {
   return PLANS.find((p) => p.id === planId) || PLANS[0];
 }
 
+/** Get domain limit label for display */
+export function getDomainLimitLabel(planId: PlanType): string {
+  const plan = getPlan(planId);
+  if (plan.maxDomains === 0) return "কোনো ডোমেইন নেই";
+  if (plan.maxDomains === -1) return "আনলিমিটেড";
+  return `সর্বোচ্চ ${plan.maxDomains}টি`;
+}
+
 // Feature comparison table structure
 export const FEATURE_COMPARISON = [
   { category: "Core", features: [
@@ -221,7 +235,7 @@ export const FEATURE_COMPARISON = [
   ]},
   { category: "Website & Domain", features: [
     { name: "Subdomain Website", free: true, basic: true, pro: true, business: true, enterprise: true },
-    { name: "Custom Domain", free: false, basic: false, pro: true, business: true, enterprise: true },
+    { name: "Custom Domain", free: false, basic: false, pro: "1 domain", business: "Unlimited", enterprise: "Unlimited" },
     { name: "Website Templates", free: false, basic: false, pro: true, business: true, enterprise: true },
     { name: "Custom Website Design", free: false, basic: false, pro: false, business: false, enterprise: true },
   ]},
