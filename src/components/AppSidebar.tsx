@@ -34,6 +34,7 @@ const crmItems = [
 const managementItems = [
   { title: "Team", url: "/team", icon: Users },
   { title: "Organization", url: "/organization", icon: Building2 },
+  { title: "Subscription", url: "/subscription", icon: Crown },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

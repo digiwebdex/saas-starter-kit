@@ -195,3 +195,23 @@ export interface Transaction {
   tenantId: string;
   createdAt: string;
 }
+
+export interface Subscription {
+  id: string;
+  tenantId: string;
+  plan: "free" | "basic" | "pro" | "business";
+  startDate: string;
+  endDate: string;
+  status: "active" | "expired" | "pending" | "cancelled";
+  createdAt: string;
+}
+
+export interface PaymentRequest {
+  id: string;
+  tenantId: string;
+  plan: string;
+  amount: number;
+  trxId: string;
+  status: "pending" | "approved" | "rejected";
+  createdAt: string;
+}
