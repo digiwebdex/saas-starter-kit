@@ -75,6 +75,16 @@ const Invoices = () => {
     setInvoiceForm({ bookingId: "", totalAmount: 0 });
     setCreateDialogOpen(false);
     toast({ title: "Invoice created" });
+    // Trigger SMS for invoice generated (reminder type)
+    sendPaymentSms({
+      invoiceId: inv.id,
+      bookingId: inv.bookingId,
+      paymentAmount: inv.totalAmount,
+      balance: inv.dueAmount,
+      clientName: "",
+      clientPhone: "",
+      company: "Travel Agency",
+    }).catch(() => {});
   };
 
   const handleAddPayment = (e: React.FormEvent) => {
