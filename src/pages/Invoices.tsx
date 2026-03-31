@@ -49,6 +49,8 @@ const Invoices = () => {
   const [paymentForm, setPaymentForm] = useState({ amount: 0, method: "cash" as PaymentMethod, date: new Date().toISOString().split("T")[0] });
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [payDialogOpen, setPayDialogOpen] = useState(false);
+  const [payGatewayOpen, setPayGatewayOpen] = useState(false);
+  const [payGatewayInvoice, setPayGatewayInvoice] = useState<{ id: string; amount: number } | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const { toast } = useToast();
