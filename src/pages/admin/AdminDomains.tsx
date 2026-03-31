@@ -668,6 +668,15 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                           <Button
                             variant="ghost"
                             size="icon"
+                            title="SSL Certificate"
+                            onClick={() => { setSslFallbackCommand(null); setSslDialogDomain(d); }}
+                            disabled={d.verificationStatus !== "verified"}
+                          >
+                            <Lock className={`h-4 w-4 ${d.sslStatus === "active" ? "text-green-600" : "text-muted-foreground"}`} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             title="Copy Nginx setup command"
                             onClick={() => copyNginxCommand(d.domain)}
                           >
