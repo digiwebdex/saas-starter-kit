@@ -27,6 +27,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
 import AdminPayments from "./pages/admin/AdminPayments";
 import AdminPlans from "./pages/admin/AdminPlans";
+import AdminDomains from "./pages/admin/AdminDomains";
 import SiteHome from "./pages/site/SiteHome";
 import SiteAbout from "./pages/site/SiteAbout";
 import SitePackages from "./pages/site/SitePackages";
@@ -83,6 +84,7 @@ const App = () => (
             <Route path="/admin/tenants" element={<A><AdminTenants /></A>} />
             <Route path="/admin/payments" element={<A><AdminPayments /></A>} />
             <Route path="/admin/plans" element={<A><AdminPlans /></A>} />
+            <Route path="/admin/domains" element={<A><AdminDomains /></A>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

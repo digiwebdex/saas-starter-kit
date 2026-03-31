@@ -1,4 +1,4 @@
-import { LayoutDashboard, Building2, CreditCard, Crown, Ban, LogOut, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Building2, CreditCard, Crown, Ban, LogOut, ArrowLeft, Globe } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 const adminItems = [
   { title: "Overview", url: "/admin", icon: LayoutDashboard },
   { title: "Tenants", url: "/admin/tenants", icon: Building2 },
+  { title: "Domains", url: "/admin/domains", icon: Globe },
   { title: "Payment Requests", url: "/admin/payments", icon: CreditCard },
   { title: "Manage Plans", url: "/admin/plans", icon: Crown },
 ];
