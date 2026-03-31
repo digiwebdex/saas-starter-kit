@@ -25,6 +25,7 @@ const adminItems = [
   { title: "Subscriptions", url: "/admin/subscriptions", icon: ListChecks },
   { title: "Feature Control", url: "/admin/features", icon: Shield },
   { title: "SMS Templates", url: "/admin/sms-templates", icon: MessageSquare },
+  { title: "SMS Logs", url: "/admin/sms-logs", icon: ScrollText },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
