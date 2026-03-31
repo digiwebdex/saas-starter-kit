@@ -34,10 +34,16 @@ interface TenantDomain {
 }
 
 const mockTenants = [
-  { id: "t1", name: "Acme Travel", plan: "pro" as PlanType },
-  { id: "t2", name: "Globe Tours", plan: "business" as PlanType },
-  { id: "t3", name: "Star Holidays", plan: "basic" as PlanType },
+  { id: "t1", name: "Acme Travel", slug: "acme-travel", plan: "pro" as PlanType },
+  { id: "t2", name: "Globe Tours", slug: "globe-tours", plan: "business" as PlanType },
+  { id: "t3", name: "Star Holidays", slug: "star-holidays", plan: "basic" as PlanType },
 ];
+
+// Generate subdomain URL from slug
+const getSubdomainUrl = (slug: string) => {
+  const appDomain = import.meta.env.VITE_APP_DOMAIN || "yourapp.com";
+  return `${slug}.${appDomain}`;
+};
 
 const mockDomains: TenantDomain[] = [
   {
