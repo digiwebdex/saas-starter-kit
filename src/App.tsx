@@ -26,6 +26,7 @@ import Reports from "./pages/Reports";
 import HajjUmrah from "./pages/HajjUmrah";
 import Subscriptions from "./pages/Subscriptions";
 import PaymentCallback from "./pages/PaymentCallback";
+import Onboarding from "./pages/Onboarding";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
 import AdminPayments from "./pages/admin/AdminPayments";
@@ -64,6 +65,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/onboarding" element={<P><Onboarding /></P>} />
 
             {/* Public website (no auth required) */}
             <Route path="/site" element={<WebsiteProvider><SiteHome /></WebsiteProvider>} />
