@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import {
-  Plus, Pencil, Trash2, Users, UserPlus, CreditCard,
+  Plus, Pencil, Trash2, Users, UserPlus, CreditCard, Eye, Search,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
