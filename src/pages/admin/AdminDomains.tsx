@@ -829,12 +829,17 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                   domains.map((d) => (
                     <TableRow key={d.id}>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{d.domain}</span>
-                          <a href={`https://${d.domain}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">{d.domain}</span>
+                            <a href={`https://${d.domain}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          </div>
+                          <span className="text-xs text-muted-foreground ml-6">
+                            + www.{d.domain} ({d.wwwRedirect === "www-to-root" ? "www → root" : "root → www"})
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground">{d.tenantName}</TableCell>
