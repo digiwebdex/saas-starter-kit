@@ -7,8 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
-import { Plus, Receipt, CreditCard, Eye } from "lucide-react";
+import { Plus, Receipt, CreditCard, Eye, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { emailApi } from "@/lib/emailApi";
 import { Progress } from "@/components/ui/progress";
 
 type PaymentMethod = "cash" | "bank";
