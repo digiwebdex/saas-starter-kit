@@ -42,7 +42,8 @@ const Dashboard = () => {
           paymentApi.list().catch(() => []),
         ]);
 
-        const totalRevenue = bookings.reduce<number>((sum, b) => sum + (b.amount || 0), 0);
+        let totalRevenue = 0;
+        bookings.forEach((b: any) => { totalRevenue += b.amount || 0; });
 
         setStats({
           totalUsers: members.length,
