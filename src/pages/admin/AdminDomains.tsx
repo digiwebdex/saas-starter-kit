@@ -311,12 +311,26 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Domain Management</h1>
-            <p className="text-muted-foreground">টেন্যান্টদের কাস্টম ডোমেইন ম্যানেজ করুন</p>
+            <p className="text-muted-foreground">
+              টেন্যান্টদের কাস্টম ডোমেইন ম্যানেজ করুন
+              {lastAutoCheck && (
+                <span className="ml-2 text-xs">• শেষ চেক: {lastAutoCheck}</span>
+              )}
+            </p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button><Plus className="mr-2 h-4 w-4" />Add Domain</Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => runDnsStatusCheck(false)}
+              disabled={autoChecking}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${autoChecking ? "animate-spin" : ""}`} />
+              {autoChecking ? "Checking..." : "Check DNS Now"}
+            </Button>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button><Plus className="mr-2 h-4 w-4" />Add Domain</Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>নতুন ডোমেইন যুক্ত করুন</DialogTitle>
