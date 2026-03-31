@@ -104,6 +104,7 @@ const AppContent = () => (
               <Route path="/admin/subscriptions" element={<A><AdminSubscriptions /></A>} />
               <Route path="/admin/settings" element={<A><AdminSettings /></A>} />
               <Route path="/admin/features" element={<A><AdminFeatures /></A>} />
+              <Route path="/admin/sms-templates" element={<A><AdminSmsTemplates /></A>} />
 
               <Route path="*" element={<NotFound />} />
         </Routes>
