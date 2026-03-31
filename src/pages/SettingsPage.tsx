@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import SmtpSettings from "@/components/SmtpSettings";
+import DataExport from "@/components/DataExport";
 
 const SettingsPage = () => {
   return (
