@@ -33,6 +33,7 @@ import AdminPlans from "./pages/admin/AdminPlans";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminTenantDetails from "./pages/admin/AdminTenantDetails";
 import AdminDomains from "./pages/admin/AdminDomains";
+import AdminSettings from "./pages/admin/AdminSettings";
 import SiteHome from "./pages/site/SiteHome";
 import SiteAbout from "./pages/site/SiteAbout";
 import SitePackages from "./pages/site/SitePackages";
