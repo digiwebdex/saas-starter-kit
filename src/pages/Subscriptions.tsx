@@ -221,7 +221,7 @@ const Subscription_Page = () => {
                     <TableRow key={req.id}>
                       <TableCell>{new Date(req.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell className="capitalize font-medium">{req.plan}</TableCell>
-                      <TableCell className="text-right">${req.amount.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">৳{req.amount.toFixed(2)}</TableCell>
                       <TableCell className="font-mono text-xs">{req.trxId}</TableCell>
                       <TableCell>{statusBadge(req.status)}</TableCell>
                       {isAdmin && (
