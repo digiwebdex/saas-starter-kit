@@ -11,6 +11,7 @@ import { Plus, Receipt, CreditCard, Eye, Mail, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { emailApi } from "@/lib/emailApi";
 import PaymentGatewayDialog from "@/components/PaymentGatewayDialog";
+import { sendPaymentSms } from "@/lib/smsAutomation";
 import { Progress } from "@/components/ui/progress";
 
 type PaymentMethod = "cash" | "bank";
@@ -74,6 +75,16 @@ const Invoices = () => {
     setInvoiceForm({ bookingId: "", totalAmount: 0 });
     setCreateDialogOpen(false);
     toast({ title: "Invoice created" });
+    // Trigger SMS for invoice generated (reminder type)
+    sendPaymentSms({
+      invoiceId: inv.id,
+      bookingId: inv.bookingId,
+      paymentAmount: inv.totalAmount,
+      balance: inv.dueAmount,
+      clientName: "",
+      clientPhone: "",
+      company: "Travel Agency",
+    }).catch(() => {});
   };
 
   const handleAddPayment = (e: React.FormEvent) => {
@@ -110,6 +121,18 @@ const Invoices = () => {
     setPaymentForm({ amount: 0, method: "cash", date: new Date().toISOString().split("T")[0] });
     setPayDialogOpen(false);
     toast({ title: "Payment recorded", description: `${payAmount.toFixed(2)} paid via ${paymentForm.method}` });
+    // Trigger SMS for payment received
+    sendPaymentSms({
+      paymentAmount: payAmount,
+      paymentMethod: paymentForm.method,
+      invoiceId: selectedInvoice.id,
+      balance: Math.max(0, selectedInvoice.dueAmount - payAmount),
+      clientName: "",
+      clientPhone: "",
+      company: "Travel Agency",
+    }).then((res) => {
+      if (res.sent) toast({ title: "Payment SMS sent to client" });
+    }).catch(() => {});
   };
 
   const totals = useMemo(() => ({

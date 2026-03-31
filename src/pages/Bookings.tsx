@@ -12,6 +12,7 @@ import { Plus, Pencil, Trash2, Plane, Mail, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { emailApi } from "@/lib/emailApi";
 import { bookingApi } from "@/lib/api";
+import { sendBookingSms } from "@/lib/smsAutomation";
 import EmptyState from "@/components/EmptyState";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
@@ -85,6 +86,18 @@ const Bookings = () => {
       bookingApi.create(booking).then((created: any) => {
         setItems((prev) => [...prev, created]);
         toast({ title: "Booking created" });
+        // Trigger SMS automation (fire-and-forget)
+        sendBookingSms({
+          bookingId: created.id,
+          bookingType: created.type,
+          bookingStatus: created.status,
+          bookingAmount: created.amount,
+          clientName: created.clientId,
+          clientPhone: "",  // Backend resolves phone from clientId
+          company: "Travel Agency",
+        }).then((res) => {
+          if (res.sent) toast({ title: "SMS sent to client" });
+        }).catch(() => {});
       }).catch((err: any) => {
         toast({ title: "Create failed", description: err.message, variant: "destructive" });
       });
