@@ -838,6 +838,14 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                           <Button
                             variant="ghost"
                             size="icon"
+                            title="Run diagnostic"
+                            onClick={() => runDiagnostic(d)}
+                          >
+                            <Search className="h-4 w-4 text-primary" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             title="Verify domain"
                             onClick={() => setVerifyDialogDomain(d)}
                           >
