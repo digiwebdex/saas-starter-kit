@@ -336,7 +336,7 @@ const Invoices = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Total / Paid / Due:</span>
-                    <span>{selectedInvoice.totalAmount.toFixed(2)} / <span className="text-green-600">{selectedInvoice.paidAmount.toFixed(2)}</span> / <span className="text-destructive">{selectedInvoice.dueAmount.toFixed(2)}</span></span>
+                    <span>৳{selectedInvoice.totalAmount.toFixed(2)} / <span className="text-green-600">৳{selectedInvoice.paidAmount.toFixed(2)}</span> / <span className="text-destructive">৳{selectedInvoice.dueAmount.toFixed(2)}</span></span>
                   </div>
                 </div>
                 <Table>
