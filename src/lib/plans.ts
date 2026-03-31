@@ -227,7 +227,7 @@ export const FEATURE_COMPARISON = [
   ]},
   { category: "Website & Domain", features: [
     { name: "Subdomain Website", free: true, basic: true, pro: true, business: true, enterprise: true },
-    { name: "Custom Domain", free: false, basic: false, pro: true, business: true, enterprise: true },
+    { name: "Custom Domain", free: false, basic: false, pro: "1 domain", business: "Unlimited", enterprise: "Unlimited" },
     { name: "Website Templates", free: false, basic: false, pro: true, business: true, enterprise: true },
     { name: "Custom Website Design", free: false, basic: false, pro: false, business: false, enterprise: true },
   ]},
