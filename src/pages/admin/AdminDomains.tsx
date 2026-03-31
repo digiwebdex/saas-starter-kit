@@ -24,6 +24,7 @@ interface TenantDomain {
   tenantId: string;
   tenantName: string;
   domain: string;
+  wwwRedirect: "www-to-root" | "root-to-www";
   status: "active" | "pending" | "error";
   sslStatus: "active" | "pending" | "none";
   verificationStatus: "unverified" | "verifying" | "verified";
