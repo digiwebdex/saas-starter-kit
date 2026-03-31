@@ -169,7 +169,6 @@ const AdminSettings = () => {
             <TabsTrigger value="payment" className="gap-1.5"><CreditCard className="h-4 w-4" /> Payment</TabsTrigger>
             <TabsTrigger value="domain" className="gap-1.5"><Globe className="h-4 w-4" /> Domain</TabsTrigger>
           </TabsList>
-          </TabsList>
 
           {/* ════════ GENERAL ════════ */}
           <TabsContent value="general">
