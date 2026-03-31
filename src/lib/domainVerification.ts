@@ -112,3 +112,72 @@ export async function markDomainVerified(domainId: string): Promise<void> {
     },
   });
 }
+
+/**
+ * Request SSL certificate generation via backend API.
+ * The backend should run: certbot --nginx -d domain -d www.domain
+ * Returns success/failure. Falls back to manual command if API unavailable.
+ */
+export async function requestSslCertificate(
+  domainId: string,
+  domain: string
+): Promise<{ success: boolean; method: "api" | "manual"; error?: string; command?: string }> {
+  const token = localStorage.getItem("token");
+
+  // Generate the certbot command for manual fallback
+  const certbotCommand = `sudo certbot --nginx -d ${domain} -d www.${domain} --non-interactive --agree-tos --redirect`;
+
+  try {
+    const res = await fetch(`${BASE_URL}/admin/domains/${domainId}/ssl`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ domain }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      return { success: true, method: "api", ...data };
+    }
+
+    // API returned error — provide manual fallback
+    const errorData = await res.json().catch(() => ({}));
+    return {
+      success: false,
+      method: "manual",
+      error: errorData.message || "API SSL generation failed",
+      command: certbotCommand,
+    };
+  } catch {
+    // API unreachable — provide manual fallback
+    return {
+      success: false,
+      method: "manual",
+      error: "Backend API unavailable. Use the command below on your VPS.",
+      command: certbotCommand,
+    };
+  }
+}
+
+/**
+ * Generate the full SSL + Nginx setup command for a domain.
+ */
+export function generateSslCommand(domain: string): string {
+  return `# SSL Certificate Generation for ${domain}
+# Run this on your VPS as root
+
+# Step 1: Ensure Nginx config exists and is enabled
+nginx -t && systemctl reload nginx
+
+# Step 2: Generate SSL certificate
+sudo certbot --nginx -d ${domain} -d www.${domain} --non-interactive --agree-tos --redirect
+
+# Step 3: Verify SSL
+echo "Testing SSL..."
+curl -sI https://${domain} | head -5
+
+# Step 4: Auto-renewal check
+sudo certbot renew --dry-run`;
+}
