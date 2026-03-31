@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { publicApi, type TenantPublic, type PackagePublic } from "@/lib/publicApi";
+import { websiteApi, templateDefaults, type WebsiteConfig } from "@/lib/websiteApi";
 
 // Demo fallback
 const demoTenant: TenantPublic = {
@@ -23,30 +24,19 @@ const demoPackages: PackagePublic[] = [
   { id: "6", name: "Maldives Honeymoon", description: "Romantic overwater villa stay in the Maldives paradise.", price: 150000, duration: "5 Days / 4 Nights", type: "hotel", image: "", highlights: ["Overwater villa", "Couple spa", "Sunset cruise", "All-inclusive meals"] },
 ];
 
-/**
- * Resolves tenant identifier from the current hostname.
- *
- * Supports three patterns:
- *   1. Subdomain:    acme.yourapp.com   → slug "acme"
- *   2. Custom domain: acme-travel.com   → full hostname passed to API
- *   3. Localhost/dev: falls back to demo data
- */
 function resolveTenantFromHostname(): { slug?: string; customDomain?: string } {
   const hostname = window.location.hostname;
-  const appDomain = import.meta.env.VITE_APP_DOMAIN || ""; // e.g. "yourapp.com"
+  const appDomain = import.meta.env.VITE_APP_DOMAIN || "";
 
-  // Local / preview → demo
   if (!appDomain || hostname === "localhost" || hostname.includes("lovable.app")) {
     return {};
   }
 
-  // Subdomain pattern: {slug}.yourapp.com
   if (hostname.endsWith(`.${appDomain}`) && hostname !== appDomain && hostname !== `www.${appDomain}`) {
     const slug = hostname.replace(`.${appDomain}`, "");
     return { slug };
   }
 
-  // Custom domain (not matching app domain at all)
   if (hostname !== appDomain && hostname !== `www.${appDomain}`) {
     return { customDomain: hostname };
   }
@@ -57,12 +47,14 @@ function resolveTenantFromHostname(): { slug?: string; customDomain?: string } {
 interface WebsiteContextType {
   tenant: TenantPublic;
   packages: PackagePublic[];
+  websiteConfig: WebsiteConfig;
   loading: boolean;
 }
 
 const WebsiteContext = createContext<WebsiteContextType>({
   tenant: demoTenant,
   packages: demoPackages,
+  websiteConfig: templateDefaults["travel-agency"],
   loading: false,
 });
 
@@ -71,6 +63,7 @@ export const useWebsite = () => useContext(WebsiteContext);
 export const WebsiteProvider = ({ slug: propSlug, children }: { slug?: string; children: React.ReactNode }) => {
   const [tenant, setTenant] = useState<TenantPublic>(demoTenant);
   const [packages, setPackages] = useState<PackagePublic[]>(demoPackages);
+  const [websiteConfig, setWebsiteConfig] = useState<WebsiteConfig>(templateDefaults["travel-agency"]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -78,30 +71,30 @@ export const WebsiteProvider = ({ slug: propSlug, children }: { slug?: string; c
     const identifier = propSlug || domainSlug;
 
     if (identifier) {
-      // Resolve by slug (subdomain or prop)
       setLoading(true);
       Promise.all([
         publicApi.getTenant(identifier),
         publicApi.getPackages(identifier),
+        websiteApi.getPublicConfig(identifier),
       ])
-        .then(([t, p]) => { setTenant(t); setPackages(p); })
-        .catch(() => { /* keep demo data on error */ })
+        .then(([t, p, w]) => { setTenant(t); setPackages(p); setWebsiteConfig(w); })
+        .catch(() => {})
         .finally(() => setLoading(false));
     } else if (customDomain) {
-      // Resolve by custom domain
       setLoading(true);
       Promise.all([
         publicApi.getTenantByDomain(customDomain),
         publicApi.getPackagesByDomain(customDomain),
+        websiteApi.getPublicConfigByDomain(customDomain),
       ])
-        .then(([t, p]) => { setTenant(t); setPackages(p); })
-        .catch(() => { /* keep demo data on error */ })
+        .then(([t, p, w]) => { setTenant(t); setPackages(p); setWebsiteConfig(w); })
+        .catch(() => {})
         .finally(() => setLoading(false));
     }
   }, [propSlug]);
 
   return (
-    <WebsiteContext.Provider value={{ tenant, packages, loading }}>
+    <WebsiteContext.Provider value={{ tenant, packages, websiteConfig, loading }}>
       {children}
     </WebsiteContext.Provider>
   );

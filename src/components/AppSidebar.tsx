@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Settings, Building2, LogOut, UserCheck, UserCog, Store, Target, ListTodo, Plane, Receipt, Wallet, Crown, Shield, BarChart3, Moon } from "lucide-react";
+import { LayoutDashboard, Users, Settings, Building2, LogOut, UserCheck, UserCog, Store, Target, ListTodo, Plane, Receipt, Wallet, Crown, Shield, BarChart3, Moon, Globe } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -36,6 +36,7 @@ const crmItems = [
 const managementItems = [
   { title: "Team", url: "/team", icon: Users },
   { title: "Organization", url: "/organization", icon: Building2 },
+  { title: "Website", url: "/website", icon: Globe },
   { title: "Subscription", url: "/subscription", icon: Crown },
   { title: "Settings", url: "/settings", icon: Settings },
 ];

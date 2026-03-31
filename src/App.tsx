@@ -13,6 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import Team from "./pages/Team";
 import Organization from "./pages/Organization";
 import SettingsPage from "./pages/SettingsPage";
+import WebsiteCustomizer from "./pages/WebsiteCustomizer";
 import Clients from "./pages/Clients";
 import Agents from "./pages/Agents";
 import Vendors from "./pages/Vendors";
@@ -82,6 +83,7 @@ const App = () => (
             <Route path="/team" element={<P><Team /></P>} />
             <Route path="/organization" element={<P><Organization /></P>} />
             <Route path="/settings" element={<P><SettingsPage /></P>} />
+            <Route path="/website" element={<P><WebsiteCustomizer /></P>} />
 
             {/* Admin routes */}
             <Route path="/admin" element={<A><AdminDashboard /></A>} />
