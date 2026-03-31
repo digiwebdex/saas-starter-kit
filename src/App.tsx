@@ -40,6 +40,7 @@ import SiteHome from "./pages/site/SiteHome";
 import SiteAbout from "./pages/site/SiteAbout";
 import SitePackages from "./pages/site/SitePackages";
 import SiteContact from "./pages/site/SiteContact";
+import SitePricing from "./pages/site/SitePricing";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 
@@ -72,6 +73,7 @@ const App = () => (
             <Route path="/site/about" element={<WebsiteProvider><SiteAbout /></WebsiteProvider>} />
             <Route path="/site/packages" element={<WebsiteProvider><SitePackages /></WebsiteProvider>} />
             <Route path="/site/contact" element={<WebsiteProvider><SiteContact /></WebsiteProvider>} />
+            <Route path="/site/pricing" element={<SitePricing />} />
 
             {/* App routes (protected) */}
             <Route path="/dashboard" element={<P><Dashboard /></P>} />
