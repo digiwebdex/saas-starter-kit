@@ -22,6 +22,7 @@ import Bookings from "./pages/Bookings";
 import Invoices from "./pages/Invoices";
 import Accounts from "./pages/Accounts";
 import Subscriptions from "./pages/Subscriptions";
+import PaymentCallback from "./pages/PaymentCallback";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
 import AdminPayments from "./pages/admin/AdminPayments";

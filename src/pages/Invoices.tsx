@@ -367,6 +367,16 @@ const Invoices = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Online Payment Gateway Dialog */}
+        {payGatewayInvoice && (
+          <PaymentGatewayDialog
+            open={payGatewayOpen}
+            onOpenChange={(v) => { setPayGatewayOpen(v); if (!v) setPayGatewayInvoice(null); }}
+            invoiceId={payGatewayInvoice.id}
+            amount={payGatewayInvoice.amount}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
