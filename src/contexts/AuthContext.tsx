@@ -8,7 +8,7 @@ interface AuthContextType {
   currentPlan: PlanType;
   isSubscriptionExpired: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   register: (data: { name: string; email: string; password: string; tenantName: string }) => Promise<void>;
   logout: () => void;
   refreshTenant: () => Promise<void>;

@@ -19,8 +19,8 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(email, password);
-      navigate("/dashboard");
+      const loggedInUser = await login(email, password);
+      navigate(loggedInUser.role === "owner" ? "/admin" : "/dashboard");
     } catch (err: any) {
       toast({ variant: "destructive", title: "Login failed", description: err.message });
     } finally {
