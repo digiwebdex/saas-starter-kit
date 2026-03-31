@@ -7,7 +7,7 @@ import type { WebsiteConfig } from "@/lib/websiteApi";
 import {
   Moon, Star, Plane, Shield, MapPin, Hotel, ChevronDown, Quote,
   Phone, Mail, Clock, Users, Globe, Award, Heart, CheckCircle2,
-  ArrowRight, Facebook, Instagram, Youtube, MessageCircle,
+  ArrowRight, MessageCircle,
 } from "lucide-react";
 import { useState } from "react";
 
