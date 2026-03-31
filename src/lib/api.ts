@@ -147,3 +147,25 @@ export interface Booking {
   tenantId: string;
   createdAt: string;
 }
+
+export interface Invoice {
+  id: string;
+  bookingId: string;
+  totalAmount: number;
+  paidAmount: number;
+  dueAmount: number;
+  status: "unpaid" | "partial" | "paid";
+  tenantId: string;
+  createdAt: string;
+}
+
+export interface Payment {
+  id: string;
+  invoiceId: string;
+  bookingId: string;
+  amount: number;
+  method: "cash" | "bank";
+  date: string;
+  tenantId: string;
+  createdAt: string;
+}
