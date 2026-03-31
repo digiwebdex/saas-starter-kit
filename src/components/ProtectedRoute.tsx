@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import SubscriptionGate from "@/components/SubscriptionGate";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -13,7 +14,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!user) return <Navigate to="/login" replace />;
-  return <>{children}</>;
+
+  return (
+    <SubscriptionGate>
+      {children}
+    </SubscriptionGate>
+  );
 };
 
 export default ProtectedRoute;
