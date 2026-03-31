@@ -347,13 +347,13 @@ const Index = () => {
               <h4 className="font-semibold mb-3">Follow Us</h4>
               <div className="flex gap-3">
                 <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-cyan-400/20 transition-colors">
-                  <Facebook className="h-4 w-4" />
+                  <Globe className="h-4 w-4" />
                 </a>
                 <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-cyan-400/20 transition-colors">
-                  <Instagram className="h-4 w-4" />
+                  <Mail className="h-4 w-4" />
                 </a>
                 <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-cyan-400/20 transition-colors">
-                  <Twitter className="h-4 w-4" />
+                  <Phone className="h-4 w-4" />
                 </a>
               </div>
             </div>
