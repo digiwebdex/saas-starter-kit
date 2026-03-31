@@ -33,9 +33,9 @@ interface TenantDomain {
 }
 
 const mockTenants = [
-  { id: "t1", name: "Acme Travel" },
-  { id: "t2", name: "Globe Tours" },
-  { id: "t3", name: "Star Holidays" },
+  { id: "t1", name: "Acme Travel", plan: "pro" as PlanType },
+  { id: "t2", name: "Globe Tours", plan: "business" as PlanType },
+  { id: "t3", name: "Star Holidays", plan: "basic" as PlanType },
 ];
 
 const mockDomains: TenantDomain[] = [
