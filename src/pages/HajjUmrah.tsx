@@ -12,7 +12,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Progress } from "@/components/ui/progress";
 import {
   Plus, Pencil, Trash2, Users, UserPlus, CreditCard,
-  Kaaba, Package, Eye, Search,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
