@@ -172,6 +172,7 @@ export const PLANS: PlanConfig[] = [
     maxClients: -1,
     maxBookings: -1,
     maxUsers: -1,
+    maxDomains: -1,
     features: [
       "All features unlocked",
       "Custom website design",
