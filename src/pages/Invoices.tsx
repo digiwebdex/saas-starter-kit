@@ -245,6 +245,16 @@ const Invoices = () => {
                             >
                               <Mail className="h-4 w-4 text-primary" />
                             </Button>
+                            {inv.status !== "paid" && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                title="Pay Now (Online)"
+                                onClick={() => { setPayGatewayInvoice({ id: inv.id, amount: inv.dueAmount }); setPayGatewayOpen(true); }}
+                              >
+                                <Wallet className="h-4 w-4 text-primary" />
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
