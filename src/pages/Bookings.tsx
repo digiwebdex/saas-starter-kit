@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Plus, Pencil, Trash2, Plane, Mail, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { emailApi } from "@/lib/emailApi";
+import { bookingApi } from "@/lib/api";
+import EmptyState from "@/components/EmptyState";
+import LoadingState from "@/components/LoadingState";
+import ErrorState from "@/components/ErrorState";
 
 type BookingType = "tour" | "ticket" | "hotel" | "visa";
 type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
@@ -41,7 +45,24 @@ const Bookings = () => {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const fetchBookings = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await bookingApi.list();
+      setItems(data as any);
+    } catch (err: any) {
+      setError(err.message || "Failed to load bookings");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchBookings(); }, [fetchBookings]);
 
   const profit = useMemo(() => form.amount - form.cost, [form.amount, form.cost]);
 
@@ -195,10 +216,24 @@ const Bookings = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.length === 0 ? (
+                {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                      No bookings yet. Click "New Booking" to get started.
+                    <TableCell colSpan={8}><LoadingState rows={3} /></TableCell>
+                  </TableRow>
+                ) : error ? (
+                  <TableRow>
+                    <TableCell colSpan={8}><ErrorState message={error} onRetry={fetchBookings} /></TableCell>
+                  </TableRow>
+                ) : items.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8}>
+                      <EmptyState
+                        icon={Plane}
+                        title="No bookings yet"
+                        description="Create your first booking to start tracking tours, tickets, hotels, and visas."
+                        actionLabel="New Booking"
+                        onAction={() => setDialogOpen(true)}
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (
