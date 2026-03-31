@@ -12,6 +12,7 @@ import { Plus, Pencil, Trash2, Plane, Mail, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { emailApi } from "@/lib/emailApi";
 import { bookingApi } from "@/lib/api";
+import { sendBookingSms } from "@/lib/smsAutomation";
 import EmptyState from "@/components/EmptyState";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
