@@ -115,13 +115,23 @@ const defaultDomain: DomainSettings = {
   defaultSubdomain: "{company}.travelsaas.digiwebdex.com",
 };
 
+const defaultSms: SmsSettings = {
+  provider: "sslwireless",
+  apiKey: "",
+  senderId: "",
+  baseUrl: "",
+  enabled: false,
+};
+
 const AdminSettings = () => {
   const [general, setGeneral] = useState<GeneralSettings>(defaultGeneral);
   const [email, setEmail] = useState<EmailSettings>(defaultEmail);
   const [payment, setPayment] = useState<PaymentSettings>(defaultPayment);
   const [domain, setDomain] = useState<DomainSettings>(defaultDomain);
+  const [sms, setSms] = useState<SmsSettings>(defaultSms);
   const [saving, setSaving] = useState(false);
   const [testEmail, setTestEmail] = useState("");
+  const [testPhone, setTestPhone] = useState("");
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
