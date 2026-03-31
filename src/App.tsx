@@ -65,6 +65,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/onboarding" element={<P><Onboarding /></P>} />
 
             {/* Public website (no auth required) */}
             <Route path="/site" element={<WebsiteProvider><SiteHome /></WebsiteProvider>} />
