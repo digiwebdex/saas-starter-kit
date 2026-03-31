@@ -449,6 +449,7 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                       </p>
                     );
                   })()}
+                </div>
                 <div className="space-y-2">
                   <Label>ডোমেইন</Label>
                   <Input
