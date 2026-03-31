@@ -73,6 +73,7 @@ const App = () => (
             <Route path="/site/about" element={<WebsiteProvider><SiteAbout /></WebsiteProvider>} />
             <Route path="/site/packages" element={<WebsiteProvider><SitePackages /></WebsiteProvider>} />
             <Route path="/site/contact" element={<WebsiteProvider><SiteContact /></WebsiteProvider>} />
+            <Route path="/site/pricing" element={<SitePricing />} />
 
             {/* App routes (protected) */}
             <Route path="/dashboard" element={<P><Dashboard /></P>} />
