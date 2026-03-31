@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { authApi, type User } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
@@ -17,32 +18,46 @@ export const useAuth = () => {
   return ctx;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) { setLoading(false); return; }
-    authApi.me().then(setUser).catch(() => localStorage.removeItem("token")).finally(() => setLoading(false));
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    authApi
+      .me()
+      .then(setUser)
+      .catch(() => localStorage.removeItem("token"))
+      .finally(() => setLoading(false));
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const { token, user } = await authApi.login(email, password);
-    localStorage.setItem("token", token);
-    setUser(user);
+    const res = await authApi.login(email, password);
+    localStorage.setItem("token", res.token);
+    setUser(res.user);
   }, []);
 
-  const register = useCallback(async (data: { name: string; email: string; password: string; tenantName: string }) => {
-    const { token, user } = await authApi.register(data);
-    localStorage.setItem("token", token);
-    setUser(user);
-  }, []);
+  const register = useCallback(
+    async (data: { name: string; email: string; password: string; tenantName: string }) => {
+      const res = await authApi.register(data);
+      localStorage.setItem("token", res.token);
+      setUser(res.user);
+    },
+    []
+  );
 
   const logout = useCallback(() => {
     localStorage.removeItem("token");
     setUser(null);
   }, []);
 
-  return <AuthContext.Provider value={{ user, loading, login, register, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
