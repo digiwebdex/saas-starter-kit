@@ -104,9 +104,7 @@ const App = () => (
             <Route path="/admin/features" element={<A><AdminFeatures /></A>} />
 
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
+      </Routes>
     </TooltipProvider>
   </QueryClientProvider>
 );
