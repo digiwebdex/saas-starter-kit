@@ -1,6 +1,7 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import NotificationBell from "@/components/NotificationBell";
 
 const TopNavbar = () => {
   const { user } = useAuth();
@@ -10,7 +11,8 @@ const TopNavbar = () => {
     <header className="flex h-14 items-center gap-4 border-b bg-card px-4">
       <SidebarTrigger />
       <div className="flex-1" />
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
+        <NotificationBell />
         <span className="text-sm text-muted-foreground hidden sm:inline">{user?.name}</span>
         <Avatar className="h-8 w-8">
           <AvatarFallback className="bg-primary text-primary-foreground text-xs">{initials}</AvatarFallback>
