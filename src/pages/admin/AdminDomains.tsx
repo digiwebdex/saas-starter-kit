@@ -12,6 +12,12 @@ import { Plus, Globe, Trash2, Copy, CheckCircle, AlertCircle, ExternalLink, Shie
 import { useToast } from "@/hooks/use-toast";
 import { generateVerificationToken, verifyDomainDns, checkDomainARecord } from "@/lib/domainVerification";
 
+// DNS check interval in milliseconds (3 minutes)
+const DNS_CHECK_INTERVAL = 3 * 60 * 1000;
+
+// VPS IP — in production, fetch from admin settings API
+const VPS_IP = import.meta.env.VITE_VPS_IP || "";
+
 interface TenantDomain {
   id: string;
   tenantId: string;
@@ -21,6 +27,7 @@ interface TenantDomain {
   sslStatus: "active" | "pending" | "none";
   verificationStatus: "unverified" | "verifying" | "verified";
   verificationToken: string;
+  lastDnsCheck?: string;
   addedAt: string;
 }
 
