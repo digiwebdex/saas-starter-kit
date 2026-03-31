@@ -9,7 +9,7 @@ interface AuthContextType {
   isSubscriptionExpired: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
-  register: (data: { name: string; email: string; password: string; tenantName: string }) => Promise<void>;
+  register: (data: { name: string; email: string; password: string; tenantName: string }) => Promise<User>;
   logout: () => void;
   refreshTenant: () => Promise<void>;
 }
