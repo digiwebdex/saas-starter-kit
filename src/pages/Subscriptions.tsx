@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, Crown, Zap, Rocket, Star, Gem, AlertTriangle, ArrowUpRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { PLANS, type PlanType } from "@/lib/plans";
 import { usePlanAccess } from "@/hooks/usePlanAccess";
 
@@ -50,7 +51,8 @@ const Subscription_Page = () => {
   const [selectedPlan, setSelectedPlan] = useState<PlanType | null>(null);
   const [payForm, setPayForm] = useState({ trxId: "", method: "manual" as "manual" | "bkash" | "sslcommerz" });
   const [payDialogOpen, setPayDialogOpen] = useState(false);
-  const [isAdmin] = useState(true);
+  const { user } = useAuth();
+  const isAdmin = user?.role === "owner";
   const { toast } = useToast();
 
   const access = usePlanAccess(currentSub.plan);
