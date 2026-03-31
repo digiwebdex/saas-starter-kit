@@ -675,6 +675,101 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
           </DialogContent>
         </Dialog>
 
+        {/* Domain Diagnostic Dialog */}
+        <Dialog open={!!diagDomain} onOpenChange={(open) => { if (!open) { setDiagDomain(null); setDiagResult(null); } }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Search className="h-5 w-5 text-primary" />
+                Domain Diagnostic — {diagDomain?.domain}
+              </DialogTitle>
+            </DialogHeader>
+            {diagDomain && (
+              <div className="space-y-4">
+                {diagRunning ? (
+                  <div className="flex flex-col items-center py-6 gap-3">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="text-sm text-muted-foreground">DNS ও SSL চেক হচ্ছে...</p>
+                  </div>
+                ) : diagResult ? (
+                  <div className="space-y-3">
+                    {/* A Record */}
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                      {diagResult.aRecord.found ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+                      )}
+                      <div>
+                        <p className="font-medium text-sm">
+                          {diagResult.aRecord.found ? "✔ A record found" : "❌ A record not found"}
+                        </p>
+                        {diagResult.aRecord.ips.length > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            Resolved IPs: {diagResult.aRecord.ips.join(", ")}
+                          </p>
+                        )}
+                        {diagResult.aRecord.error && (
+                          <p className="text-xs text-destructive">{diagResult.aRecord.error}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* IP Match */}
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                      {diagResult.ipMatch ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+                      )}
+                      <div>
+                        <p className="font-medium text-sm">
+                          {diagResult.ipMatch ? "✔ IP matches VPS" : "❌ IP mismatch"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Expected: {VPS_IP || "(not set)"} {diagResult.aRecord.ips.length > 0 && `→ Got: ${diagResult.aRecord.ips.join(", ")}`}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* SSL */}
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                      {diagResult.ssl.active ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+                      )}
+                      <div>
+                        <p className="font-medium text-sm">
+                          {diagResult.ssl.active ? "✔ SSL installed" : "❌ SSL not installed"}
+                        </p>
+                        {diagResult.ssl.error && (
+                          <p className="text-xs text-destructive">{diagResult.ssl.error}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => runDiagnostic(diagDomain)}
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />Re-check
+                    </Button>
+                  </div>
+                ) : (
+                  <Button className="w-full" onClick={() => runDiagnostic(diagDomain)}>
+                    <Search className="mr-2 h-4 w-4" />Run Diagnostic
+                  </Button>
+                )}
+                <DialogClose asChild>
+                  <Button variant="outline" className="w-full">Close</Button>
+                </DialogClose>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
         {/* Domains Table */}
         <Card>
           <CardHeader>
