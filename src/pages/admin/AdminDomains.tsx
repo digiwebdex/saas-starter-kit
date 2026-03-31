@@ -68,6 +68,9 @@ const AdminDomains = () => {
   const [verifyDialogDomain, setVerifyDialogDomain] = useState<TenantDomain | null>(null);
   const [form, setForm] = useState({ tenantId: "", domain: "" });
   const [verifying, setVerifying] = useState<string | null>(null);
+  const [sslDialogDomain, setSslDialogDomain] = useState<TenantDomain | null>(null);
+  const [sslGenerating, setSslGenerating] = useState(false);
+  const [sslFallbackCommand, setSslFallbackCommand] = useState<string | null>(null);
   const [autoChecking, setAutoChecking] = useState(false);
   const [lastAutoCheck, setLastAutoCheck] = useState<string | null>(null);
   const domainsRef = useRef(domains);
