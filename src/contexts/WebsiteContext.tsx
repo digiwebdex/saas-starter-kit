@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import type { TenantPublic, PackagePublic } from "@/lib/publicApi";
+import { publicApi, type TenantPublic, type PackagePublic } from "@/lib/publicApi";
 
-// Demo data — replaced by real API when backend is connected
+// Demo fallback
 const demoTenant: TenantPublic = {
   id: "demo",
   name: "Skyline Travel & Tours",
@@ -23,6 +23,37 @@ const demoPackages: PackagePublic[] = [
   { id: "6", name: "Maldives Honeymoon", description: "Romantic overwater villa stay in the Maldives paradise.", price: 150000, duration: "5 Days / 4 Nights", type: "hotel", image: "", highlights: ["Overwater villa", "Couple spa", "Sunset cruise", "All-inclusive meals"] },
 ];
 
+/**
+ * Resolves tenant identifier from the current hostname.
+ *
+ * Supports three patterns:
+ *   1. Subdomain:    acme.yourapp.com   → slug "acme"
+ *   2. Custom domain: acme-travel.com   → full hostname passed to API
+ *   3. Localhost/dev: falls back to demo data
+ */
+function resolveTenantFromHostname(): { slug?: string; customDomain?: string } {
+  const hostname = window.location.hostname;
+  const appDomain = import.meta.env.VITE_APP_DOMAIN || ""; // e.g. "yourapp.com"
+
+  // Local / preview → demo
+  if (!appDomain || hostname === "localhost" || hostname.includes("lovable.app")) {
+    return {};
+  }
+
+  // Subdomain pattern: {slug}.yourapp.com
+  if (hostname.endsWith(`.${appDomain}`) && hostname !== appDomain && hostname !== `www.${appDomain}`) {
+    const slug = hostname.replace(`.${appDomain}`, "");
+    return { slug };
+  }
+
+  // Custom domain (not matching app domain at all)
+  if (hostname !== appDomain && hostname !== `www.${appDomain}`) {
+    return { customDomain: hostname };
+  }
+
+  return {};
+}
+
 interface WebsiteContextType {
   tenant: TenantPublic;
   packages: PackagePublic[];
@@ -37,14 +68,37 @@ const WebsiteContext = createContext<WebsiteContextType>({
 
 export const useWebsite = () => useContext(WebsiteContext);
 
-export const WebsiteProvider = ({ slug, children }: { slug?: string; children: React.ReactNode }) => {
-  const [tenant] = useState<TenantPublic>(demoTenant);
-  const [packages] = useState<PackagePublic[]>(demoPackages);
-  const [loading] = useState(false);
+export const WebsiteProvider = ({ slug: propSlug, children }: { slug?: string; children: React.ReactNode }) => {
+  const [tenant, setTenant] = useState<TenantPublic>(demoTenant);
+  const [packages, setPackages] = useState<PackagePublic[]>(demoPackages);
+  const [loading, setLoading] = useState(false);
 
-  // When backend is connected, replace with:
-  // useEffect(() => { publicApi.getTenant(slug).then(setTenant) }, [slug]);
-  // useEffect(() => { publicApi.getPackages(slug).then(setPackages) }, [slug]);
+  useEffect(() => {
+    const { slug: domainSlug, customDomain } = resolveTenantFromHostname();
+    const identifier = propSlug || domainSlug;
+
+    if (identifier) {
+      // Resolve by slug (subdomain or prop)
+      setLoading(true);
+      Promise.all([
+        publicApi.getTenant(identifier),
+        publicApi.getPackages(identifier),
+      ])
+        .then(([t, p]) => { setTenant(t); setPackages(p); })
+        .catch(() => { /* keep demo data on error */ })
+        .finally(() => setLoading(false));
+    } else if (customDomain) {
+      // Resolve by custom domain
+      setLoading(true);
+      Promise.all([
+        publicApi.getTenantByDomain(customDomain),
+        publicApi.getPackagesByDomain(customDomain),
+      ])
+        .then(([t, p]) => { setTenant(t); setPackages(p); })
+        .catch(() => { /* keep demo data on error */ })
+        .finally(() => setLoading(false));
+    }
+  }, [propSlug]);
 
   return (
     <WebsiteContext.Provider value={{ tenant, packages, loading }}>

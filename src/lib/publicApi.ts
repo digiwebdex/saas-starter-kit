@@ -34,4 +34,6 @@ export interface PackagePublic {
 export const publicApi = {
   getTenant: (slug: string) => publicRequest<TenantPublic>(`/public/${slug}`),
   getPackages: (slug: string) => publicRequest<PackagePublic[]>(`/public/${slug}/packages`),
+  getTenantByDomain: (domain: string) => publicRequest<TenantPublic>(`/public/domain/${domain}`),
+  getPackagesByDomain: (domain: string) => publicRequest<PackagePublic[]>(`/public/domain/${domain}/packages`),
 };
