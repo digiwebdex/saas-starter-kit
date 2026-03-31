@@ -71,6 +71,8 @@ export const taskApi = createCrudApi<Task>("tasks");
 export const bookingApi = createCrudApi<Booking>("bookings");
 export const invoiceApi = createCrudApi<Invoice>("invoices");
 export const paymentApi = createCrudApi<Payment>("payments");
+export const accountApi = createCrudApi<Account>("accounts");
+export const transactionApi = createCrudApi<Transaction>("transactions");
 
 // ── Types ──
 export interface User {
@@ -165,6 +167,28 @@ export interface Payment {
   bookingId: string;
   amount: number;
   method: "cash" | "bank";
+  date: string;
+  tenantId: string;
+  createdAt: string;
+}
+
+export interface Account {
+  id: string;
+  name: string;
+  type: "cash" | "bank";
+  balance: number;
+  tenantId: string;
+  createdAt: string;
+}
+
+export interface Transaction {
+  id: string;
+  accountId: string;
+  type: "income" | "expense";
+  category: string;
+  description: string;
+  amount: number;
+  referenceId: string;
   date: string;
   tenantId: string;
   createdAt: string;
