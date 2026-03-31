@@ -36,6 +36,7 @@ export const PLANS: PlanConfig[] = [
     maxClients: 50,
     maxBookings: 50,
     maxUsers: 1,
+    maxDomains: 0,
     features: [
       "Dashboard",
       "CRM (50 clients limit)",
