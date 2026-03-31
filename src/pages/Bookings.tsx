@@ -8,8 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Plane } from "lucide-react";
+import { Plus, Pencil, Trash2, Plane, Mail, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { emailApi } from "@/lib/emailApi";
 
 type BookingType = "tour" | "ticket" | "hotel" | "visa";
 type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
@@ -218,6 +219,14 @@ const Bookings = () => {
                         <div className="flex gap-1">
                           <Button variant="ghost" size="icon" onClick={() => handleEdit(b)}><Pencil className="h-4 w-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => handleDelete(b.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                          <Button variant="ghost" size="icon" title="Send confirmation email" onClick={async () => {
+                            try {
+                              await emailApi.sendBookingConfirmation(b.id);
+                              toast({ title: "Confirmation email sent" });
+                            } catch (err: any) {
+                              toast({ title: "Email failed", description: err.message, variant: "destructive" });
+                            }
+                          }}><Mail className="h-4 w-4 text-primary" /></Button>
                         </div>
                       </TableCell>
                     </TableRow>

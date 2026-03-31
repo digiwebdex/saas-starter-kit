@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import SmtpSettings from "@/components/SmtpSettings";
 
 const SettingsPage = () => {
   return (
@@ -10,7 +11,7 @@ const SettingsPage = () => {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-          <p className="text-muted-foreground">Manage your account settings</p>
+          <p className="text-muted-foreground">Manage your account and email settings</p>
         </div>
         <Card>
           <CardHeader><CardTitle>Profile</CardTitle></CardHeader>
@@ -26,6 +27,7 @@ const SettingsPage = () => {
             <Button>Update Profile</Button>
           </CardContent>
         </Card>
+        <SmtpSettings />
       </div>
     </DashboardLayout>
   );

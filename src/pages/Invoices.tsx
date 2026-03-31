@@ -7,8 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
-import { Plus, Receipt, CreditCard, Eye } from "lucide-react";
+import { Plus, Receipt, CreditCard, Eye, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { emailApi } from "@/lib/emailApi";
 import { Progress } from "@/components/ui/progress";
 
 type PaymentMethod = "cash" | "bank";
@@ -225,6 +226,21 @@ const Invoices = () => {
                               title="View Payments"
                             >
                               <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="Send invoice email"
+                              onClick={async () => {
+                                try {
+                                  await emailApi.sendInvoice(inv.id);
+                                  toast({ title: "Invoice email sent" });
+                                } catch (err: any) {
+                                  toast({ title: "Email failed", description: err.message, variant: "destructive" });
+                                }
+                              }}
+                            >
+                              <Mail className="h-4 w-4 text-primary" />
                             </Button>
                           </div>
                         </TableCell>
