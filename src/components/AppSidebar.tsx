@@ -29,6 +29,7 @@ const crmItems = [
   { title: "Bookings", url: "/bookings", icon: Plane },
   { title: "Invoices", url: "/invoices", icon: Receipt },
   { title: "Accounts", url: "/accounts", icon: Wallet },
+  { title: "Reports", url: "/reports", icon: BarChart3 },
 ];
 
 const managementItems = [
