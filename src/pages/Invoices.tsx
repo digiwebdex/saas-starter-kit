@@ -11,6 +11,7 @@ import { Plus, Receipt, CreditCard, Eye, Mail, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { emailApi } from "@/lib/emailApi";
 import PaymentGatewayDialog from "@/components/PaymentGatewayDialog";
+import { sendPaymentSms } from "@/lib/smsAutomation";
 import { Progress } from "@/components/ui/progress";
 
 type PaymentMethod = "cash" | "bank";
