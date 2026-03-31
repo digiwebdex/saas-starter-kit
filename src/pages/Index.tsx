@@ -411,7 +411,7 @@ const Index = () => {
             <DialogTitle className="text-xl">
               Subscribe to{" "}
               <span className="text-cyan-400">
-                {plans.find((p) => p.id === selectedPlan)?.name}
+                {PLANS.find((p) => p.id === selectedPlan)?.name}
               </span>{" "}
               Plan
             </DialogTitle>
@@ -424,10 +424,13 @@ const Index = () => {
             {/* Plan summary */}
             <div className="p-3 rounded-lg bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-between">
               <span className="text-sm font-medium">
-                {plans.find((p) => p.id === selectedPlan)?.name} Plan
+                {PLANS.find((p) => p.id === selectedPlan)?.name} Plan
               </span>
               <span className="font-bold text-cyan-400">
-                ৳{plans.find((p) => p.id === selectedPlan)?.price.toLocaleString()}/month
+                {(() => {
+                  const p = PLANS.find((p) => p.id === selectedPlan);
+                  return p?.price === -1 ? "Custom Pricing" : `৳${p?.price.toLocaleString()}/month`;
+                })()}
               </span>
             </div>
 
