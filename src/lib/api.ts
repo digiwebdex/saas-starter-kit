@@ -18,6 +18,20 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res.json();
 }
 
+// ── Generic CRUD factory ──
+function createCrudApi<T extends { id: string }>(resource: string) {
+  return {
+    list: () => request<T[]>(`/${resource}`),
+    get: (id: string) => request<T>(`/${resource}/${id}`),
+    create: (data: Omit<T, "id" | "tenantId" | "createdAt">) =>
+      request<T>(`/${resource}`, { method: "POST", body: JSON.stringify(data) }),
+    update: (id: string, data: Partial<T>) =>
+      request<T>(`/${resource}/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+    delete: (id: string) =>
+      request<void>(`/${resource}/${id}`, { method: "DELETE" }),
+  };
+}
+
 // ── Auth ──
 export const authApi = {
   login: (email: string, password: string) =>
@@ -48,6 +62,13 @@ export const tenantApi = {
     request<void>(`/tenants/me/members/${userId}`, { method: "DELETE" }),
 };
 
+// ── Resource APIs ──
+export const clientApi = createCrudApi<Client>("clients");
+export const agentApi = createCrudApi<Agent>("agents");
+export const vendorApi = createCrudApi<Vendor>("vendors");
+export const leadApi = createCrudApi<Lead>("leads");
+export const taskApi = createCrudApi<Task>("tasks");
+
 // ── Types ──
 export interface User {
   id: string;
@@ -63,5 +84,50 @@ export interface Tenant {
   name: string;
   ownerId: string;
   subscriptionPlan: "free" | "pro" | "enterprise";
+  createdAt: string;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  tenantId: string;
+  createdAt: string;
+}
+
+export interface Agent {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  tenantId: string;
+  createdAt: string;
+}
+
+export interface Vendor {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  tenantId: string;
+  createdAt: string;
+}
+
+export interface Lead {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  tenantId: string;
+  createdAt: string;
+}
+
+export interface Task {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  tenantId: string;
   createdAt: string;
 }

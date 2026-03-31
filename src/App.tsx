@@ -11,9 +11,18 @@ import Dashboard from "./pages/Dashboard";
 import Team from "./pages/Team";
 import Organization from "./pages/Organization";
 import SettingsPage from "./pages/SettingsPage";
+import Clients from "./pages/Clients";
+import Agents from "./pages/Agents";
+import Vendors from "./pages/Vendors";
+import Leads from "./pages/Leads";
+import Tasks from "./pages/Tasks";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+const P = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute>{children}</ProtectedRoute>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -26,10 +35,15 @@ const App = () => (
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
-            <Route path="/organization" element={<ProtectedRoute><Organization /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<P><Dashboard /></P>} />
+            <Route path="/clients" element={<P><Clients /></P>} />
+            <Route path="/agents" element={<P><Agents /></P>} />
+            <Route path="/vendors" element={<P><Vendors /></P>} />
+            <Route path="/leads" element={<P><Leads /></P>} />
+            <Route path="/tasks" element={<P><Tasks /></P>} />
+            <Route path="/team" element={<P><Team /></P>} />
+            <Route path="/organization" element={<P><Organization /></P>} />
+            <Route path="/settings" element={<P><SettingsPage /></P>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
