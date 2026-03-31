@@ -36,6 +36,7 @@ import SiteAbout from "./pages/site/SiteAbout";
 import SitePackages from "./pages/site/SitePackages";
 import SiteContact from "./pages/site/SiteContact";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -55,8 +56,8 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* Public landing → site home */}
-            <Route path="/" element={<Navigate to="/site" replace />} />
+            {/* Main landing page */}
+            <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
