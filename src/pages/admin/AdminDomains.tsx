@@ -514,6 +514,84 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
           </DialogContent>
         </Dialog>
 
+        {/* SSL Generation Dialog */}
+        <Dialog open={!!sslDialogDomain} onOpenChange={(open) => { if (!open) { setSslDialogDomain(null); setSslFallbackCommand(null); } }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-primary" />
+                SSL Certificate — {sslDialogDomain?.domain}
+              </DialogTitle>
+            </DialogHeader>
+            {sslDialogDomain && (
+              <div className="space-y-4">
+                {sslDialogDomain.sslStatus === "active" ? (
+                  <div className="text-center py-4">
+                    <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-2" />
+                    <p className="font-medium">SSL ইতিমধ্যে Active আছে</p>
+                    <p className="text-sm text-muted-foreground">{sslDialogDomain.domain}</p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      সিস্টেম প্রথমে API দিয়ে SSL তৈরি করার চেষ্টা করবে। ব্যর্থ হলে ম্যানুয়াল কমান্ড দেখাবে।
+                    </p>
+
+                    {sslFallbackCommand ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                          <AlertCircle className="h-4 w-4" />
+                          <span className="text-sm font-medium">API unavailable — ম্যানুয়াল কমান্ড ব্যবহার করুন</span>
+                        </div>
+                        <pre className="bg-muted rounded-lg p-3 text-xs overflow-x-auto whitespace-pre-wrap max-h-48">
+                          {sslFallbackCommand}
+                        </pre>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            onClick={() => {
+                              navigator.clipboard.writeText(sslFallbackCommand);
+                              toast({ title: "কমান্ড কপি হয়েছে" });
+                            }}
+                          >
+                            <Copy className="mr-2 h-4 w-4" />Copy Command
+                          </Button>
+                          <Button
+                            variant="default"
+                            className="flex-1"
+                            onClick={() => markSslActive(sslDialogDomain.id)}
+                          >
+                            <CheckCircle className="mr-2 h-4 w-4" />Mark SSL Active
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          VPS-এ কমান্ড সফলভাবে রান করার পর "Mark SSL Active" ক্লিক করুন
+                        </p>
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={() => handleSslGenerate(sslDialogDomain)}
+                        disabled={sslGenerating}
+                        className="w-full"
+                      >
+                        {sslGenerating ? (
+                          <><Loader2 className="mr-2 h-4 w-4 animate-spin" />SSL তৈরি হচ্ছে...</>
+                        ) : (
+                          <><Lock className="mr-2 h-4 w-4" />Generate SSL Certificate</>
+                        )}
+                      </Button>
+                    )}
+                  </>
+                )}
+                <DialogClose asChild>
+                  <Button variant="outline" className="w-full">Close</Button>
+                </DialogClose>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
         {/* Domains Table */}
         <Card>
           <CardHeader>
