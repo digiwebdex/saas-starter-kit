@@ -635,7 +635,7 @@ const AdminSettings = () => {
                       if (!testPhone) return;
                       try {
                         const res = await smsApi.testSms(testPhone);
-                        toast({ title: "Test SMS sent!", description: res.message });
+                        toast({ title: "Test SMS sent!", description: res.success ? "Delivered" : res.error });
                         setTestPhone("");
                       } catch (err: any) {
                         toast({ title: "Test failed", description: err.message, variant: "destructive" });
