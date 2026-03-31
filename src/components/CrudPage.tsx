@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import EmptyState from "@/components/EmptyState";
+import LoadingState from "@/components/LoadingState";
+import ErrorState from "@/components/ErrorState";
 import type { LucideIcon } from "lucide-react";
 
 interface EntityRecord {
@@ -20,37 +23,77 @@ interface EntityRecord {
 interface CrudPageProps {
   title: string;
   icon: LucideIcon;
+  api?: {
+    list: () => Promise<any[]>;
+    create: (data: any) => Promise<any>;
+    update: (id: string, data: any) => Promise<any>;
+    delete: (id: string) => Promise<void>;
+  };
 }
 
-const CrudPage = ({ title, icon: Icon }: CrudPageProps) => {
+const CrudPage = ({ title, icon: Icon, api }: CrudPageProps) => {
   const [items, setItems] = useState<EntityRecord[]>([]);
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(!!api);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
+
+  const singular = title.slice(0, -1);
+
+  const fetchData = useCallback(async () => {
+    if (!api) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.list();
+      setItems(data);
+    } catch (err: any) {
+      setError(err.message || `Failed to load ${title.toLowerCase()}`);
+    } finally {
+      setLoading(false);
+    }
+  }, [api, title]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const resetForm = () => {
     setForm({ name: "", phone: "", email: "" });
     setEditingId(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingId) {
-      setItems((prev) =>
-        prev.map((item) => (item.id === editingId ? { ...item, ...form } : item))
-      );
-      toast({ title: `${title.slice(0, -1)} updated` });
-    } else {
-      const newItem: EntityRecord = {
-        id: crypto.randomUUID(),
-        ...form,
-      };
-      setItems((prev) => [...prev, newItem]);
-      toast({ title: `${title.slice(0, -1)} created` });
+    setSubmitting(true);
+    try {
+      if (editingId) {
+        if (api) {
+          await api.update(editingId, form);
+        }
+        setItems((prev) =>
+          prev.map((item) => (item.id === editingId ? { ...item, ...form } : item))
+        );
+        toast({ title: `${singular} updated` });
+      } else {
+        if (api) {
+          const created = await api.create(form);
+          setItems((prev) => [...prev, created]);
+        } else {
+          setItems((prev) => [...prev, { id: crypto.randomUUID(), ...form }]);
+        }
+        toast({ title: `${singular} created` });
+      }
+      resetForm();
+      setDialogOpen(false);
+    } catch (err: any) {
+      toast({ title: `Failed to save ${singular.toLowerCase()}`, description: err.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
     }
-    resetForm();
-    setDialogOpen(false);
   };
 
   const handleEdit = (item: EntityRecord) => {
@@ -59,9 +102,14 @@ const CrudPage = ({ title, icon: Icon }: CrudPageProps) => {
     setDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-    toast({ title: `${title.slice(0, -1)} deleted`, variant: "destructive" });
+  const handleDelete = async (id: string) => {
+    try {
+      if (api) await api.delete(id);
+      setItems((prev) => prev.filter((item) => item.id !== id));
+      toast({ title: `${singular} deleted`, variant: "destructive" });
+    } catch (err: any) {
+      toast({ title: `Failed to delete`, description: err.message, variant: "destructive" });
+    }
   };
 
   return (
@@ -76,43 +124,29 @@ const CrudPage = ({ title, icon: Icon }: CrudPageProps) => {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Add {title.slice(0, -1)}
+                Add {singular}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{editingId ? "Edit" : "Add"} {title.slice(0, -1)}</DialogTitle>
+                <DialogTitle>{editingId ? "Edit" : "Add"} {singular}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label>Name</Label>
-                  <Input
-                    value={form.name}
-                    onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                    required
-                  />
+                  <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required />
                 </div>
                 <div className="space-y-2">
                   <Label>Phone</Label>
-                  <Input
-                    type="tel"
-                    value={form.phone}
-                    onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                    required
-                  />
+                  <Input type="tel" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} required />
                 </div>
                 <div className="space-y-2">
                   <Label>Email</Label>
-                  <Input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                    required
-                  />
+                  <Input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} required />
                 </div>
                 <div className="flex gap-2">
-                  <Button type="submit" className="flex-1">
-                    {editingId ? "Update" : "Create"}
+                  <Button type="submit" className="flex-1" disabled={submitting}>
+                    {submitting ? "Saving…" : editingId ? "Update" : "Create"}
                   </Button>
                   <DialogClose asChild>
                     <Button type="button" variant="outline">Cancel</Button>
@@ -123,32 +157,42 @@ const CrudPage = ({ title, icon: Icon }: CrudPageProps) => {
           </Dialog>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Icon className="h-5 w-5" />
-              {title} List
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {items.length === 0 ? (
+        {loading ? (
+          <LoadingState rows={5} />
+        ) : error ? (
+          <ErrorState message={error} onRetry={fetchData} />
+        ) : items.length === 0 ? (
+          <Card>
+            <CardContent>
+              <EmptyState
+                icon={Icon}
+                title={`No ${title.toLowerCase()} yet`}
+                description={`Add your first ${singular.toLowerCase()} to get started. Click the button above or below.`}
+                actionLabel={`Add ${singular}`}
+                onAction={() => setDialogOpen(true)}
+              />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icon className="h-5 w-5" />
+                {title} List ({items.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      No {title.toLowerCase()} yet. Click "Add {title.slice(0, -1)}" to get started.
-                    </TableCell>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
-                ) : (
-                  items.map((item) => (
+                </TableHeader>
+                <TableBody>
+                  {items.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell className="font-medium">{item.name}</TableCell>
                       <TableCell>{item.phone}</TableCell>
@@ -164,12 +208,12 @@ const CrudPage = ({ title, icon: Icon }: CrudPageProps) => {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );
