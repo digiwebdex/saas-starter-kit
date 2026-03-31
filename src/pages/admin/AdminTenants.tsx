@@ -118,7 +118,7 @@ const AdminTenants = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => { setSelectedTenant(t); setDetailOpen(true); }}
+                            onClick={() => navigate(`/admin/tenants/${t.id}`)}
                             title="View details"
                           >
                             <Eye className="h-4 w-4" />
