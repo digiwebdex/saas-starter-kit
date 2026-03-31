@@ -68,7 +68,90 @@ const AdminDomains = () => {
   const [verifyDialogDomain, setVerifyDialogDomain] = useState<TenantDomain | null>(null);
   const [form, setForm] = useState({ tenantId: "", domain: "" });
   const [verifying, setVerifying] = useState<string | null>(null);
+  const [autoChecking, setAutoChecking] = useState(false);
+  const [lastAutoCheck, setLastAutoCheck] = useState<string | null>(null);
+  const domainsRef = useRef(domains);
+  domainsRef.current = domains;
   const { toast } = useToast();
+
+  // Auto-check DNS A records for all verified domains
+  const runDnsStatusCheck = useCallback(async (silent = true) => {
+    if (!VPS_IP) {
+      if (!silent) {
+        toast({
+          title: "VPS IP সেট করা হয়নি",
+          description: "VITE_VPS_IP env variable সেট করুন",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    setAutoChecking(true);
+    const currentDomains = domainsRef.current;
+    const verifiedDomains = currentDomains.filter((d) => d.verificationStatus === "verified");
+
+    if (verifiedDomains.length === 0) {
+      setAutoChecking(false);
+      return;
+    }
+
+    const results = await Promise.allSettled(
+      verifiedDomains.map(async (d) => {
+        const result = await checkDomainARecord(d.domain, VPS_IP);
+        return { id: d.id, domain: d.domain, ...result };
+      })
+    );
+
+    const now = new Date().toLocaleTimeString("bn-BD");
+    let changed = 0;
+
+    setDomains((prev) =>
+      prev.map((d) => {
+        const check = results.find(
+          (r) => r.status === "fulfilled" && r.value.id === d.id
+        );
+        if (!check || check.status !== "fulfilled") return d;
+
+        const { pointing } = check.value;
+        const newStatus = pointing ? "active" : "pending";
+        const newSsl = pointing ? "active" : d.sslStatus;
+
+        if (d.status !== newStatus) changed++;
+
+        return {
+          ...d,
+          status: newStatus as TenantDomain["status"],
+          sslStatus: newSsl as TenantDomain["sslStatus"],
+          lastDnsCheck: now,
+        };
+      })
+    );
+
+    setLastAutoCheck(now);
+    setAutoChecking(false);
+
+    if (!silent && changed > 0) {
+      toast({ title: `${changed}টি ডোমেইনের স্ট্যাটাস আপডেট হয়েছে` });
+    } else if (!silent && changed === 0) {
+      toast({ title: "সব ডোমেইনের স্ট্যাটাস আগের মতোই আছে" });
+    }
+  }, [toast]);
+
+  // Set up interval for auto-checking
+  useEffect(() => {
+    // Initial check after 5 seconds
+    const initialTimeout = setTimeout(() => runDnsStatusCheck(true), 5000);
+
+    const interval = setInterval(() => {
+      runDnsStatusCheck(true);
+    }, DNS_CHECK_INTERVAL);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, [runDnsStatusCheck]);
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
