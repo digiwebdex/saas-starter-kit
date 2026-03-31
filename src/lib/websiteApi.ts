@@ -24,9 +24,19 @@ export interface WebsiteConfig {
   content: {
     heroTitle: string;
     heroSubtitle: string;
+    heroImage?: string;
+    heroBadge?: string;
     aboutTitle: string;
     aboutText: string;
+    aboutImage?: string;
     services: { icon: string; title: string; desc: string }[];
+    stats?: { value: string; label: string }[];
+    testimonials?: { name: string; text: string; date?: string }[];
+    faq?: { question: string; answer: string }[];
+    team?: { name: string; role: string; desc?: string }[];
+    whyChooseUs?: { title: string; desc: string }[];
+    ctaTitle?: string;
+    ctaSubtitle?: string;
     footerText: string;
   };
   socialLinks?: {
@@ -34,6 +44,13 @@ export interface WebsiteConfig {
     instagram?: string;
     twitter?: string;
     whatsapp?: string;
+    youtube?: string;
+  };
+  contactInfo?: {
+    phone?: string;
+    email?: string;
+    address?: string;
+    mapEmbed?: string;
   };
 }
 
@@ -51,16 +68,51 @@ export const templateDefaults: Record<string, WebsiteConfig> = {
     content: {
       heroTitle: "Explore the World With Us",
       heroSubtitle: "Your trusted partner for unforgettable travel experiences across the globe.",
+      heroBadge: "Trusted Travel Partner",
       aboutTitle: "About Our Agency",
-      aboutText: "We are a full-service travel agency dedicated to creating memorable journeys for our clients.",
+      aboutText: "We are a full-service travel agency dedicated to creating memorable journeys for our clients. With years of experience and a passionate team, we ensure every trip is perfectly planned.",
       services: [
         { icon: "Plane", title: "Flight Booking", desc: "Best deals on domestic & international flights" },
         { icon: "Hotel", title: "Hotel Reservation", desc: "Premium hotels at competitive prices" },
         { icon: "Map", title: "Tour Packages", desc: "Curated tours for every budget" },
         { icon: "Shield", title: "Visa Assistance", desc: "Hassle-free visa processing" },
       ],
+      stats: [
+        { value: "5000+", label: "Happy Travelers" },
+        { value: "200+", label: "Destinations" },
+        { value: "50+", label: "Tour Packages" },
+        { value: "10+", label: "Years Experience" },
+      ],
+      testimonials: [
+        { name: "Rahim Hasan", text: "Amazing service! They planned our entire Thailand trip perfectly. Highly recommended.", date: "2024" },
+        { name: "Fatema Begum", text: "Very professional team. Our Dubai trip was flawless and well organized.", date: "2024" },
+        { name: "Kamal Ahmed", text: "Best travel agency in Bangladesh. Their visa processing service is excellent.", date: "2023" },
+      ],
+      faq: [
+        { question: "How do I book a tour package?", answer: "You can browse our packages online and contact us via phone, WhatsApp, or the contact form. Our team will guide you through the booking process." },
+        { question: "What documents are needed for visa processing?", answer: "Required documents vary by country. Generally you need a valid passport, photos, bank statements, and travel itinerary. We provide a complete checklist for each destination." },
+        { question: "Can I customize a tour package?", answer: "Yes! We offer fully customizable packages. Tell us your preferences, budget, and dates, and we'll create a personalized itinerary." },
+        { question: "What payment methods do you accept?", answer: "We accept cash, bank transfer, bKash, and online payment through SSLCommerz." },
+      ],
+      whyChooseUs: [
+        { title: "Expert Team", desc: "Years of experience in travel planning and execution" },
+        { title: "Best Prices", desc: "Competitive pricing with no hidden charges" },
+        { title: "24/7 Support", desc: "Round-the-clock customer assistance" },
+        { title: "Trusted Partner", desc: "Thousands of satisfied customers across Bangladesh" },
+        { title: "Custom Packages", desc: "Tailored travel plans to suit your needs" },
+        { title: "Safe Travel", desc: "Your safety and comfort is our top priority" },
+      ],
+      team: [
+        { name: "Mohammad Ali", role: "Managing Director", desc: "15+ years in travel industry" },
+        { name: "Rashida Khan", role: "Operations Head", desc: "Expert in tour operations" },
+        { name: "Imran Hossain", role: "Visa Specialist", desc: "Handles 20+ country visas" },
+      ],
+      ctaTitle: "Ready to Start Your Journey?",
+      ctaSubtitle: "Contact us today and let us plan your perfect trip.",
       footerText: "Your journey begins here.",
     },
+    socialLinks: { facebook: "#", instagram: "#", youtube: "#", whatsapp: "#" },
+    contactInfo: { phone: "+880 1234-567890", email: "info@travelagency.com", address: "Dhaka, Bangladesh" },
   },
   "hajj-umrah": {
     template: "hajj-umrah",
@@ -74,16 +126,54 @@ export const templateDefaults: Record<string, WebsiteConfig> = {
     content: {
       heroTitle: "Your Sacred Journey Starts Here",
       heroSubtitle: "Trusted Hajj & Umrah packages with complete guidance and support.",
+      heroBadge: "বিশ্বস্ত হজ্জ ও ওমরাহ পার্টনার",
       aboutTitle: "About Our Services",
-      aboutText: "We provide comprehensive Hajj and Umrah services with decades of experience guiding pilgrims.",
+      aboutText: "We provide comprehensive Hajj and Umrah services with decades of experience guiding pilgrims. Our dedicated team ensures a comfortable, safe, and spiritually enriching journey for every pilgrim.",
       services: [
         { icon: "Moon", title: "Hajj Packages", desc: "Complete Hajj packages with 5-star accommodation" },
         { icon: "Star", title: "Umrah Packages", desc: "Year-round Umrah with flexible dates" },
         { icon: "Plane", title: "Flight & Transfer", desc: "Direct flights and airport transfers" },
         { icon: "Shield", title: "Visa & Documentation", desc: "Full visa processing support" },
+        { icon: "Hotel", title: "Hotel Booking", desc: "Premium hotels near Haramain" },
+        { icon: "MapPin", title: "Ziyarat Tours", desc: "Guided tours of holy sites" },
       ],
+      stats: [
+        { value: "1000+", label: "সুখী মুসাফির" },
+        { value: "10+", label: "শরীয়া পরামর্শদাতা" },
+        { value: "20+", label: "ওমরাহ গাইড" },
+        { value: "50+", label: "ব্যবসায়িক সহযোগী" },
+      ],
+      testimonials: [
+        { name: "Monir Hossain", text: "One of the best service. They are very well organized and friendly.", date: "2023" },
+        { name: "MD Al Amin", text: "Their service is very good and they take care of everything properly.", date: "2023" },
+        { name: "Selim Khan", text: "No one else in Bangladesh has been able to demonstrate the smart system that they have shown. Highly recommended.", date: "2023" },
+        { name: "Monjur Morshed", text: "Excellent service and very professional team. The whole Umrah journey was smooth and well-organized.", date: "2024" },
+      ],
+      faq: [
+        { question: "ওমরাহর জন্য ভিসার প্রয়োজনীয়তা কী?", answer: "ওমরাহ ভিসা পেতে কমপক্ষে ছয় মাস মেয়াদ থাকা বৈধ পাসপোর্ট, পাসপোর্ট সাইজের ছবি, মেনিনজাইটিস টিকাকরণ রেকর্ড প্রয়োজন।" },
+        { question: "সঠিক ওমরাহ প্যাকেজ কীভাবে বেছে নেবেন?", answer: "আপনার বাজেট, পছন্দসই থাকার সময়, হোটেলের আরাম, প্রদত্ত সেবা এবং ট্রাভেল কোম্পানির সুনাম বিবেচনা করুন।" },
+        { question: "ওমরাহ প্যাকেজে কি ফ্লাইট অন্তর্ভুক্ত?", answer: "কিছু প্যাকেজে এয়ারলাইন টিকেট অন্তর্ভুক্ত থাকে, অন্যগুলো শুধু স্থল প্রস্তুতিতে মনোযোগ দেয়।" },
+        { question: "ওমরাহ প্যাকেজে কী অন্তর্ভুক্ত?", answer: "মক্কা ও মদীনায় থাকার ব্যবস্থা, পরিবহন, ভিসা প্রক্রিয়া, গাইডেড ট্যুর এবং কখনো কখনো খাবার অন্তর্ভুক্ত থাকে।" },
+      ],
+      whyChooseUs: [
+        { title: "24/7 কাস্টমার সাপোর্ট", desc: "নিবেদিত সাপোর্ট টিম সবসময় আপনার পাশে" },
+        { title: "হারামাইনের কাছে হোটেল", desc: "মক্কা ও মদীনায় প্রিমিয়াম হোটেল" },
+        { title: "অভিজ্ঞ গাইড", desc: "বাংলাভাষী অভিজ্ঞ মুয়াল্লিম গাইড" },
+        { title: "প্রাইভেট ট্রান্সপোর্ট", desc: "সৌদিতে এক্সক্লুসিভ প্রাইভেট পরিবহন" },
+        { title: "স্বচ্ছ মূল্য", desc: "কোনো লুকানো চার্জ নেই" },
+        { title: "ওমরাহ ট্রেনিং", desc: "প্রাক-প্রস্থান ব্যাপক ট্রেনিং" },
+      ],
+      team: [
+        { name: "Managing Director", role: "প্রধান পরিচালক", desc: "সকল কার্যক্রমের সার্বিক তত্ত্বাবধান" },
+        { name: "Operations Manager", role: "অপারেশন্স ম্যানেজার", desc: "তীর্থযাত্রার লজিস্টিক পরিচালনা" },
+        { name: "Sharia Advisor", role: "শরীয়া পরামর্শদাতা", desc: "ধর্মীয় গাইডেন্স প্রদান" },
+      ],
+      ctaTitle: "আপনার পবিত্র যাত্রা শুরু করতে প্রস্তুত?",
+      ctaSubtitle: "ওমরাহ ভিসার জন্য আবেদন করুন বা অনলাইনে বুকিং অনুরোধ করুন।",
       footerText: "Serving pilgrims with dedication and trust.",
     },
+    socialLinks: { facebook: "#", instagram: "#", youtube: "#", whatsapp: "#" },
+    contactInfo: { phone: "+880 1234-567890", email: "info@hajjumrah.com", address: "Dhaka, Bangladesh" },
   },
   "tour-packages": {
     template: "tour-packages",
@@ -97,16 +187,51 @@ export const templateDefaults: Record<string, WebsiteConfig> = {
     content: {
       heroTitle: "Discover Amazing Destinations",
       heroSubtitle: "Handcrafted tour packages for adventure seekers and leisure travelers.",
+      heroBadge: "Adventure Awaits",
       aboutTitle: "Why Choose Our Tours",
-      aboutText: "We craft unique travel experiences that combine adventure, culture, and comfort.",
+      aboutText: "We craft unique travel experiences that combine adventure, culture, and comfort. Our expert team designs every tour to create lasting memories.",
       services: [
         { icon: "Mountain", title: "Adventure Tours", desc: "Thrilling adventures in stunning locations" },
         { icon: "Palmtree", title: "Beach Holidays", desc: "Relaxing beach getaways worldwide" },
         { icon: "Building", title: "City Breaks", desc: "Explore the world's greatest cities" },
         { icon: "Camera", title: "Photography Tours", desc: "Capture breathtaking moments" },
       ],
+      stats: [
+        { value: "3000+", label: "Happy Travelers" },
+        { value: "100+", label: "Tour Packages" },
+        { value: "50+", label: "Destinations" },
+        { value: "8+", label: "Years Experience" },
+      ],
+      testimonials: [
+        { name: "Sarah Ahmed", text: "The Cox's Bazar package was absolutely wonderful. Everything was well planned.", date: "2024" },
+        { name: "Tanvir Rahman", text: "Best tour operator in Bangladesh. Their attention to detail is amazing.", date: "2024" },
+        { name: "Nusrat Jahan", text: "Our family trip to Thailand was perfect. Will book again!", date: "2023" },
+      ],
+      faq: [
+        { question: "How far in advance should I book?", answer: "We recommend booking at least 2-4 weeks in advance for domestic tours and 4-8 weeks for international tours." },
+        { question: "Are meals included in tour packages?", answer: "It varies by package. Most packages include breakfast, while premium packages include all meals." },
+        { question: "Can I bring children on tours?", answer: "Yes! We have family-friendly tours. Children under 5 travel free on most packages." },
+        { question: "What is the cancellation policy?", answer: "Free cancellation up to 7 days before departure. Partial refund available for later cancellations." },
+      ],
+      whyChooseUs: [
+        { title: "Handcrafted Itineraries", desc: "Every tour is carefully designed by travel experts" },
+        { title: "Small Groups", desc: "Intimate group sizes for better experiences" },
+        { title: "Local Guides", desc: "Expert local guides who know every destination" },
+        { title: "Best Value", desc: "Premium experiences at competitive prices" },
+        { title: "Safety First", desc: "Comprehensive safety measures on every tour" },
+        { title: "Flexible Dates", desc: "Choose dates that work for your schedule" },
+      ],
+      team: [
+        { name: "Tour Director", role: "Head of Tours", desc: "Designs all tour itineraries" },
+        { name: "Adventure Guide", role: "Lead Guide", desc: "Expert in adventure tourism" },
+        { name: "Customer Relations", role: "Support Lead", desc: "Ensures client satisfaction" },
+      ],
+      ctaTitle: "Ready for Your Next Adventure?",
+      ctaSubtitle: "Browse our packages or contact us for a customized tour plan.",
       footerText: "Adventure awaits around every corner.",
     },
+    socialLinks: { facebook: "#", instagram: "#", youtube: "#", whatsapp: "#" },
+    contactInfo: { phone: "+880 1234-567890", email: "info@tourpackages.com", address: "Dhaka, Bangladesh" },
   },
 };
 
