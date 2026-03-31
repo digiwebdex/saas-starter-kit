@@ -29,6 +29,7 @@ const SettingsPage = () => {
           </CardContent>
         </Card>
         <SmtpSettings />
+        <DataExport />
       </div>
     </DashboardLayout>
   );
