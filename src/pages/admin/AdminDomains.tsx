@@ -531,6 +531,7 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                   <p className="text-xs text-muted-foreground">
                     উভয় ভার্সন (www ও non-www) অটোমেটিক সাপোর্ট হবে, একটি থেকে অন্যটিতে redirect হবে
                   </p>
+                </div>
                 <div className="flex gap-2">
                   <Button type="submit" className="flex-1">
                     <Globe className="mr-2 h-4 w-4" />Add Domain
