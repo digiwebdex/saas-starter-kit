@@ -297,7 +297,7 @@ const AdminSubscriptions = () => {
                           <div className="flex items-center gap-1">
                             {sub.endDate || "—"}
                             {expiringSoon && (
-                              <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" title={`Expires in ${days} days`} />
+                              <span title={`Expires in ${days} days`}><AlertTriangle className="h-3.5 w-3.5 text-yellow-500" /></span>
                             )}
                           </div>
                         </TableCell>
