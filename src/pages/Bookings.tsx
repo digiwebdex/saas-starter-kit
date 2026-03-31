@@ -8,8 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Plane } from "lucide-react";
+import { Plus, Pencil, Trash2, Plane, Mail, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { emailApi } from "@/lib/emailApi";
 
 type BookingType = "tour" | "ticket" | "hotel" | "visa";
 type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
