@@ -224,7 +224,7 @@ const Accounts = () => {
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><TrendingDown className="h-4 w-4 text-destructive" />Total Expense</CardTitle></CardHeader>
-            <CardContent><div className="text-2xl font-bold text-destructive">{totals.expense.toFixed(2)}</div></CardContent>
+            <CardContent><CardContent><div className="text-2xl font-bold text-destructive">৳{totals.expense.toFixed(2)}</div></CardContent></CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><DollarSign className="h-4 w-4" />Net Balance</CardTitle></CardHeader>
