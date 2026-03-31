@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { publicApi, type TenantPublic, type PackagePublic } from "@/lib/publicApi";
 import { websiteApi, templateDefaults, type WebsiteConfig } from "@/lib/websiteApi";
+import { resolveHostname, fetchTenantByDomain, type DomainResolution } from "@/lib/domainResolver";
+import DomainErrorPage from "@/components/DomainErrorPage";
 
 // Demo fallback
 const demoTenant: TenantPublic = {
@@ -24,31 +26,12 @@ const demoPackages: PackagePublic[] = [
   { id: "6", name: "Maldives Honeymoon", description: "Romantic overwater villa stay in the Maldives paradise.", price: 150000, duration: "5 Days / 4 Nights", type: "hotel", image: "", highlights: ["Overwater villa", "Couple spa", "Sunset cruise", "All-inclusive meals"] },
 ];
 
-function resolveTenantFromHostname(): { slug?: string; customDomain?: string } {
-  const hostname = window.location.hostname;
-  const appDomain = import.meta.env.VITE_APP_DOMAIN || "";
-
-  if (!appDomain || hostname === "localhost" || hostname.includes("lovable.app")) {
-    return {};
-  }
-
-  if (hostname.endsWith(`.${appDomain}`) && hostname !== appDomain && hostname !== `www.${appDomain}`) {
-    const slug = hostname.replace(`.${appDomain}`, "");
-    return { slug };
-  }
-
-  if (hostname !== appDomain && hostname !== `www.${appDomain}`) {
-    return { customDomain: hostname };
-  }
-
-  return {};
-}
-
 interface WebsiteContextType {
   tenant: TenantPublic;
   packages: PackagePublic[];
   websiteConfig: WebsiteConfig;
   loading: boolean;
+  domainResolution: DomainResolution | null;
 }
 
 const WebsiteContext = createContext<WebsiteContextType>({
@@ -56,6 +39,7 @@ const WebsiteContext = createContext<WebsiteContextType>({
   packages: demoPackages,
   websiteConfig: templateDefaults["travel-agency"],
   loading: false,
+  domainResolution: null,
 });
 
 export const useWebsite = () => useContext(WebsiteContext);
@@ -65,36 +49,68 @@ export const WebsiteProvider = ({ slug: propSlug, children }: { slug?: string; c
   const [packages, setPackages] = useState<PackagePublic[]>(demoPackages);
   const [websiteConfig, setWebsiteConfig] = useState<WebsiteConfig>(templateDefaults["travel-agency"]);
   const [loading, setLoading] = useState(false);
+  const [domainResolution, setDomainResolution] = useState<DomainResolution | null>(null);
+  const [domainError, setDomainError] = useState<{ hostname: string; error?: string } | null>(null);
 
   useEffect(() => {
-    const { slug: domainSlug, customDomain } = resolveTenantFromHostname();
-    const identifier = propSlug || domainSlug;
+    const resolution = resolveHostname();
+    setDomainResolution(resolution);
 
-    if (identifier) {
+    // If a prop slug is provided, use it directly
+    const identifier = propSlug || resolution.slug;
+
+    async function loadTenantData() {
       setLoading(true);
-      Promise.all([
-        publicApi.getTenant(identifier),
-        publicApi.getPackages(identifier),
-        websiteApi.getPublicConfig(identifier),
-      ])
-        .then(([t, p, w]) => { setTenant(t); setPackages(p); setWebsiteConfig(w); })
-        .catch(() => {})
-        .finally(() => setLoading(false));
-    } else if (customDomain) {
-      setLoading(true);
-      Promise.all([
-        publicApi.getTenantByDomain(customDomain),
-        publicApi.getPackagesByDomain(customDomain),
-        websiteApi.getPublicConfigByDomain(customDomain),
-      ])
-        .then(([t, p, w]) => { setTenant(t); setPackages(p); setWebsiteConfig(w); })
-        .catch(() => {})
-        .finally(() => setLoading(false));
+      setDomainError(null);
+
+      try {
+        if (identifier) {
+          // Slug-based resolution (subdomain or prop)
+          const [t, p, w] = await Promise.all([
+            publicApi.getTenant(identifier),
+            publicApi.getPackages(identifier),
+            websiteApi.getPublicConfig(identifier),
+          ]);
+          setTenant(t);
+          setPackages(p);
+          setWebsiteConfig(w);
+        } else if (resolution.type === "custom-domain" && resolution.customDomain) {
+          // Custom domain resolution
+          const [t, p, w] = await Promise.all([
+            publicApi.getTenantByDomain(resolution.customDomain),
+            publicApi.getPackagesByDomain(resolution.customDomain),
+            websiteApi.getPublicConfigByDomain(resolution.customDomain),
+          ]);
+          setTenant(t);
+          setPackages(p);
+          setWebsiteConfig(w);
+        }
+        // main-app type with no slug → use demo data (already set)
+      } catch (err: any) {
+        // If we were trying to resolve a real tenant (not demo), show error
+        if (identifier || resolution.type === "custom-domain") {
+          setDomainError({
+            hostname: resolution.hostname,
+            error: err.message,
+          });
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (identifier || resolution.type === "custom-domain") {
+      loadTenantData();
     }
   }, [propSlug]);
 
+  // Show domain error page if tenant resolution failed
+  if (domainError) {
+    return <DomainErrorPage hostname={domainError.hostname} error={domainError.error} />;
+  }
+
   return (
-    <WebsiteContext.Provider value={{ tenant, packages, websiteConfig, loading }}>
+    <WebsiteContext.Provider value={{ tenant, packages, websiteConfig, loading, domainResolution }}>
       {children}
     </WebsiteContext.Provider>
   );
