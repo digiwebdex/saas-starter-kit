@@ -172,6 +172,30 @@ const AdminDomains = () => {
     }
 
     const tenant = mockTenants.find((t) => t.id === form.tenantId);
+    if (!tenant) return;
+
+    // Check plan domain limit
+    const plan = getPlan(tenant.plan);
+    if (plan.maxDomains === 0) {
+      toast({
+        title: "ডোমেইন সাপোর্ট নেই",
+        description: `${tenant.name} এর "${plan.name}" প্ল্যানে কাস্টম ডোমেইন সাপোর্ট নেই। Pro বা তার উপরের প্ল্যানে আপগ্রেড করুন।`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (plan.maxDomains > 0) {
+      const tenantDomainCount = domains.filter((d) => d.tenantId === form.tenantId).length;
+      if (tenantDomainCount >= plan.maxDomains) {
+        toast({
+          title: "ডোমেইন লিমিট পূর্ণ",
+          description: `${tenant.name} এর "${plan.name}" প্ল্যানে সর্বোচ্চ ${plan.maxDomains}টি ডোমেইন যুক্ত করা যায়। আরো ডোমেইন যুক্ত করতে Business প্ল্যানে আপগ্রেড করুন।`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     const token = generateVerificationToken();
     const newDomain: TenantDomain = {
       id: crypto.randomUUID(),
