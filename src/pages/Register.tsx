@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { seedDemoData } from "@/lib/demoData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +23,9 @@ const Register = () => {
     setLoading(true);
     try {
       await register({ name, email, password, tenantName });
+      // Seed demo data in background (don't block navigation)
+      seedDemoData().catch(() => {});
+      toast({ title: "Account created!", description: "Demo data has been added to your dashboard." });
       navigate("/dashboard");
     } catch (err: any) {
       toast({ variant: "destructive", title: "Registration failed", description: err.message });
