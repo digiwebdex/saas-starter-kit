@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { WebsiteProvider } from "@/contexts/WebsiteContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
 import Login from "./pages/Login";
@@ -25,6 +26,10 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
 import AdminPayments from "./pages/admin/AdminPayments";
 import AdminPlans from "./pages/admin/AdminPlans";
+import SiteHome from "./pages/site/SiteHome";
+import SiteAbout from "./pages/site/SiteAbout";
+import SitePackages from "./pages/site/SitePackages";
+import SiteContact from "./pages/site/SiteContact";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,10 +50,18 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            {/* Public landing → site home */}
+            <Route path="/" element={<Navigate to="/site" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            {/* App routes */}
+
+            {/* Public website (no auth required) */}
+            <Route path="/site" element={<WebsiteProvider><SiteHome /></WebsiteProvider>} />
+            <Route path="/site/about" element={<WebsiteProvider><SiteAbout /></WebsiteProvider>} />
+            <Route path="/site/packages" element={<WebsiteProvider><SitePackages /></WebsiteProvider>} />
+            <Route path="/site/contact" element={<WebsiteProvider><SiteContact /></WebsiteProvider>} />
+
+            {/* App routes (protected) */}
             <Route path="/dashboard" element={<P><Dashboard /></P>} />
             <Route path="/clients" element={<P><Clients /></P>} />
             <Route path="/agents" element={<P><Agents /></P>} />
@@ -62,11 +75,13 @@ const App = () => (
             <Route path="/team" element={<P><Team /></P>} />
             <Route path="/organization" element={<P><Organization /></P>} />
             <Route path="/settings" element={<P><SettingsPage /></P>} />
+
             {/* Admin routes */}
             <Route path="/admin" element={<A><AdminDashboard /></A>} />
             <Route path="/admin/tenants" element={<A><AdminTenants /></A>} />
             <Route path="/admin/payments" element={<A><AdminPayments /></A>} />
             <Route path="/admin/plans" element={<A><AdminPlans /></A>} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
