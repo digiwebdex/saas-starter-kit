@@ -24,6 +24,7 @@ interface TenantDomain {
   tenantId: string;
   tenantName: string;
   domain: string;
+  wwwRedirect: "www-to-root" | "root-to-www";
   status: "active" | "pending" | "error";
   sslStatus: "active" | "pending" | "none";
   verificationStatus: "unverified" | "verifying" | "verified";
@@ -44,6 +45,7 @@ const mockDomains: TenantDomain[] = [
     tenantId: "t1",
     tenantName: "Acme Travel",
     domain: "acmetravel.com",
+    wwwRedirect: "www-to-root",
     status: "active",
     sslStatus: "active",
     verificationStatus: "verified",
@@ -55,6 +57,7 @@ const mockDomains: TenantDomain[] = [
     tenantId: "t2",
     tenantName: "Globe Tours",
     domain: "globetours.net",
+    wwwRedirect: "www-to-root",
     status: "pending",
     sslStatus: "pending",
     verificationStatus: "unverified",
@@ -67,7 +70,7 @@ const AdminDomains = () => {
   const [domains, setDomains] = useState<TenantDomain[]>(mockDomains);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [verifyDialogDomain, setVerifyDialogDomain] = useState<TenantDomain | null>(null);
-  const [form, setForm] = useState({ tenantId: "", domain: "" });
+  const [form, setForm] = useState({ tenantId: "", domain: "", wwwRedirect: "www-to-root" as TenantDomain["wwwRedirect"] });
   const [verifying, setVerifying] = useState<string | null>(null);
   const [sslDialogDomain, setSslDialogDomain] = useState<TenantDomain | null>(null);
   const [sslGenerating, setSslGenerating] = useState(false);
@@ -166,7 +169,7 @@ const AdminDomains = () => {
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    const domainClean = form.domain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/$/, "");
+    const domainClean = form.domain.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/$/, "");
 
     if (!form.tenantId || !domainClean) {
       toast({ title: "সব ফিল্ড পূরণ করুন", variant: "destructive" });
@@ -209,6 +212,7 @@ const AdminDomains = () => {
       tenantId: form.tenantId,
       tenantName: tenant?.name || "",
       domain: domainClean,
+      wwwRedirect: form.wwwRedirect,
       status: "pending",
       sslStatus: "none",
       verificationStatus: "unverified",
@@ -218,8 +222,8 @@ const AdminDomains = () => {
 
     setDomains((prev) => [...prev, newDomain]);
     setVerifyDialogDomain(newDomain);
-    toast({ title: "ডোমেইন যুক্ত হয়েছে", description: `DNS TXT রেকর্ড যুক্ত করে ভেরিফাই করুন` });
-    setForm({ tenantId: "", domain: "" });
+    toast({ title: "ডোমেইন যুক্ত হয়েছে", description: `${domainClean} + www.${domainClean} উভয়ই সাপোর্ট করবে` });
+    setForm({ tenantId: "", domain: "", wwwRedirect: "www-to-root" });
     setDialogOpen(false);
   };
 
@@ -258,12 +262,23 @@ const AdminDomains = () => {
     toast({ title: "ডোমেইন সরানো হয়েছে", description: d?.domain });
   };
 
-  const copyNginxCommand = (domain: string) => {
-    const cmd = `# 1. Nginx config তৈরি করুন
+  const copyNginxCommand = (domain: string, wwwRedirect: TenantDomain["wwwRedirect"]) => {
+    const primary = wwwRedirect === "root-to-www" ? `www.${domain}` : domain;
+    const redirect = wwwRedirect === "root-to-www" ? domain : `www.${domain}`;
+
+    const cmd = `# 1. Nginx config তৈরি করুন (www ↔ root redirect সহ)
 cat > /etc/nginx/sites-available/${domain} << 'EOF'
+# Redirect ${redirect} → ${primary}
 server {
     listen 80;
-    server_name ${domain} www.${domain};
+    server_name ${redirect};
+    return 301 https://${primary}$request_uri;
+}
+
+# Main server block
+server {
+    listen 80;
+    server_name ${primary};
 
     location /api/ {
         proxy_pass http://127.0.0.1:4001;
@@ -279,13 +294,13 @@ server {
 }
 EOF
 
-# 2. Enable & SSL
-ln -s /etc/nginx/sites-available/${domain} /etc/nginx/sites-enabled/
+# 2. Enable & SSL (both domains)
+ln -sf /etc/nginx/sites-available/${domain} /etc/nginx/sites-enabled/
 nginx -t && systemctl reload nginx
 sudo certbot --nginx -d ${domain} -d www.${domain}`;
 
     navigator.clipboard.writeText(cmd);
-    toast({ title: "কমান্ড কপি হয়েছে", description: "VPS টার্মিনালে পেস্ট করুন" });
+    toast({ title: "কমান্ড কপি হয়েছে", description: `${redirect} → ${primary} redirect সহ` });
   };
 
   const copyToken = (token: string) => {
@@ -500,6 +515,21 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                   />
                   <p className="text-xs text-muted-foreground">
                     শুধু ডোমেইন নাম লিখুন, http:// বা www ছাড়া
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>WWW Redirect</Label>
+                  <Select value={form.wwwRedirect} onValueChange={(v) => setForm((f) => ({ ...f, wwwRedirect: v as TenantDomain["wwwRedirect"] }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="www-to-root">www → root (www.example.com → example.com)</SelectItem>
+                      <SelectItem value="root-to-www">root → www (example.com → www.example.com)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    উভয় ভার্সন (www ও non-www) অটোমেটিক সাপোর্ট হবে, একটি থেকে অন্যটিতে redirect হবে
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -800,12 +830,17 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                   domains.map((d) => (
                     <TableRow key={d.id}>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{d.domain}</span>
-                          <a href={`https://${d.domain}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">{d.domain}</span>
+                            <a href={`https://${d.domain}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          </div>
+                          <span className="text-xs text-muted-foreground ml-6">
+                            + www.{d.domain} ({d.wwwRedirect === "www-to-root" ? "www → root" : "root → www"})
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground">{d.tenantName}</TableCell>
@@ -864,7 +899,7 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
                             variant="ghost"
                             size="icon"
                             title="Copy Nginx setup command"
-                            onClick={() => copyNginxCommand(d.domain)}
+                            onClick={() => copyNginxCommand(d.domain, d.wwwRedirect)}
                           >
                             <Copy className="h-4 w-4" />
                           </Button>

@@ -44,8 +44,9 @@ export function resolveHostname(): DomainResolution {
     }
   }
 
-  // Everything else → custom domain
-  return { type: "custom-domain", customDomain: hostname, hostname };
+  // Everything else → custom domain (strip www for matching)
+  const customDomain = hostname.replace(/^www\./, "");
+  return { type: "custom-domain", customDomain, hostname };
 }
 
 /**
