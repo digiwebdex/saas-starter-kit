@@ -197,9 +197,9 @@ const Invoices = () => {
                       <TableRow key={inv.id}>
                         <TableCell className="font-mono text-xs">{inv.id.slice(0, 8)}</TableCell>
                         <TableCell className="text-muted-foreground text-xs">{inv.bookingId.slice(0, 8)}</TableCell>
-                        <TableCell className="text-right">{inv.totalAmount.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-green-600">{inv.paidAmount.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-destructive font-semibold">{inv.dueAmount.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">৳{inv.totalAmount.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-green-600">৳{inv.paidAmount.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-destructive font-semibold">৳{inv.dueAmount.toFixed(2)}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2 min-w-[100px]">
                             <Progress value={pct} className="h-2 flex-1" />
