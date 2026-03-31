@@ -37,6 +37,7 @@ import AdminDomains from "./pages/admin/AdminDomains";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminFeatures from "./pages/admin/AdminFeatures";
 import AdminSmsTemplates from "./pages/admin/AdminSmsTemplates";
+import AdminSmsLogs from "./pages/admin/AdminSmsLogs";
 import SiteHome from "./pages/site/SiteHome";
 import SiteAbout from "./pages/site/SiteAbout";
 import SitePackages from "./pages/site/SitePackages";
@@ -105,6 +106,7 @@ const AppContent = () => (
               <Route path="/admin/settings" element={<A><AdminSettings /></A>} />
               <Route path="/admin/features" element={<A><AdminFeatures /></A>} />
               <Route path="/admin/sms-templates" element={<A><AdminSmsTemplates /></A>} />
+              <Route path="/admin/sms-logs" element={<A><AdminSmsLogs /></A>} />
 
               <Route path="*" element={<NotFound />} />
         </Routes>
