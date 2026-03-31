@@ -10,9 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import {
   Settings, Globe, Mail, CreditCard, Upload, Save, Loader2, CheckCircle2,
-  Send, Eye, EyeOff, Shield,
+  Send, Eye, EyeOff, Shield, MessageSquare, Smartphone,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { smsApi, type SmsConfig } from "@/lib/smsApi";
 
 // ── Types ──
 interface GeneralSettings {
