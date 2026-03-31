@@ -55,8 +55,8 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* Public landing → site home */}
-            <Route path="/" element={<Navigate to="/site" replace />} />
+            {/* Main landing page */}
+            <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
