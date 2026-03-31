@@ -72,6 +72,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem("token", res.token);
     setUser(res.user);
     fetchTenant();
+    return res.user;
   }, []);
 
   const register = useCallback(
