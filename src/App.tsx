@@ -16,6 +16,7 @@ import Agents from "./pages/Agents";
 import Vendors from "./pages/Vendors";
 import Leads from "./pages/Leads";
 import Tasks from "./pages/Tasks";
+import Bookings from "./pages/Bookings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
