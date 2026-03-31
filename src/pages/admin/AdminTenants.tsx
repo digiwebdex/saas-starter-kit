@@ -28,6 +28,7 @@ const mockTenants: TenantRow[] = [
 ];
 
 const AdminTenants = () => {
+  const navigate = useNavigate();
   const [tenants, setTenants] = useState<TenantRow[]>(mockTenants);
   const [search, setSearch] = useState("");
   const [selectedTenant, setSelectedTenant] = useState<TenantRow | null>(null);
