@@ -162,7 +162,7 @@ const Invoices = () => {
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Due</CardTitle></CardHeader>
-            <CardContent><div className="text-2xl font-bold text-destructive">{totals.due.toFixed(2)}</div></CardContent>
+            <CardContent><CardContent><div className="text-2xl font-bold text-destructive">৳{totals.due.toFixed(2)}</div></CardContent></CardContent>
           </Card>
         </div>
 
