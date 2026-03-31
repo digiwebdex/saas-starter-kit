@@ -121,6 +121,18 @@ const Invoices = () => {
     setPaymentForm({ amount: 0, method: "cash", date: new Date().toISOString().split("T")[0] });
     setPayDialogOpen(false);
     toast({ title: "Payment recorded", description: `${payAmount.toFixed(2)} paid via ${paymentForm.method}` });
+    // Trigger SMS for payment received
+    sendPaymentSms({
+      paymentAmount: payAmount,
+      paymentMethod: paymentForm.method,
+      invoiceId: selectedInvoice.id,
+      balance: Math.max(0, selectedInvoice.dueAmount - payAmount),
+      clientName: "",
+      clientPhone: "",
+      company: "Travel Agency",
+    }).then((res) => {
+      if (res.sent) toast({ title: "Payment SMS sent to client" });
+    }).catch(() => {});
   };
 
   const totals = useMemo(() => ({

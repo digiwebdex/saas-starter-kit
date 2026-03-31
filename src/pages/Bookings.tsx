@@ -86,6 +86,18 @@ const Bookings = () => {
       bookingApi.create(booking).then((created: any) => {
         setItems((prev) => [...prev, created]);
         toast({ title: "Booking created" });
+        // Trigger SMS automation (fire-and-forget)
+        sendBookingSms({
+          bookingId: created.id,
+          bookingType: created.type,
+          bookingStatus: created.status,
+          bookingAmount: created.amount,
+          clientName: created.clientId,
+          clientPhone: "",  // Backend resolves phone from clientId
+          company: "Travel Agency",
+        }).then((res) => {
+          if (res.sent) toast({ title: "SMS sent to client" });
+        }).catch(() => {});
       }).catch((err: any) => {
         toast({ title: "Create failed", description: err.message, variant: "destructive" });
       });
