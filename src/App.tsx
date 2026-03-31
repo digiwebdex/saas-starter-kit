@@ -40,6 +40,7 @@ import SiteHome from "./pages/site/SiteHome";
 import SiteAbout from "./pages/site/SiteAbout";
 import SitePackages from "./pages/site/SitePackages";
 import SiteContact from "./pages/site/SiteContact";
+import SitePricing from "./pages/site/SitePricing";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 
