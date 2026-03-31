@@ -73,6 +73,8 @@ export const invoiceApi = createCrudApi<Invoice>("invoices");
 export const paymentApi = createCrudApi<Payment>("payments");
 export const accountApi = createCrudApi<Account>("accounts");
 export const transactionApi = createCrudApi<Transaction>("transactions");
+export const subscriptionApi = createCrudApi<Subscription>("subscriptions");
+export const paymentRequestApi = createCrudApi<PaymentRequest>("payment-requests");
 
 // ── Types ──
 export interface User {
@@ -191,5 +193,25 @@ export interface Transaction {
   referenceId: string;
   date: string;
   tenantId: string;
+  createdAt: string;
+}
+
+export interface Subscription {
+  id: string;
+  tenantId: string;
+  plan: "free" | "basic" | "pro" | "business";
+  startDate: string;
+  endDate: string;
+  status: "active" | "expired" | "pending" | "cancelled";
+  createdAt: string;
+}
+
+export interface PaymentRequest {
+  id: string;
+  tenantId: string;
+  plan: string;
+  amount: number;
+  trxId: string;
+  status: "pending" | "approved" | "rejected";
   createdAt: string;
 }
