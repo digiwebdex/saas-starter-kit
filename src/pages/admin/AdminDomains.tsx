@@ -373,6 +373,7 @@ sudo certbot --nginx -d ${domain} -d www.${domain}`;
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Verification Instructions */}
