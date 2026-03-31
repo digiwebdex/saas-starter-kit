@@ -162,11 +162,13 @@ const AdminSettings = () => {
         </div>
 
         <Tabs defaultValue="general" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="general" className="gap-1.5"><Settings className="h-4 w-4" /> General</TabsTrigger>
             <TabsTrigger value="email" className="gap-1.5"><Mail className="h-4 w-4" /> Email</TabsTrigger>
+            <TabsTrigger value="sms" className="gap-1.5"><Smartphone className="h-4 w-4" /> SMS</TabsTrigger>
             <TabsTrigger value="payment" className="gap-1.5"><CreditCard className="h-4 w-4" /> Payment</TabsTrigger>
             <TabsTrigger value="domain" className="gap-1.5"><Globe className="h-4 w-4" /> Domain</TabsTrigger>
+          </TabsList>
           </TabsList>
 
           {/* ════════ GENERAL ════════ */}
