@@ -1,4 +1,4 @@
-import { LayoutDashboard, Building2, CreditCard, Crown, Ban, LogOut, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Building2, CreditCard, Crown, Ban, LogOut, ArrowLeft, Globe } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
