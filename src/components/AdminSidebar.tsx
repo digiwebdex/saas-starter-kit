@@ -23,6 +23,7 @@ const adminItems = [
   { title: "Payment Requests", url: "/admin/payments", icon: CreditCard },
   { title: "Manage Plans", url: "/admin/plans", icon: Crown },
   { title: "Subscriptions", url: "/admin/subscriptions", icon: ListChecks },
+  { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebar() {
