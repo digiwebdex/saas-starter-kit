@@ -383,15 +383,32 @@ export interface BookingDocument {
   uploadedBy?: string;
 }
 
+export type InvoiceStatus = "unpaid" | "partial" | "paid" | "overdue" | "refunded" | "cancelled";
+export type PaymentMethod = "cash" | "bank" | "card" | "mobile_banking" | "cheque" | "online";
+
 export interface Invoice {
   id: string;
+  invoiceNumber?: string;
   bookingId: string;
+  bookingTitle?: string;
+  clientId?: string;
+  clientName?: string;
   totalAmount: number;
   paidAmount: number;
   dueAmount: number;
-  status: "unpaid" | "partial" | "paid";
+  refundedAmount?: number;
+  bookingCost?: number;
+  bookingProfit?: number;
+  status: InvoiceStatus;
+  dueDate?: string;
+  issuedDate?: string;
+  notes?: string;
+  cancelReason?: string;
   tenantId: string;
+  createdBy?: string;
+  createdByName?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Payment {
@@ -399,9 +416,38 @@ export interface Payment {
   invoiceId: string;
   bookingId: string;
   amount: number;
-  method: "cash" | "bank";
+  method: PaymentMethod;
+  transactionRef?: string;
+  proofUrl?: string;
   date: string;
+  notes?: string;
+  receivedBy?: string;
+  receivedByName?: string;
   tenantId: string;
+  createdAt: string;
+}
+
+export interface InvoiceRefund {
+  id: string;
+  invoiceId: string;
+  amount: number;
+  reason: string;
+  method?: string;
+  processedBy?: string;
+  processedByName?: string;
+  createdAt: string;
+}
+
+export interface InvoiceAuditEvent {
+  id: string;
+  invoiceId: string;
+  type: "created" | "payment" | "status_change" | "refund" | "cancellation" | "reminder" | "note";
+  content: string;
+  oldStatus?: string;
+  newStatus?: string;
+  amount?: number;
+  createdBy?: string;
+  createdByName?: string;
   createdAt: string;
 }
 
