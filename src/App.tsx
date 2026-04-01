@@ -47,6 +47,7 @@ import AdminFeatures from "./pages/admin/AdminFeatures";
 import AdminSmsTemplates from "./pages/admin/AdminSmsTemplates";
 import AdminSmsLogs from "./pages/admin/AdminSmsLogs";
 import AdminRoles from "./pages/admin/AdminRoles";
+import AdminAuditLog from "./pages/admin/AdminAuditLog";
 import SiteHome from "./pages/site/SiteHome";
 import SiteAbout from "./pages/site/SiteAbout";
 import SitePackages from "./pages/site/SitePackages";
@@ -126,6 +127,7 @@ const AppContent = () => (
               <Route path="/admin/roles" element={<A><AdminRoles /></A>} />
               <Route path="/admin/sms-templates" element={<A><AdminSmsTemplates /></A>} />
               <Route path="/admin/sms-logs" element={<A><AdminSmsLogs /></A>} />
+              <Route path="/admin/audit-log" element={<A><AdminAuditLog /></A>} />
 
               <Route path="*" element={<NotFound />} />
         </Routes>
