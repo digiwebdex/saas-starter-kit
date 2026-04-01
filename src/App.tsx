@@ -17,6 +17,7 @@ import WebsiteCustomizer from "./pages/WebsiteCustomizer";
 import Clients from "./pages/Clients";
 import Agents from "./pages/Agents";
 import Vendors from "./pages/Vendors";
+import VendorDetails from "./pages/VendorDetails";
 import Leads from "./pages/Leads";
 import LeadDetails from "./pages/LeadDetails";
 import ClientProfile from "./pages/ClientProfile";
@@ -95,6 +96,7 @@ const AppContent = () => (
               <Route path="/clients/:id" element={<P><ClientProfile /></P>} />
               <Route path="/agents" element={<P><Agents /></P>} />
               <Route path="/vendors" element={<P><Vendors /></P>} />
+              <Route path="/vendors/:id" element={<P><VendorDetails /></P>} />
               <Route path="/leads" element={<P><Leads /></P>} />
               <Route path="/leads/:id" element={<P><LeadDetails /></P>} />
               <Route path="/tasks" element={<P><Tasks /></P>} />
