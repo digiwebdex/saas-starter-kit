@@ -401,8 +401,61 @@ const Bookings = () => {
                 <SelectItem value="paid">Paid</SelectItem>
               </SelectContent>
             </Select>
+            <Button variant="outline" size="sm" onClick={() => setShowFilters((v) => !v)} className="gap-1.5">
+              <Filter className="h-4 w-4" /> Filters
+              {activeFilterCount > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">{activeFilterCount}</Badge>
+              )}
+            </Button>
+            {activeFilterCount > 0 && (
+              <Button variant="ghost" size="sm" onClick={() => { setDestinationFilter(""); setTravelDateFrom(undefined); setTravelDateTo(undefined); }}>
+                Clear filters
+              </Button>
+            )}
           </div>
         </div>
+
+        {/* Advanced Filter Bar */}
+        {showFilters && (
+          <Card>
+            <CardContent className="p-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Destination</Label>
+                  <Input className="h-8 text-xs" placeholder="e.g. Dubai, Thailand" value={destinationFilter} onChange={(e) => setDestinationFilter(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Travel Date From</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className={cn("w-full justify-start text-left font-normal h-8 text-xs", !travelDateFrom && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-1 h-3 w-3" />
+                        {travelDateFrom ? format(travelDateFrom, "PP") : "Any"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={travelDateFrom} onSelect={setTravelDateFrom} initialFocus className="p-3 pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Travel Date To</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className={cn("w-full justify-start text-left font-normal h-8 text-xs", !travelDateTo && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-1 h-3 w-3" />
+                        {travelDateTo ? format(travelDateTo, "PP") : "Any"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={travelDateTo} onSelect={setTravelDateTo} initialFocus className="p-3 pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Table */}
         {loading ? (
