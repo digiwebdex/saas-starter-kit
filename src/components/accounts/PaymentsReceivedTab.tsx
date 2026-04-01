@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Search, Download, ArrowUpCircle } from "lucide-react";
-import { PermissionGate } from "@/components/PermissionGate";
+import PermissionGate from "@/components/PermissionGate";
 import type { Payment } from "@/lib/api";
 
 const METHOD_LABELS: Record<string, string> = {

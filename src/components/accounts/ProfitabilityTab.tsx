@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Download, TrendingUp, TrendingDown } from "lucide-react";
-import { PermissionGate } from "@/components/PermissionGate";
+import PermissionGate from "@/components/PermissionGate";
 import { useNavigate } from "react-router-dom";
 import type { BookingProfitability } from "@/lib/api";
 

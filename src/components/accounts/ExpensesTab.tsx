@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Search, Download, Plus, ArrowDownCircle } from "lucide-react";
-import { PermissionGate } from "@/components/PermissionGate";
+import PermissionGate from "@/components/PermissionGate";
 import { useToast } from "@/hooks/use-toast";
 import type { Expense, ExpenseCategory, PaymentMethod } from "@/lib/api";
 import { expenseApi } from "@/lib/api";

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Search, Download } from "lucide-react";
-import { PermissionGate } from "@/components/PermissionGate";
+import PermissionGate from "@/components/PermissionGate";
 import { useNavigate } from "react-router-dom";
 import type { VendorBill, VendorBillStatus } from "@/lib/api";
 

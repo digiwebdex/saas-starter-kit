@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Plus, Wallet, Building2 } from "lucide-react";
-import { PermissionGate } from "@/components/PermissionGate";
+import PermissionGate from "@/components/PermissionGate";
 import { useToast } from "@/hooks/use-toast";
 import { accountApi } from "@/lib/api";
 import type { Account } from "@/lib/api";
