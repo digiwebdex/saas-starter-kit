@@ -187,6 +187,8 @@ const Invoices = () => {
         transactionRef: paymentForm.transactionRef,
         date: paymentForm.date,
         notes: paymentForm.notes,
+        receivedBy: paymentForm.receivedBy || user?.name || "",
+        receivedByName: paymentForm.receivedBy || user?.name || "",
         tenantId: selectedInvoice.tenantId,
       } as any);
       setInvoicePayments((p) => [...p, payment]);
