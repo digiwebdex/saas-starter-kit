@@ -26,6 +26,7 @@ import QuotationBuilder from "./pages/QuotationBuilder";
 import QuotationDetails from "./pages/QuotationDetails";
 import QuotationPrint from "./pages/QuotationPrint";
 import Bookings from "./pages/Bookings";
+import BookingDetails from "./pages/BookingDetails";
 import Invoices from "./pages/Invoices";
 import Accounts from "./pages/Accounts";
 import Reports from "./pages/Reports";
