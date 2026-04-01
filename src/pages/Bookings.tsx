@@ -221,11 +221,17 @@ const Bookings = () => {
             </h1>
             <p className="text-muted-foreground">Manage tours, tickets, hotels, visas & packages</p>
           </div>
-          <PermissionGate module="bookings" action="create">
-            <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
-              <DialogTrigger asChild>
-                <Button><Plus className="mr-2 h-4 w-4" />New Booking</Button>
-              </DialogTrigger>
+          <div className="flex gap-2">
+            <PermissionGate module="bookings" action="create">
+              <Button variant="outline" onClick={handleOpenQuotationDialog}>
+                <FileText className="mr-2 h-4 w-4" /> From Quotation
+              </Button>
+            </PermissionGate>
+            <PermissionGate module="bookings" action="create">
+              <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
+                <DialogTrigger asChild>
+                  <Button><Plus className="mr-2 h-4 w-4" />New Booking</Button>
+                </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{editingId ? "Edit" : "New"} Booking</DialogTitle>
