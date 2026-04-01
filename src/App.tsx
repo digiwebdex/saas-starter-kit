@@ -140,18 +140,22 @@ const AppContent = () => (
   </QueryClientProvider>
 );
 
+const AppWithRouter = () => (
+  <BrowserRouter>
+    <AppContent />
+  </BrowserRouter>
+);
+
 const App = () => {
-  const inRouterContext = useInRouterContext();
-
-  if (inRouterContext) {
-    return <AppContent />;
+  try {
+    const inRouterContext = useInRouterContext();
+    if (inRouterContext) {
+      return <AppContent />;
+    }
+  } catch {
+    // Not in a router context
   }
-
-  return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
-  );
+  return <AppWithRouter />;
 };
 
 export default App;
