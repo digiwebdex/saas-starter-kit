@@ -51,7 +51,7 @@ const yearly = (monthly: number, discountPct = 20) =>
 
 export const PLANS: PlanConfig[] = [
   {
-    id: "free", name: "Free", monthlyPrice: 0, yearlyPrice: 0,
+    id: "free", name: "Free", price: 0, monthlyPrice: 0, yearlyPrice: 0,
     description: "Get started with basic features", trialDays: 0,
     maxClients: 50, maxBookings: 50, maxUsers: 1, maxDomains: 0,
     maxBranches: 1, maxSmsPerMonth: 0, maxStorageMB: 100, maxReports: 5,
