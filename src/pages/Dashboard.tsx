@@ -72,9 +72,9 @@ const Dashboard = () => {
         const overdueInvoicesList = invoices.filter((i: any) => i.status === "overdue" || (i.status !== "paid" && i.status !== "cancelled" && i.dueDate && i.dueDate < today));
         const overdueInvoices = overdueInvoicesList.length;
         const overdueInvoiceAmount = overdueInvoicesList.reduce((s: number, i: any) => s + (i.dueAmount || 0), 0);
-        const vendorDues = vendorBills.reduce((s: number, b: any) => s + (b.dueAmount || 0), 0);
-        const salesThisMonth = payments.filter((p: any) => p.date?.startsWith(thisMonth) || p.createdAt?.startsWith(thisMonth)).reduce((s: number, p: any) => s + (p.amount || 0), 0);
-        const totalRevenue = bookings.reduce((s: number, b: any) => s + (b.amount || 0), 0);
+        const vendorDues = vendorBills.reduce((s: number, b: any) => s + (b.dueAmount || 0), 0 as number);
+        const salesThisMonth = payments.filter((p: any) => p.date?.startsWith(thisMonth) || p.createdAt?.startsWith(thisMonth)).reduce((s: number, p: any) => s + (p.amount || 0), 0 as number);
+        const totalRevenue = bookings.reduce((s: number, b: any) => s + (b.amount || 0), 0 as number);
 
         // Top destinations
         const destMap: Record<string, number> = {};
