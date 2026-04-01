@@ -840,6 +840,49 @@ const Invoices = () => {
           </DialogContent>
         </Dialog>
 
+        {/* ═══════ FROM BOOKING DIALOG ═══════ */}
+        <Dialog open={fromBookingOpen} onOpenChange={setFromBookingOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Create Invoice from Booking</DialogTitle></DialogHeader>
+            {bookingsLoading ? (
+              <div className="py-8 text-center text-muted-foreground">Loading bookings...</div>
+            ) : bookingsList.length === 0 ? (
+              <div className="py-8 text-center text-muted-foreground">No bookings found.</div>
+            ) : (
+              <div className="max-h-[400px] overflow-y-auto space-y-2">
+                {bookingsList.map((bk) => (
+                  <div
+                    key={bk.id}
+                    className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50 cursor-pointer"
+                    onClick={() => {
+                      setInvoiceForm({
+                        bookingId: bk.id,
+                        bookingTitle: bk.title || `${bk.type} — ${bk.destination || "Trip"}`,
+                        clientName: bk.clientName || "",
+                        totalAmount: bk.amount || 0,
+                        bookingCost: bk.cost || 0,
+                        dueDate: "",
+                        notes: "",
+                      });
+                      setFromBookingOpen(false);
+                      setCreateDialogOpen(true);
+                    }}
+                  >
+                    <div>
+                      <p className="text-sm font-medium">{bk.title || `${bk.type} — ${bk.destination || "Trip"}`}</p>
+                      <p className="text-xs text-muted-foreground">{bk.clientName || "No client"} · {bk.status}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold">৳{(bk.amount || 0).toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground">{bk.createdAt?.slice(0, 10)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
         {/* Online Payment Gateway */}
         {payGatewayInvoice && (
           <PaymentGatewayDialog
