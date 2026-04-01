@@ -320,6 +320,19 @@ const Invoices = () => {
               </Button>
             </PermissionGate>
             <PermissionGate module="invoices" action="create">
+              <Button variant="outline" onClick={async () => {
+                setFromBookingOpen(true);
+                setBookingsLoading(true);
+                try {
+                  const bks = await bookingApi.list();
+                  setBookingsList(bks);
+                } catch { setBookingsList([]); }
+                finally { setBookingsLoading(false); }
+              }}>
+                <Plane className="mr-2 h-4 w-4" /> From Booking
+              </Button>
+            </PermissionGate>
+            <PermissionGate module="invoices" action="create">
               <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogTrigger asChild>
                   <Button><Plus className="mr-2 h-4 w-4" />New Invoice</Button>
