@@ -543,21 +543,96 @@ export interface Account {
   name: string;
   type: "cash" | "bank";
   balance: number;
+  accountNumber?: string;
+  bankName?: string;
+  notes?: string;
+  status: "active" | "inactive";
   tenantId: string;
   createdAt: string;
+  updatedAt?: string;
 }
+
+export type TransactionType = "income" | "expense" | "refund" | "vendor_payment";
 
 export interface Transaction {
   id: string;
-  accountId: string;
-  type: "income" | "expense";
+  accountId?: string;
+  accountName?: string;
+  type: TransactionType;
   category: string;
   description: string;
   amount: number;
-  referenceId: string;
+  referenceId?: string;
+  referenceType?: "invoice" | "payment" | "booking" | "vendor_bill" | "expense" | "refund";
+  clientId?: string;
+  clientName?: string;
+  bookingId?: string;
+  bookingTitle?: string;
+  vendorId?: string;
+  vendorName?: string;
+  invoiceId?: string;
+  invoiceNumber?: string;
+  paymentMethod?: PaymentMethod;
+  status?: "completed" | "pending" | "failed" | "reversed";
   date: string;
   tenantId: string;
+  createdBy?: string;
+  createdByName?: string;
   createdAt: string;
+}
+
+export type ExpenseCategory = "office" | "travel" | "salary" | "marketing" | "utilities" | "rent" | "insurance" | "supplies" | "commission" | "bank_charges" | "taxes" | "miscellaneous";
+
+export interface Expense {
+  id: string;
+  category: ExpenseCategory;
+  description: string;
+  amount: number;
+  date: string;
+  paymentMethod: PaymentMethod;
+  reference?: string;
+  notes?: string;
+  attachmentUrl?: string;
+  vendorId?: string;
+  vendorName?: string;
+  accountId?: string;
+  accountName?: string;
+  approvedBy?: string;
+  approvedByName?: string;
+  status: "pending" | "approved" | "rejected";
+  tenantId: string;
+  createdBy?: string;
+  createdByName?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface AccountsSummary {
+  totalReceivable: number;
+  totalReceived: number;
+  totalPayable: number;
+  overdueReceivable: number;
+  overduePayable: number;
+  cashBankBalance: number;
+  totalExpenses: number;
+  netProfit: number;
+  receivableCount: number;
+  payableCount: number;
+  overdueReceivableCount: number;
+  overduePayableCount: number;
+}
+
+export interface BookingProfitability {
+  bookingId: string;
+  bookingTitle: string;
+  clientName: string;
+  sellingAmount: number;
+  vendorCosts: number;
+  expenses: number;
+  grossProfit: number;
+  marginPercent: number;
+  status: BookingStatus;
+  date: string;
 }
 
 export interface Subscription {
