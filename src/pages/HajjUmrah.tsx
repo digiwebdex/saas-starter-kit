@@ -260,7 +260,7 @@ const HajjUmrah = () => {
     if (editingPkgId) {
       try {
         const updated = await hajjApi.updatePackage(editingPkgId, { ...pkgForm, profit } as any).catch(() => null);
-        setPackages((prev) => prev.map((p) => p.id === editingPkgId ? { ...p, ...pkgForm, profit } : p));
+        setPackages((prev) => prev.map((p) => p.id === editingPkgId ? { ...p, ...pkgForm, profit, hotelClass: pkgForm.hotelClass as HajjPackage["hotelClass"] } : p));
         toast({ title: "Package updated" });
       } catch {}
     } else {
