@@ -88,6 +88,13 @@ const AppContent = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/demo" element={<Demo />} />
+              <Route path="/contact-us" element={<ContactUs />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
               <Route path="/onboarding" element={<P><Onboarding /></P>} />
 
               {/* Public website (no auth required) */}
