@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import PermissionGate from "@/components/PermissionGate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,11 +18,11 @@ import { format, isAfter, isBefore, addDays, parseISO } from "date-fns";
 import {
   Plus, Pencil, Trash2, Plane, Mail, Search, Eye, DollarSign,
   CalendarIcon, MapPin, Users, AlertTriangle, Clock, CheckCircle2, XCircle,
-  Ticket, Hotel, Stamp, Package,
+  Ticket, Hotel, Stamp, Package, Filter, FileText,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { emailApi } from "@/lib/emailApi";
-import { bookingApi, type Booking, type BookingStatus, type BookingType } from "@/lib/api";
+import { bookingApi, quotationApi, type Booking, type BookingStatus, type BookingType, type Quotation } from "@/lib/api";
 import { sendBookingSms } from "@/lib/smsAutomation";
 import EmptyState from "@/components/EmptyState";
 import LoadingState from "@/components/LoadingState";
