@@ -1,7 +1,9 @@
-import { LayoutDashboard, Users, Settings, Building2, LogOut, UserCheck, UserCog, Store, Target, ListTodo, Plane, Receipt, Wallet, Crown, Shield, BarChart3, Moon, Globe, Lock } from "lucide-react";
+import { LayoutDashboard, Users, Settings, Building2, LogOut, UserCheck, UserCog, Store, Target, ListTodo, Plane, Receipt, Wallet, Crown, Shield, BarChart3, Moon, Globe, Lock, UserCog2 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { usePlanAccess } from "@/hooks/usePlanAccess";
+import { getRoleMeta } from "@/lib/permissions";
 import {
   Sidebar,
   SidebarContent,
@@ -15,69 +17,70 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import type { PlanType } from "@/lib/plans";
+import type { Module } from "@/lib/permissions";
 
 interface MenuItem {
   title: string;
   url: string;
   icon: any;
-  requiredFeature?: string; // maps to PlanConfig key
+  module: Module;
+  requiredFeature?: string;
   minPlan?: PlanType;
 }
 
 const mainItems: MenuItem[] = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, module: "dashboard" },
 ];
 
 const crmItems: MenuItem[] = [
-  { title: "Clients", url: "/clients", icon: UserCheck },
-  { title: "Agents", url: "/agents", icon: UserCog },
-  { title: "Vendors", url: "/vendors", icon: Store },
-  { title: "Leads", url: "/leads", icon: Target },
-  { title: "Tasks", url: "/tasks", icon: ListTodo },
-  { title: "Bookings", url: "/bookings", icon: Plane },
-  { title: "Invoices", url: "/invoices", icon: Receipt },
-  { title: "Accounts", url: "/accounts", icon: Wallet, requiredFeature: "hasEmailNotifications", minPlan: "basic" },
-  { title: "Reports", url: "/reports", icon: BarChart3, requiredFeature: "hasAdvancedAnalytics", minPlan: "business" },
-  { title: "Hajj/Umrah", url: "/hajj-umrah", icon: Moon },
+  { title: "Clients", url: "/clients", icon: UserCheck, module: "clients" },
+  { title: "Agents", url: "/agents", icon: UserCog, module: "agents" },
+  { title: "Vendors", url: "/vendors", icon: Store, module: "vendors" },
+  { title: "Leads", url: "/leads", icon: Target, module: "leads" },
+  { title: "Tasks", url: "/tasks", icon: ListTodo, module: "tasks" },
+  { title: "Bookings", url: "/bookings", icon: Plane, module: "bookings" },
+  { title: "Invoices", url: "/invoices", icon: Receipt, module: "invoices" },
+  { title: "Accounts", url: "/accounts", icon: Wallet, module: "accounts", requiredFeature: "hasEmailNotifications", minPlan: "basic" },
+  { title: "Reports", url: "/reports", icon: BarChart3, module: "reports", requiredFeature: "hasAdvancedAnalytics", minPlan: "business" },
+  { title: "Hajj/Umrah", url: "/hajj-umrah", icon: Moon, module: "hajj_umrah" },
 ];
 
 const managementItems: MenuItem[] = [
-  { title: "Team", url: "/team", icon: Users },
-  { title: "Organization", url: "/organization", icon: Building2 },
-  { title: "Website", url: "/website", icon: Globe, requiredFeature: "hasWebsiteTemplates", minPlan: "pro" },
-  { title: "Subscription", url: "/subscription", icon: Crown },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Team", url: "/team", icon: Users, module: "team" },
+  { title: "Roles", url: "/roles", icon: UserCog2, module: "team" },
+  { title: "Organization", url: "/organization", icon: Building2, module: "organization" },
+  { title: "Website", url: "/website", icon: Globe, module: "website", requiredFeature: "hasWebsiteTemplates", minPlan: "pro" },
+  { title: "Subscription", url: "/subscription", icon: Crown, module: "subscription" },
+  { title: "Settings", url: "/settings", icon: Settings, module: "settings" },
 ];
 
 const planOrder: PlanType[] = ["free", "basic", "pro", "business", "enterprise"];
 
-function isFeatureAvailable(requiredFeature: string | undefined, minPlan: PlanType | undefined, currentPlan: PlanType): boolean {
-  if (!requiredFeature && !minPlan) return true;
-  if (minPlan) {
-    const currentIdx = planOrder.indexOf(currentPlan);
-    const requiredIdx = planOrder.indexOf(minPlan);
-    return currentIdx >= requiredIdx;
-  }
-  return true;
-}
-
-function getMinPlanName(minPlan?: PlanType): string {
-  if (!minPlan) return "a higher";
-  return minPlan.charAt(0).toUpperCase() + minPlan.slice(1);
+function isPlanSufficient(minPlan: PlanType | undefined, currentPlan: PlanType): boolean {
+  if (!minPlan) return true;
+  return planOrder.indexOf(currentPlan) >= planOrder.indexOf(minPlan);
 }
 
 function NavGroup({ label, items, collapsed, currentPlan }: { label: string; items: MenuItem[]; collapsed: boolean; currentPlan: PlanType }) {
+  const { canAccess } = usePermissions();
+
+  // Filter items by permission first
+  const visibleItems = items.filter((item) => canAccess(item.module));
+
+  if (visibleItems.length === 0) return null;
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{!collapsed ? label : ""}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => {
-            const available = isFeatureAvailable(item.requiredFeature, item.minPlan, currentPlan);
+          {visibleItems.map((item) => {
+            const planOk = isPlanSufficient(item.minPlan, currentPlan);
 
-            if (!available) {
+            if (!planOk) {
               return (
                 <SidebarMenuItem key={item.title}>
                   <TooltipProvider>
@@ -94,7 +97,7 @@ function NavGroup({ label, items, collapsed, currentPlan }: { label: string; ite
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="right">
-                        <p>Upgrade to {getMinPlanName(item.minPlan)} plan to unlock</p>
+                        <p>Upgrade to {item.minPlan?.charAt(0).toUpperCase()}{item.minPlan?.slice(1)} plan</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -127,7 +130,9 @@ function NavGroup({ label, items, collapsed, currentPlan }: { label: string; ite
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const { user, logout, currentPlan } = useAuth();
+  const { user, logout, currentPlan, appRole } = useAuth();
+  const { canAccessAdmin } = usePermissions();
+  const roleMeta = getRoleMeta(appRole);
 
   return (
     <Sidebar collapsible="icon">
@@ -138,7 +143,7 @@ export function AppSidebar() {
         <NavGroup label="Overview" items={mainItems} collapsed={collapsed} currentPlan={currentPlan} />
         <NavGroup label="CRM" items={crmItems} collapsed={collapsed} currentPlan={currentPlan} />
         <NavGroup label="Management" items={managementItems} collapsed={collapsed} currentPlan={currentPlan} />
-        {user?.role === "owner" && (
+        {canAccessAdmin && (
           <SidebarGroup>
             <SidebarGroupLabel>{!collapsed ? "Admin" : ""}</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -158,9 +163,14 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         {!collapsed && user && (
-          <div className="px-3 pb-1">
+          <div className="px-3 pb-1 space-y-1">
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-            <p className="text-xs text-primary capitalize">{currentPlan} Plan</p>
+            <div className="flex items-center gap-1.5">
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize">{currentPlan}</Badge>
+              <span className={`inline-flex items-center rounded-full px-1.5 py-0 text-[10px] font-medium ${roleMeta.color}`}>
+                {roleMeta.label}
+              </span>
+            </div>
           </div>
         )}
         <Button variant="ghost" size="sm" className="w-full justify-start" onClick={logout}>
