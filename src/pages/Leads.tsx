@@ -41,6 +41,8 @@ const LEAD_STATUSES: { value: LeadStatus; label: string; color: string }[] = [
 
 const getStatusMeta = (status: LeadStatus) => LEAD_STATUSES.find((s) => s.value === status) || LEAD_STATUSES[0];
 
+const LEAD_SOURCES = ["Facebook", "Google", "Referral", "Walk-in", "Phone", "Website", "WhatsApp", "Agent"];
+
 const emptyForm = {
   name: "", phone: "", email: "", status: "new" as LeadStatus,
   source: "", destination: "", travelDateFrom: "", travelDateTo: "",
