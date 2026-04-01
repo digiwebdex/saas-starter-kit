@@ -93,7 +93,11 @@ const Leads = () => {
         l.phone?.includes(search) ||
         l.destination?.toLowerCase().includes(search.toLowerCase());
       const matchStatus = statusFilter === "all" || l.status === statusFilter;
-      return matchSearch && matchStatus;
+      const matchSource = sourceFilter === "all" || (l.source || "").toLowerCase() === sourceFilter.toLowerCase();
+      const matchDest = !destinationFilter || (l.destination || "").toLowerCase().includes(destinationFilter.toLowerCase());
+      const matchDateFrom = !dateFrom || new Date(l.createdAt) >= dateFrom;
+      const matchDateTo = !dateTo || new Date(l.createdAt) <= dateTo;
+      return matchSearch && matchStatus && matchSource && matchDest && matchDateFrom && matchDateTo;
     });
     result.sort((a, b) => {
       let cmp = 0;
@@ -103,7 +107,21 @@ const Leads = () => {
       return sortDir === "desc" ? -cmp : cmp;
     });
     return result;
-  }, [leads, search, statusFilter, sortField, sortDir]);
+  }, [leads, search, statusFilter, sourceFilter, destinationFilter, dateFrom, dateTo, sortField, sortDir]);
+
+  const uniqueSources = useMemo(() => {
+    const sources = new Set(leads.map((l) => l.source).filter(Boolean));
+    return Array.from(sources) as string[];
+  }, [leads]);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (sourceFilter !== "all") count++;
+    if (destinationFilter) count++;
+    if (dateFrom) count++;
+    if (dateTo) count++;
+    return count;
+  }, [sourceFilter, destinationFilter, dateFrom, dateTo]);
 
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = { all: leads.length };
