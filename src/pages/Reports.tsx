@@ -636,6 +636,107 @@ const Reports = () => {
             </Card>
           </TabsContent>
 
+          {/* ═══ DUE PAYMENTS TAB ═══ */}
+          <TabsContent value="due" className="space-y-4">
+            {(() => {
+              const totalDue = mockDuePayments.reduce((s, p) => s + p.due, 0);
+              const overdue = mockDuePayments.filter((p) => p.status === "overdue");
+              const totalOverdue = overdue.reduce((s, p) => s + p.due, 0);
+              return (
+                <>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <StatCard title="Total Outstanding" value={`৳${totalDue.toLocaleString()}`} icon={DollarSign} variant="danger" />
+                    <StatCard title="Overdue Amount" value={`৳${totalOverdue.toLocaleString()}`} icon={TrendingDown} variant="danger" />
+                    <StatCard title="Overdue Invoices" value={overdue.length.toString()} icon={Users} variant="danger" />
+                  </div>
+                  <Card>
+                    <CardHeader><CardTitle className="text-base">Outstanding Payments</CardTitle></CardHeader>
+                    <CardContent>
+                      <Table>
+                        <TableHeader><TableRow><TableHead>Invoice</TableHead><TableHead>Client</TableHead><TableHead className="text-right">Total</TableHead><TableHead className="text-right">Paid</TableHead><TableHead className="text-right">Due</TableHead><TableHead>Due Date</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                        <TableBody>
+                          {mockDuePayments.map((p) => (
+                            <TableRow key={p.invoiceId}>
+                              <TableCell className="font-mono text-sm">{p.invoiceId}</TableCell>
+                              <TableCell className="font-medium">{p.clientName}</TableCell>
+                              <TableCell className="text-right">৳{p.amount.toLocaleString()}</TableCell>
+                              <TableCell className="text-right text-green-600">৳{p.paid.toLocaleString()}</TableCell>
+                              <TableCell className="text-right font-semibold text-destructive">৳{p.due.toLocaleString()}</TableCell>
+                              <TableCell className="text-muted-foreground">{p.dueDate}</TableCell>
+                              <TableCell>
+                                <Badge variant={p.status === "overdue" ? "destructive" : "secondary"}>{p.status === "overdue" ? "Overdue" : "Upcoming"}</Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
+                </>
+              );
+            })()}
+          </TabsContent>
+
+          {/* ═══ STAFF PERFORMANCE TAB ═══ */}
+          <TabsContent value="staff" className="space-y-4">
+            {(() => {
+              const staffPerf = agents.map((a) => {
+                const agentBookings = mockBookings.filter((b) => b.agentId === a.id);
+                const agentLeads = mockLeads.filter((l) => l.assignedTo === a.name);
+                const wonLeads = agentLeads.filter((l) => l.status === "won").length;
+                return {
+                  name: a.name,
+                  bookings: agentBookings.length,
+                  revenue: agentBookings.reduce((s, b) => s + b.amount, 0),
+                  profit: agentBookings.reduce((s, b) => s + b.profit, 0),
+                  totalLeads: agentLeads.length,
+                  wonLeads,
+                  conversionRate: agentLeads.length > 0 ? ((wonLeads / agentLeads.length) * 100).toFixed(1) : "0",
+                };
+              });
+              return (
+                <>
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <Card>
+                      <CardHeader><CardTitle className="text-base">Staff Revenue Comparison</CardTitle></CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={280}>
+                          <BarChart data={staffPerf}>
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                            <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                            <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} tickFormatter={(v) => `৳${(v/1000).toFixed(0)}k`} />
+                            <Tooltip formatter={(v: number) => `৳${v.toLocaleString()}`} />
+                            <Bar dataKey="revenue" name="Revenue" fill="hsl(var(--primary))" radius={[4,4,0,0]} />
+                            <Bar dataKey="profit" name="Profit" fill="#10b981" radius={[4,4,0,0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader><CardTitle className="text-base">Staff Performance Details</CardTitle></CardHeader>
+                      <CardContent>
+                        <Table>
+                          <TableHeader><TableRow><TableHead>Staff</TableHead><TableHead className="text-right">Bookings</TableHead><TableHead className="text-right">Revenue</TableHead><TableHead className="text-right">Leads</TableHead><TableHead className="text-right">Conversion</TableHead></TableRow></TableHeader>
+                          <TableBody>
+                            {staffPerf.map((s) => (
+                              <TableRow key={s.name}>
+                                <TableCell className="font-medium">{s.name}</TableCell>
+                                <TableCell className="text-right">{s.bookings}</TableCell>
+                                <TableCell className="text-right font-semibold">৳{s.revenue.toLocaleString()}</TableCell>
+                                <TableCell className="text-right">{s.totalLeads} ({s.wonLeads} won)</TableCell>
+                                <TableCell className="text-right"><Badge variant={parseFloat(s.conversionRate) > 40 ? "default" : "secondary"}>{s.conversionRate}%</Badge></TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </>
+              );
+            })()}
+          </TabsContent>
+
           {/* ═══ COMMISSION TAB ═══ */}
           <TabsContent value="commission" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
