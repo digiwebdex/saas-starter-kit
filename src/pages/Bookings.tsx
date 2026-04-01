@@ -145,9 +145,20 @@ const Bookings = () => {
         b.clientId?.toLowerCase().includes(search.toLowerCase());
       const matchStatus = statusFilter === "all" || b.status === statusFilter;
       const matchPayment = paymentFilter === "all" || b.paymentStatus === paymentFilter;
-      return matchSearch && matchStatus && matchPayment;
+      const matchDest = !destinationFilter || (b.destination || "").toLowerCase().includes(destinationFilter.toLowerCase());
+      const matchTravelFrom = !travelDateFrom || (b.travelDateFrom && new Date(b.travelDateFrom) >= travelDateFrom);
+      const matchTravelTo = !travelDateTo || (b.travelDateFrom && new Date(b.travelDateFrom) <= travelDateTo);
+      return matchSearch && matchStatus && matchPayment && matchDest && matchTravelFrom && matchTravelTo;
     });
-  }, [items, search, statusFilter, paymentFilter]);
+  }, [items, search, statusFilter, paymentFilter, destinationFilter, travelDateFrom, travelDateTo]);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (destinationFilter) count++;
+    if (travelDateFrom) count++;
+    if (travelDateTo) count++;
+    return count;
+  }, [destinationFilter, travelDateFrom, travelDateTo]);
 
   // Dashboard widgets
   const now = new Date();
