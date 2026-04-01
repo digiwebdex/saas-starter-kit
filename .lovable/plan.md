@@ -1,52 +1,97 @@
-## Accounts Module — Implementation Plan
+
+## Public Marketing Website Upgrade
 
 ### Current State
-- `accountApi` + `transactionApi` CRUD already in `api.ts`
-- `Account` / `Transaction` types exist but are minimal
-- Current `Accounts.tsx` uses **local state only** — no API calls
-- Sidebar shows Accounts locked for free plan (`minPlan: "basic"`)
-- RBAC already configured: owner/accountant = full, manager = limited, sales/ops = none
+- **`/` (Index.tsx)** — 563-line monolithic landing page with dark theme (#0a1628), hero, 8 feature cards, plan cards, comparison table, contact section, footer, and registration dialog. Good foundation but needs more depth.
+- **`/site/*`** — Tenant-facing public website (separate concern, not touched).
+- **`/site/pricing`** — Tenant-facing pricing page (separate from SaaS pricing).
+- No dedicated Features, Demo, FAQ, Privacy, or Terms pages exist.
+- Footer links to Privacy/About are dead (`href="#"`).
 
-### Changes
+### Plan
 
-#### 1. Extend API types (`src/lib/api.ts`)
-- Add `Expense` interface (category, amount, date, method, reference, note, attachmentUrl, vendorId?)
-- Add `expenseApi` CRUD
-- Add `accountsApi.getSummary()` for aggregate stats
-- Add `accountsApi.getLedger()` for unified transaction ledger with filters
-- Expand `Transaction` type to include: clientId, clientName, bookingId, bookingTitle, vendorId, vendorName, invoiceId, status, paymentMethod
+#### 1. Create shared `MarketingLayout` component
+- Reusable navbar + footer for all marketing pages
+- Dark theme consistent with current Index.tsx (#0a1628 background, cyan-400 accents)
+- Nav links: Home, Features, Pricing, Contact, Demo, Login
+- Footer: Product links, Company (About, Contact, Privacy, Terms), Support (FAQ, Demo)
+- Mobile hamburger menu
 
-#### 2. Rewrite `src/pages/Accounts.tsx`
-Complete rewrite into 7-tab operational finance page:
+#### 2. Upgrade Homepage (`/` — Index.tsx)
+- Keep existing hero, improve copy
+- Add **workflow section** showing inquiry → quotation → booking → invoice → trip flow
+- Add **testimonials** section with realistic travel agency quotes
+- Add **FAQ preview** (3-4 questions)
+- Add **pricing preview** (keep existing cards)
+- Link hero CTA to `/pricing` and `/demo`
+- Replace hardcoded contact info with proper links
+- Wrap in `MarketingLayout`
 
-**Tab 1 — Overview**: 6 summary cards (total receivable, received, payable, overdue receivable, overdue payable, cash/bank balance) + quick charts
+#### 3. Create `/features` page
+- Grouped feature sections:
+  - Leads & CRM
+  - Quotations & Itineraries
+  - Bookings & Operations
+  - Invoices & Payments
+  - Vendor Management
+  - Team & Role Management
+  - Reports & Analytics
+  - Hajj/Umrah Module
+- Each group: icon, title, description, 3-5 bullet capabilities
+- CTA at bottom
 
-**Tab 2 — Receivables**: Linked from invoices — shows all unpaid/partial invoices with client, booking, amounts, due dates. Filterable.
+#### 4. Create `/pricing` page (SaaS-level)
+- Pull from PLANS config
+- Monthly/yearly toggle
+- Plan cards with proper feature lists
+- Feature comparison table
+- Locked features callout (Accounts on Pro+, Reports on Business+)
+- Enterprise CTA
+- Registration dialog (reuse from Index.tsx)
 
-**Tab 3 — Payments Received**: All payments from invoices with client, booking, method, date, reference. Searchable.
+#### 5. Create `/demo` page (Book a Call / Request Demo)
+- Form: name, email, phone, company, team size, message
+- Sidebar with benefits/what to expect
+- Calendar placeholder (Calendly-style text)
 
-**Tab 4 — Vendor Payables**: All vendor bills with status, vendor, booking link, due dates. Links to vendor details.
+#### 6. Create `/contact` page (SaaS contact)
+- Contact form + company info
+- Support hours, email, phone
 
-**Tab 5 — Expenses**: Manual expense entry form (category, amount, date, method, reference, note, attachment). Table of expenses with filters.
+#### 7. Create `/faq` page
+- Accordion-style FAQ
+- Categories: General, Pricing, Features, Security, Support
+- 15-20 realistic questions
 
-**Tab 6 — Cash/Bank Accounts**: Manage cash and bank accounts. Show balances. Create/edit accounts dialog.
+#### 8. Create `/privacy` page
+- Standard privacy policy with travel SaaS specifics
 
-**Tab 7 — Ledger**: Unified searchable transaction log across all types. Filters: date range, client, booking, vendor, type, status, method. Export button.
+#### 9. Create `/terms` page
+- Standard terms of service
 
-#### 3. Sidebar fix (`src/components/AppSidebar.tsx`)
-- Change `requiredFeature` to something more appropriate (or remove it since `minPlan` already gates)
-
-#### 4. Locked state
-- When plan is "free", show a proper locked screen via FeatureGate with travel-specific messaging and upgrade CTA
-
-#### 5. Role gating
-- Wrap create/edit/export actions in `<PermissionGate module="accounts" action="create|edit|export">`
-- Already configured in RBAC matrix
+#### 10. Update routes in App.tsx
+- Add routes: `/features`, `/pricing`, `/demo`, `/contact-us`, `/faq`, `/privacy`, `/terms`
 
 ### Files Changed
-- `src/lib/api.ts` — extended types + new API methods
-- `src/pages/Accounts.tsx` — complete rewrite (split into sub-components)
-- `src/components/accounts/` — new folder for tab components
-- `src/components/AppSidebar.tsx` — minor sidebar fix
+- `src/components/MarketingLayout.tsx` — New shared layout
+- `src/pages/Index.tsx` — Refactored to use MarketingLayout, add sections
+- `src/pages/marketing/Features.tsx` — New
+- `src/pages/marketing/Pricing.tsx` — New  
+- `src/pages/marketing/Demo.tsx` — New
+- `src/pages/marketing/ContactUs.tsx` — New
+- `src/pages/marketing/FAQ.tsx` — New
+- `src/pages/marketing/Privacy.tsx` — New
+- `src/pages/marketing/Terms.tsx` — New
+- `src/App.tsx` — New routes
+- `index.html` — Update meta title/description
 
-### No schema migrations needed (frontend-only, API calls go to backend)
+### Design Approach
+- Reuse current dark theme: `#0a1628` bg, cyan-400 accent, gradient CTAs
+- Consistent card style: `bg-white/5 border-white/10`
+- Travel-specific language throughout
+- Mobile-first responsive
+
+### SEO
+- Unique `<title>` per page via `useEffect`
+- Semantic HTML (single H1, proper heading hierarchy)
+- Descriptive meta descriptions

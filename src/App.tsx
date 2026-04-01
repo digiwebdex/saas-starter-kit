@@ -59,6 +59,13 @@ import SiteContact from "./pages/site/SiteContact";
 import SitePricing from "./pages/site/SitePricing";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
+import Features from "./pages/marketing/Features";
+import Pricing from "./pages/marketing/Pricing";
+import Demo from "./pages/marketing/Demo";
+import ContactUs from "./pages/marketing/ContactUs";
+import FAQ from "./pages/marketing/FAQ";
+import Privacy from "./pages/marketing/Privacy";
+import Terms from "./pages/marketing/Terms";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +88,13 @@ const AppContent = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/demo" element={<Demo />} />
+              <Route path="/contact-us" element={<ContactUs />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
               <Route path="/onboarding" element={<P><Onboarding /></P>} />
 
               {/* Public website (no auth required) */}
