@@ -70,6 +70,18 @@ export interface DashboardStats {
   totalRevenue: number;
   recentBookings: Booking[];
   recentPayments: Payment[];
+  // Extended travel dashboard stats
+  activeLeads: number;
+  followUpsDueToday: number;
+  quotationsSentThisMonth: number;
+  quotationsAwaitingApproval: number;
+  confirmedBookings: number;
+  upcomingDepartures: number;
+  overdueInvoices: number;
+  overdueInvoiceAmount: number;
+  vendorDues: number;
+  salesThisMonth: number;
+  topDestinations: { destination: string; count: number }[];
 }
 
 export const dashboardApi = {
