@@ -53,15 +53,40 @@ const mockAgentCommissions = [
   { agentId: "a3", agentName: "Tanvir Islam", totalSales: 122000, commissionRate: 5, totalCommission: 6100, paidCommission: 6100, dueCommission: 0, bookingsCount: 3 },
 ];
 
-const CHART_COLORS = [
-  "hsl(var(--primary))",
-  "hsl(var(--chart-2, 160 60% 45%))",
-  "hsl(var(--chart-3, 30 80% 55%))",
-  "hsl(var(--chart-4, 280 65% 60%))",
-  "hsl(var(--chart-5, 340 75% 55%))",
+const mockLeads = [
+  { id: "l1", name: "Ahmed Khan", source: "Website", destination: "Maldives", status: "won", assignedTo: "Karim Ahmed", date: "2026-01-10" },
+  { id: "l2", name: "Sara Akter", source: "Facebook", destination: "Turkey", status: "won", assignedTo: "Nasir Hossain", date: "2026-01-15" },
+  { id: "l3", name: "Rahim Sheikh", source: "Referral", destination: "Dubai", status: "lost", assignedTo: "Karim Ahmed", date: "2026-01-20" },
+  { id: "l4", name: "Hasina Begum", source: "Website", destination: "Thailand", status: "qualified", assignedTo: "Tanvir Islam", date: "2026-02-01" },
+  { id: "l5", name: "Kamal Hasan", source: "Walk-in", destination: "Singapore", status: "won", assignedTo: "Karim Ahmed", date: "2026-02-10" },
+  { id: "l6", name: "Nadia Islam", source: "Facebook", destination: "Malaysia", status: "contacted", assignedTo: "Nasir Hossain", date: "2026-02-15" },
+  { id: "l7", name: "Tariq Rahman", source: "Website", destination: "Cox's Bazar", status: "won", assignedTo: "Tanvir Islam", date: "2026-02-25" },
+  { id: "l8", name: "Farida Noor", source: "Referral", destination: "Bali", status: "new", assignedTo: "Karim Ahmed", date: "2026-03-01" },
+  { id: "l9", name: "Imran Ali", source: "Facebook", destination: "Egypt", status: "quoted", assignedTo: "Nasir Hossain", date: "2026-03-10" },
+  { id: "l10", name: "Salma Khatun", source: "Walk-in", destination: "Nepal", status: "lost", assignedTo: "Tanvir Islam", date: "2026-03-15" },
+  { id: "l11", name: "Riyad Haque", source: "Website", destination: "Japan", status: "won", assignedTo: "Karim Ahmed", date: "2026-03-20" },
+  { id: "l12", name: "Mitu Das", source: "Referral", destination: "Vietnam", status: "qualified", assignedTo: "Nasir Hossain", date: "2026-03-25" },
 ];
 
-const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444"];
+const mockQuotations = [
+  { id: "q1", title: "Maldives Luxury Package", clientName: "Ahmed Khan", amount: 125000, status: "approved", date: "2026-01-12" },
+  { id: "q2", title: "Turkey Cultural Tour", clientName: "Sara Akter", amount: 85000, status: "approved", date: "2026-01-18" },
+  { id: "q3", title: "Dubai City Break", clientName: "Rahim Sheikh", amount: 65000, status: "rejected", date: "2026-01-25" },
+  { id: "q4", title: "Thailand Beach Holiday", clientName: "Hasina Begum", amount: 55000, status: "sent", date: "2026-02-05" },
+  { id: "q5", title: "Singapore Explorer", clientName: "Kamal Hasan", amount: 92000, status: "approved", date: "2026-02-12" },
+  { id: "q6", title: "Cox's Bazar Getaway", clientName: "Tariq Rahman", amount: 25000, status: "approved", date: "2026-02-28" },
+  { id: "q7", title: "Bali Adventure", clientName: "Farida Noor", amount: 110000, status: "draft", date: "2026-03-05" },
+  { id: "q8", title: "Egypt Heritage Tour", clientName: "Imran Ali", amount: 78000, status: "sent", date: "2026-03-12" },
+  { id: "q9", title: "Nepal Trekking", clientName: "Salma Khatun", amount: 45000, status: "expired", date: "2026-03-18" },
+  { id: "q10", title: "Japan Cherry Blossom", clientName: "Riyad Haque", amount: 185000, status: "approved", date: "2026-03-22" },
+];
+
+const mockDuePayments = [
+  { invoiceId: "INV-2026-003", clientName: "Fatima Begum", amount: 18000, paid: 10000, due: 8000, dueDate: "2026-03-15", status: "overdue" as const },
+  { invoiceId: "INV-2026-005", clientName: "Sakib Hasan", amount: 65000, paid: 30000, due: 35000, dueDate: "2026-03-20", status: "overdue" as const },
+  { invoiceId: "INV-2026-007", clientName: "Jamal Uddin", amount: 92000, paid: 50000, due: 42000, dueDate: "2026-04-05", status: "upcoming" as const },
+  { invoiceId: "INV-2026-009", clientName: "Arif Hossain", amount: 18000, paid: 0, due: 18000, dueDate: "2026-04-10", status: "upcoming" as const },
+];
 
 const clients = [...new Map(mockBookings.map((b) => [b.clientId, { id: b.clientId, name: b.clientName }])).values()];
 const agents = [...new Map(mockBookings.map((b) => [b.agentId, { id: b.agentId, name: b.agentName }])).values()];
