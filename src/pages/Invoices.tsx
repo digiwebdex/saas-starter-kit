@@ -767,9 +767,15 @@ const Invoices = () => {
                   <Input value={paymentForm.transactionRef} onChange={(e) => setPaymentForm((f) => ({ ...f, transactionRef: e.target.value }))} placeholder="e.g. TXN-12345" />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Notes</Label>
-                <Input value={paymentForm.notes} onChange={(e) => setPaymentForm((f) => ({ ...f, notes: e.target.value }))} placeholder="Optional payment notes..." />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Received By</Label>
+                  <Input value={paymentForm.receivedBy} onChange={(e) => setPaymentForm((f) => ({ ...f, receivedBy: e.target.value }))} placeholder={user?.name || "Staff name"} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Notes</Label>
+                  <Input value={paymentForm.notes} onChange={(e) => setPaymentForm((f) => ({ ...f, notes: e.target.value }))} placeholder="Optional payment notes..." />
+                </div>
               </div>
               <div className="flex gap-2">
                 <Button type="submit" className="flex-1">Record Payment</Button>
