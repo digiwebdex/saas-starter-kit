@@ -266,7 +266,7 @@ const HajjUmrah = () => {
     } else {
       try {
         const created = await hajjApi.createPackage({ ...pkgForm, profit } as any).catch(() => null);
-        const newPkg: HajjPackage = created || { ...pkgForm, profit, id: crypto.randomUUID(), enrolled: 0, tenantId: "", createdAt: new Date().toISOString().split("T")[0] } as HajjPackage;
+        const newPkg = created || { ...pkgForm, profit, id: crypto.randomUUID(), enrolled: 0, tenantId: "", createdAt: new Date().toISOString().split("T")[0], hotelClass: pkgForm.hotelClass as HajjPackage["hotelClass"] } as HajjPackage;
         setPackages((prev) => [...prev, newPkg]);
         toast({ title: "Package created" });
       } catch {}
