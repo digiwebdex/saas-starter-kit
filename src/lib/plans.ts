@@ -6,6 +6,8 @@ export type SubscriptionStatus = "trial" | "active" | "overdue" | "expired" | "s
 
 export interface PlanConfig {
   id: PlanType;
+  /** @deprecated Use monthlyPrice instead. Kept for backward compatibility. */
+  price: number;
   name: string;
   monthlyPrice: number; // BDT/month, 0 = free, -1 = custom
   yearlyPrice: number;  // BDT/year, 0 = free, -1 = custom
