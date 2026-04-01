@@ -41,6 +41,7 @@ const crmItems: MenuItem[] = [
   { title: "Vendors", url: "/vendors", icon: Store, module: "vendors" },
   { title: "Leads", url: "/leads", icon: Target, module: "leads" },
   { title: "Tasks", url: "/tasks", icon: ListTodo, module: "tasks" },
+  { title: "Quotations", url: "/quotations", icon: FileText, module: "quotations" },
   { title: "Bookings", url: "/bookings", icon: Plane, module: "bookings" },
   { title: "Invoices", url: "/invoices", icon: Receipt, module: "invoices" },
   { title: "Accounts", url: "/accounts", icon: Wallet, module: "accounts", requiredFeature: "hasEmailNotifications", minPlan: "basic" },
