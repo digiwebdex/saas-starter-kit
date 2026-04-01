@@ -80,7 +80,17 @@ export const dashboardApi = {
 export const clientApi = createCrudApi<Client>("clients");
 export const agentApi = createCrudApi<Agent>("agents");
 export const vendorApi = createCrudApi<Vendor>("vendors");
-export const leadApi = createCrudApi<Lead>("leads");
+export const leadApi = {
+  ...createCrudApi<Lead>("leads"),
+  updateStatus: (id: string, status: string) =>
+    request<Lead>(`/leads/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  getActivities: (id: string) =>
+    request<LeadActivity[]>(`/leads/${id}/activities`),
+  addActivity: (id: string, data: { type: string; content: string }) =>
+    request<LeadActivity>(`/leads/${id}/activities`, { method: "POST", body: JSON.stringify(data) }),
+  convertToClient: (id: string) =>
+    request<Client>(`/leads/${id}/convert`, { method: "POST" }),
+};
 export const taskApi = createCrudApi<Task>("tasks");
 export const bookingApi = createCrudApi<Booking>("bookings");
 export const invoiceApi = createCrudApi<Invoice>("invoices");
