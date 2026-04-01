@@ -55,14 +55,14 @@ export default function LeadsQuotationReport({ leads, quotations }: Props) {
     const approved = quotations.filter((q) => q.status === "approved").length;
     const rejected = quotations.filter((q) => q.status === "rejected").length;
     const sent = quotations.filter((q) => q.status === "sent").length;
-    const totalValue = quotations.reduce((s, q) => s + q.totalAmount, 0);
-    const approvedValue = quotations.filter((q) => q.status === "approved").reduce((s, q) => s + q.totalAmount, 0);
+    const totalValue = quotations.reduce((s, q) => s + q.grandTotal, 0);
+    const approvedValue = quotations.filter((q) => q.status === "approved").reduce((s, q) => s + q.grandTotal, 0);
     const convRate = total > 0 ? ((approved / total) * 100).toFixed(1) : "0";
 
     const byStatus = ["draft", "sent", "approved", "rejected", "expired"].map((s) => ({
       name: s.charAt(0).toUpperCase() + s.slice(1),
       count: quotations.filter((q) => q.status === s).length,
-      value: quotations.filter((q) => q.status === s).reduce((sum, q) => sum + q.totalAmount, 0),
+      value: quotations.filter((q) => q.status === s).reduce((sum, q) => sum + q.grandTotal, 0),
     })).filter((s) => s.count > 0);
 
     return { total, approved, rejected, sent, totalValue, approvedValue, convRate, byStatus };
