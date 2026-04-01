@@ -135,6 +135,32 @@ const Bookings = () => {
     });
   };
 
+  // Fetch approved quotations for "Create from Quotation" flow
+  const handleOpenQuotationDialog = async () => {
+    setQuotationDialogOpen(true);
+    setLoadingQuotations(true);
+    try {
+      const all = await quotationApi.list();
+      setApprovedQuotations((all as Quotation[]).filter((q) => q.status === "approved"));
+    } catch {
+      setApprovedQuotations([]);
+    } finally {
+      setLoadingQuotations(false);
+    }
+  };
+
+  const handleConvertQuotation = async (quotation: Quotation) => {
+    try {
+      const booking = await quotationApi.convertToBooking(quotation.id);
+      setItems((prev) => [booking, ...prev]);
+      setQuotationDialogOpen(false);
+      toast({ title: "Booking created from quotation", description: `${quotation.title || quotation.destination} converted successfully.` });
+      navigate(`/bookings/${booking.id}`);
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Conversion failed", description: err.message });
+    }
+  };
+
   // Filters
   const filtered = useMemo(() => {
     return items.filter((b) => {
