@@ -641,3 +641,154 @@ export interface Quotation {
   createdAt: string;
   updatedAt?: string;
 }
+
+// ── Hajj/Umrah Types ──
+export type HajjPackageType = "hajj" | "umrah";
+export type HajjPackageStatus = "upcoming" | "active" | "departed" | "completed" | "closed";
+export type HajjPilgrimStatus = "registered" | "documents_pending" | "visa_processing" | "confirmed" | "departed" | "completed" | "cancelled";
+export type HajjVisaStatus = "not_started" | "documents_collected" | "submitted" | "approved" | "rejected";
+export type HajjRoomType = "single" | "double" | "triple" | "quad" | "sharing";
+
+export interface HajjPackage {
+  id: string;
+  name: string;
+  type: HajjPackageType;
+  status: HajjPackageStatus;
+  // Duration & stays
+  duration: string;
+  makkahNights: number;
+  madinahNights: number;
+  // Accommodation
+  makkahHotel?: string;
+  madinahHotel?: string;
+  hotelClass: "economy" | "3_star" | "4_star" | "5_star" | "shifting";
+  // Inclusions
+  flightInfo?: string;
+  visaIncluded: boolean;
+  transportIncluded: boolean;
+  mealsIncluded: boolean;
+  ziyaratIncluded: boolean;
+  // Pricing
+  packagePrice: number;
+  costPrice: number;
+  profit: number;
+  // Capacity
+  capacity: number;
+  enrolled: number;
+  // Dates
+  departureDate?: string;
+  returnDate?: string;
+  // Misc
+  highlights?: string;
+  notes?: string;
+  tenantId: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface HajjGroup {
+  id: string;
+  packageId: string;
+  name: string;
+  leader: string;
+  leaderPhone?: string;
+  departureDate: string;
+  returnDate: string;
+  flightDetails?: string;
+  transportSchedule?: string;
+  notes?: string;
+  tenantId: string;
+  createdAt: string;
+}
+
+export interface HajjPilgrim {
+  id: string;
+  packageId: string;
+  groupId: string;
+  clientId?: string;
+  // Personal
+  name: string;
+  phone: string;
+  email?: string;
+  dateOfBirth?: string;
+  gender?: "male" | "female";
+  // Documents
+  passportNumber: string;
+  passportExpiry?: string;
+  nidNumber?: string;
+  nationality?: string;
+  // Mahram
+  mahramName?: string;
+  mahramRelation?: string;
+  mahramPilgrimId?: string;
+  // Room
+  roomType?: HajjRoomType;
+  roomNumber?: string;
+  roomPartners?: string;
+  // Status
+  status: HajjPilgrimStatus;
+  visaStatus: HajjVisaStatus;
+  departureStatus?: "not_departed" | "departed" | "returned";
+  // Financial
+  totalAmount: number;
+  paidAmount: number;
+  dueAmount: number;
+  paymentStatus: "unpaid" | "partial" | "paid";
+  // Emergency
+  emergencyContact?: string;
+  emergencyPhone?: string;
+  medicalNotes?: string;
+  notes?: string;
+  tenantId: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface HajjPilgrimPayment {
+  id: string;
+  pilgrimId: string;
+  amount: number;
+  method: "cash" | "bank" | "bkash" | "nagad" | "card";
+  reference?: string;
+  date: string;
+  note?: string;
+  installmentLabel?: string;
+  receivedBy?: string;
+  createdAt: string;
+}
+
+// ── Hajj/Umrah API ──
+export const hajjApi = {
+  // Packages
+  listPackages: () => request<HajjPackage[]>("/hajj/packages"),
+  getPackage: (id: string) => request<HajjPackage>(`/hajj/packages/${id}`),
+  createPackage: (data: Omit<HajjPackage, "id" | "tenantId" | "createdAt" | "enrolled">) =>
+    request<HajjPackage>("/hajj/packages", { method: "POST", body: JSON.stringify(data) }),
+  updatePackage: (id: string, data: Partial<HajjPackage>) =>
+    request<HajjPackage>(`/hajj/packages/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  deletePackage: (id: string) =>
+    request<void>(`/hajj/packages/${id}`, { method: "DELETE" }),
+  // Groups
+  listGroups: (packageId?: string) =>
+    request<HajjGroup[]>(packageId ? `/hajj/groups?packageId=${packageId}` : "/hajj/groups"),
+  createGroup: (data: Omit<HajjGroup, "id" | "tenantId" | "createdAt">) =>
+    request<HajjGroup>("/hajj/groups", { method: "POST", body: JSON.stringify(data) }),
+  updateGroup: (id: string, data: Partial<HajjGroup>) =>
+    request<HajjGroup>(`/hajj/groups/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteGroup: (id: string) =>
+    request<void>(`/hajj/groups/${id}`, { method: "DELETE" }),
+  // Pilgrims
+  listPilgrims: (packageId?: string) =>
+    request<HajjPilgrim[]>(packageId ? `/hajj/pilgrims?packageId=${packageId}` : "/hajj/pilgrims"),
+  createPilgrim: (data: Omit<HajjPilgrim, "id" | "tenantId" | "createdAt">) =>
+    request<HajjPilgrim>("/hajj/pilgrims", { method: "POST", body: JSON.stringify(data) }),
+  updatePilgrim: (id: string, data: Partial<HajjPilgrim>) =>
+    request<HajjPilgrim>(`/hajj/pilgrims/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  deletePilgrim: (id: string) =>
+    request<void>(`/hajj/pilgrims/${id}`, { method: "DELETE" }),
+  // Pilgrim Payments
+  getPilgrimPayments: (pilgrimId: string) =>
+    request<HajjPilgrimPayment[]>(`/hajj/pilgrims/${pilgrimId}/payments`),
+  addPilgrimPayment: (pilgrimId: string, data: Omit<HajjPilgrimPayment, "id" | "createdAt">) =>
+    request<HajjPilgrimPayment>(`/hajj/pilgrims/${pilgrimId}/payments`, { method: "POST", body: JSON.stringify(data) }),
+};
