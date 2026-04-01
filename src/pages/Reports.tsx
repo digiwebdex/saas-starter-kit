@@ -53,18 +53,45 @@ const mockAgentCommissions = [
   { agentId: "a3", agentName: "Tanvir Islam", totalSales: 122000, commissionRate: 5, totalCommission: 6100, paidCommission: 6100, dueCommission: 0, bookingsCount: 3 },
 ];
 
-const CHART_COLORS = [
-  "hsl(var(--primary))",
-  "hsl(var(--chart-2, 160 60% 45%))",
-  "hsl(var(--chart-3, 30 80% 55%))",
-  "hsl(var(--chart-4, 280 65% 60%))",
-  "hsl(var(--chart-5, 340 75% 55%))",
+const mockLeads = [
+  { id: "l1", name: "Ahmed Khan", source: "Website", destination: "Maldives", status: "won", assignedTo: "Karim Ahmed", date: "2026-01-10" },
+  { id: "l2", name: "Sara Akter", source: "Facebook", destination: "Turkey", status: "won", assignedTo: "Nasir Hossain", date: "2026-01-15" },
+  { id: "l3", name: "Rahim Sheikh", source: "Referral", destination: "Dubai", status: "lost", assignedTo: "Karim Ahmed", date: "2026-01-20" },
+  { id: "l4", name: "Hasina Begum", source: "Website", destination: "Thailand", status: "qualified", assignedTo: "Tanvir Islam", date: "2026-02-01" },
+  { id: "l5", name: "Kamal Hasan", source: "Walk-in", destination: "Singapore", status: "won", assignedTo: "Karim Ahmed", date: "2026-02-10" },
+  { id: "l6", name: "Nadia Islam", source: "Facebook", destination: "Malaysia", status: "contacted", assignedTo: "Nasir Hossain", date: "2026-02-15" },
+  { id: "l7", name: "Tariq Rahman", source: "Website", destination: "Cox's Bazar", status: "won", assignedTo: "Tanvir Islam", date: "2026-02-25" },
+  { id: "l8", name: "Farida Noor", source: "Referral", destination: "Bali", status: "new", assignedTo: "Karim Ahmed", date: "2026-03-01" },
+  { id: "l9", name: "Imran Ali", source: "Facebook", destination: "Egypt", status: "quoted", assignedTo: "Nasir Hossain", date: "2026-03-10" },
+  { id: "l10", name: "Salma Khatun", source: "Walk-in", destination: "Nepal", status: "lost", assignedTo: "Tanvir Islam", date: "2026-03-15" },
+  { id: "l11", name: "Riyad Haque", source: "Website", destination: "Japan", status: "won", assignedTo: "Karim Ahmed", date: "2026-03-20" },
+  { id: "l12", name: "Mitu Das", source: "Referral", destination: "Vietnam", status: "qualified", assignedTo: "Nasir Hossain", date: "2026-03-25" },
 ];
 
-const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444"];
+const mockQuotations = [
+  { id: "q1", title: "Maldives Luxury Package", clientName: "Ahmed Khan", amount: 125000, status: "approved", date: "2026-01-12" },
+  { id: "q2", title: "Turkey Cultural Tour", clientName: "Sara Akter", amount: 85000, status: "approved", date: "2026-01-18" },
+  { id: "q3", title: "Dubai City Break", clientName: "Rahim Sheikh", amount: 65000, status: "rejected", date: "2026-01-25" },
+  { id: "q4", title: "Thailand Beach Holiday", clientName: "Hasina Begum", amount: 55000, status: "sent", date: "2026-02-05" },
+  { id: "q5", title: "Singapore Explorer", clientName: "Kamal Hasan", amount: 92000, status: "approved", date: "2026-02-12" },
+  { id: "q6", title: "Cox's Bazar Getaway", clientName: "Tariq Rahman", amount: 25000, status: "approved", date: "2026-02-28" },
+  { id: "q7", title: "Bali Adventure", clientName: "Farida Noor", amount: 110000, status: "draft", date: "2026-03-05" },
+  { id: "q8", title: "Egypt Heritage Tour", clientName: "Imran Ali", amount: 78000, status: "sent", date: "2026-03-12" },
+  { id: "q9", title: "Nepal Trekking", clientName: "Salma Khatun", amount: 45000, status: "expired", date: "2026-03-18" },
+  { id: "q10", title: "Japan Cherry Blossom", clientName: "Riyad Haque", amount: 185000, status: "approved", date: "2026-03-22" },
+];
+
+const mockDuePayments = [
+  { invoiceId: "INV-2026-003", clientName: "Fatima Begum", amount: 18000, paid: 10000, due: 8000, dueDate: "2026-03-15", status: "overdue" as const },
+  { invoiceId: "INV-2026-005", clientName: "Sakib Hasan", amount: 65000, paid: 30000, due: 35000, dueDate: "2026-03-20", status: "overdue" as const },
+  { invoiceId: "INV-2026-007", clientName: "Jamal Uddin", amount: 92000, paid: 50000, due: 42000, dueDate: "2026-04-05", status: "upcoming" as const },
+  { invoiceId: "INV-2026-009", clientName: "Arif Hossain", amount: 18000, paid: 0, due: 18000, dueDate: "2026-04-10", status: "upcoming" as const },
+];
 
 const clients = [...new Map(mockBookings.map((b) => [b.clientId, { id: b.clientId, name: b.clientName }])).values()];
 const agents = [...new Map(mockBookings.map((b) => [b.agentId, { id: b.agentId, name: b.agentName }])).values()];
+
+const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444"];
 
 // ── Helper: Date Picker ──
 function DatePicker({ date, onChange, label }: { date: Date | undefined; onChange: (d: Date | undefined) => void; label: string }) {
@@ -273,10 +300,14 @@ const Reports = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="sales" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="flex w-full overflow-x-auto">
             <TabsTrigger value="sales">Sales</TabsTrigger>
+            <TabsTrigger value="leads">Leads</TabsTrigger>
+            <TabsTrigger value="quotations">Quotations</TabsTrigger>
             <TabsTrigger value="expense">Expense</TabsTrigger>
             <TabsTrigger value="profit">Profit</TabsTrigger>
+            <TabsTrigger value="due">Due Payments</TabsTrigger>
+            <TabsTrigger value="staff">Staff</TabsTrigger>
             <TabsTrigger value="commission">Commission</TabsTrigger>
           </TabsList>
 
@@ -355,6 +386,109 @@ const Reports = () => {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* ═══ LEADS TAB ═══ */}
+          <TabsContent value="leads" className="space-y-4">
+            {(() => {
+              const totalLeads = mockLeads.length;
+              const won = mockLeads.filter((l) => l.status === "won").length;
+              const lost = mockLeads.filter((l) => l.status === "lost").length;
+              const conversionRate = totalLeads > 0 ? ((won / totalLeads) * 100).toFixed(1) : "0";
+              const bySource = ["Website", "Facebook", "Referral", "Walk-in"].map((s) => ({
+                name: s,
+                total: mockLeads.filter((l) => l.source === s).length,
+                won: mockLeads.filter((l) => l.source === s && l.status === "won").length,
+              }));
+              const byStatus = ["new", "contacted", "qualified", "quoted", "won", "lost"].map((s) => ({
+                name: s.charAt(0).toUpperCase() + s.slice(1),
+                value: mockLeads.filter((l) => l.status === s).length,
+              }));
+              return (
+                <>
+                  <div className="grid gap-4 md:grid-cols-4">
+                    <StatCard title="Total Leads" value={totalLeads.toString()} icon={Users} />
+                    <StatCard title="Won" value={won.toString()} icon={TrendingUp} variant="success" />
+                    <StatCard title="Lost" value={lost.toString()} icon={TrendingDown} variant="danger" />
+                    <StatCard title="Conversion Rate" value={`${conversionRate}%`} icon={TrendingUp} trend={parseFloat(conversionRate) > 30 ? 5 : -2} variant={parseFloat(conversionRate) > 30 ? "success" : "danger"} />
+                  </div>
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <Card>
+                      <CardHeader><CardTitle className="text-base">Leads by Status</CardTitle></CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={280}>
+                          <PieChart>
+                            <Pie data={byStatus} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                              {byStatus.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+                            </Pie>
+                            <Tooltip />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader><CardTitle className="text-base">Conversion by Source</CardTitle></CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={280}>
+                          <BarChart data={bySource}>
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                            <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                            <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                            <Tooltip />
+                            <Bar dataKey="total" name="Total" fill="#3b82f6" radius={[4,4,0,0]} />
+                            <Bar dataKey="won" name="Won" fill="#10b981" radius={[4,4,0,0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </>
+              );
+            })()}
+          </TabsContent>
+
+          {/* ═══ QUOTATIONS TAB ═══ */}
+          <TabsContent value="quotations" className="space-y-4">
+            {(() => {
+              const totalQ = mockQuotations.length;
+              const approved = mockQuotations.filter((q) => q.status === "approved").length;
+              const totalValue = mockQuotations.reduce((s, q) => s + q.amount, 0);
+              const approvedValue = mockQuotations.filter((q) => q.status === "approved").reduce((s, q) => s + q.amount, 0);
+              const convRate = totalQ > 0 ? ((approved / totalQ) * 100).toFixed(1) : "0";
+              const byStatus = ["draft", "sent", "approved", "rejected", "expired"].map((s) => ({
+                name: s.charAt(0).toUpperCase() + s.slice(1),
+                count: mockQuotations.filter((q) => q.status === s).length,
+                value: mockQuotations.filter((q) => q.status === s).reduce((sum, q) => sum + q.amount, 0),
+              }));
+              return (
+                <>
+                  <div className="grid gap-4 md:grid-cols-4">
+                    <StatCard title="Total Quotations" value={totalQ.toString()} icon={DollarSign} />
+                    <StatCard title="Approved" value={approved.toString()} icon={TrendingUp} variant="success" />
+                    <StatCard title="Total Value" value={`৳${totalValue.toLocaleString()}`} icon={DollarSign} />
+                    <StatCard title="Conversion Rate" value={`${convRate}%`} icon={TrendingUp} trend={parseFloat(convRate) > 40 ? 8 : -3} variant={parseFloat(convRate) > 40 ? "success" : "danger"} />
+                  </div>
+                  <Card>
+                    <CardHeader><CardTitle className="text-base">Quotation Status Breakdown</CardTitle></CardHeader>
+                    <CardContent>
+                      <Table>
+                        <TableHeader><TableRow><TableHead>Status</TableHead><TableHead className="text-right">Count</TableHead><TableHead className="text-right">Total Value</TableHead><TableHead className="text-right">% of Total</TableHead></TableRow></TableHeader>
+                        <TableBody>
+                          {byStatus.map((s) => (
+                            <TableRow key={s.name}>
+                              <TableCell><Badge variant="secondary" className="capitalize">{s.name}</Badge></TableCell>
+                              <TableCell className="text-right">{s.count}</TableCell>
+                              <TableCell className="text-right font-semibold">৳{s.value.toLocaleString()}</TableCell>
+                              <TableCell className="text-right text-muted-foreground">{totalValue > 0 ? ((s.value/totalValue)*100).toFixed(1) : 0}%</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
+                </>
+              );
+            })()}
           </TabsContent>
 
           {/* ═══ EXPENSE TAB ═══ */}
@@ -502,6 +636,107 @@ const Reports = () => {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* ═══ DUE PAYMENTS TAB ═══ */}
+          <TabsContent value="due" className="space-y-4">
+            {(() => {
+              const totalDue = mockDuePayments.reduce((s, p) => s + p.due, 0);
+              const overdue = mockDuePayments.filter((p) => p.status === "overdue");
+              const totalOverdue = overdue.reduce((s, p) => s + p.due, 0);
+              return (
+                <>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <StatCard title="Total Outstanding" value={`৳${totalDue.toLocaleString()}`} icon={DollarSign} variant="danger" />
+                    <StatCard title="Overdue Amount" value={`৳${totalOverdue.toLocaleString()}`} icon={TrendingDown} variant="danger" />
+                    <StatCard title="Overdue Invoices" value={overdue.length.toString()} icon={Users} variant="danger" />
+                  </div>
+                  <Card>
+                    <CardHeader><CardTitle className="text-base">Outstanding Payments</CardTitle></CardHeader>
+                    <CardContent>
+                      <Table>
+                        <TableHeader><TableRow><TableHead>Invoice</TableHead><TableHead>Client</TableHead><TableHead className="text-right">Total</TableHead><TableHead className="text-right">Paid</TableHead><TableHead className="text-right">Due</TableHead><TableHead>Due Date</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                        <TableBody>
+                          {mockDuePayments.map((p) => (
+                            <TableRow key={p.invoiceId}>
+                              <TableCell className="font-mono text-sm">{p.invoiceId}</TableCell>
+                              <TableCell className="font-medium">{p.clientName}</TableCell>
+                              <TableCell className="text-right">৳{p.amount.toLocaleString()}</TableCell>
+                              <TableCell className="text-right text-green-600">৳{p.paid.toLocaleString()}</TableCell>
+                              <TableCell className="text-right font-semibold text-destructive">৳{p.due.toLocaleString()}</TableCell>
+                              <TableCell className="text-muted-foreground">{p.dueDate}</TableCell>
+                              <TableCell>
+                                <Badge variant={p.status === "overdue" ? "destructive" : "secondary"}>{p.status === "overdue" ? "Overdue" : "Upcoming"}</Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
+                </>
+              );
+            })()}
+          </TabsContent>
+
+          {/* ═══ STAFF PERFORMANCE TAB ═══ */}
+          <TabsContent value="staff" className="space-y-4">
+            {(() => {
+              const staffPerf = agents.map((a) => {
+                const agentBookings = mockBookings.filter((b) => b.agentId === a.id);
+                const agentLeads = mockLeads.filter((l) => l.assignedTo === a.name);
+                const wonLeads = agentLeads.filter((l) => l.status === "won").length;
+                return {
+                  name: a.name,
+                  bookings: agentBookings.length,
+                  revenue: agentBookings.reduce((s, b) => s + b.amount, 0),
+                  profit: agentBookings.reduce((s, b) => s + b.profit, 0),
+                  totalLeads: agentLeads.length,
+                  wonLeads,
+                  conversionRate: agentLeads.length > 0 ? ((wonLeads / agentLeads.length) * 100).toFixed(1) : "0",
+                };
+              });
+              return (
+                <>
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <Card>
+                      <CardHeader><CardTitle className="text-base">Staff Revenue Comparison</CardTitle></CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={280}>
+                          <BarChart data={staffPerf}>
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                            <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                            <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} tickFormatter={(v) => `৳${(v/1000).toFixed(0)}k`} />
+                            <Tooltip formatter={(v: number) => `৳${v.toLocaleString()}`} />
+                            <Bar dataKey="revenue" name="Revenue" fill="hsl(var(--primary))" radius={[4,4,0,0]} />
+                            <Bar dataKey="profit" name="Profit" fill="#10b981" radius={[4,4,0,0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader><CardTitle className="text-base">Staff Performance Details</CardTitle></CardHeader>
+                      <CardContent>
+                        <Table>
+                          <TableHeader><TableRow><TableHead>Staff</TableHead><TableHead className="text-right">Bookings</TableHead><TableHead className="text-right">Revenue</TableHead><TableHead className="text-right">Leads</TableHead><TableHead className="text-right">Conversion</TableHead></TableRow></TableHeader>
+                          <TableBody>
+                            {staffPerf.map((s) => (
+                              <TableRow key={s.name}>
+                                <TableCell className="font-medium">{s.name}</TableCell>
+                                <TableCell className="text-right">{s.bookings}</TableCell>
+                                <TableCell className="text-right font-semibold">৳{s.revenue.toLocaleString()}</TableCell>
+                                <TableCell className="text-right">{s.totalLeads} ({s.wonLeads} won)</TableCell>
+                                <TableCell className="text-right"><Badge variant={parseFloat(s.conversionRate) > 40 ? "default" : "secondary"}>{s.conversionRate}%</Badge></TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </>
+              );
+            })()}
           </TabsContent>
 
           {/* ═══ COMMISSION TAB ═══ */}

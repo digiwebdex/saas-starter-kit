@@ -34,6 +34,7 @@ import HajjUmrah from "./pages/HajjUmrah";
 import Subscriptions from "./pages/Subscriptions";
 import PaymentCallback from "./pages/PaymentCallback";
 import RoleManagement from "./pages/RoleManagement";
+import NotificationLog from "./pages/NotificationLog";
 import Onboarding from "./pages/Onboarding";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
@@ -48,6 +49,7 @@ import AdminSmsTemplates from "./pages/admin/AdminSmsTemplates";
 import AdminSmsLogs from "./pages/admin/AdminSmsLogs";
 import AdminRoles from "./pages/admin/AdminRoles";
 import AdminAuditLog from "./pages/admin/AdminAuditLog";
+import AdminReports from "./pages/admin/AdminReports";
 import SiteHome from "./pages/site/SiteHome";
 import SiteAbout from "./pages/site/SiteAbout";
 import SitePackages from "./pages/site/SitePackages";
@@ -109,6 +111,7 @@ const AppContent = () => (
               <Route path="/subscription" element={<P><Subscriptions /></P>} />
               <Route path="/payment/callback" element={<P><PaymentCallback /></P>} />
               <Route path="/roles" element={<P><RoleManagement /></P>} />
+              <Route path="/notifications" element={<P><NotificationLog /></P>} />
               <Route path="/team" element={<P><Team /></P>} />
               <Route path="/organization" element={<P><Organization /></P>} />
               <Route path="/settings" element={<P><SettingsPage /></P>} />
@@ -128,6 +131,7 @@ const AppContent = () => (
               <Route path="/admin/sms-templates" element={<A><AdminSmsTemplates /></A>} />
               <Route path="/admin/sms-logs" element={<A><AdminSmsLogs /></A>} />
               <Route path="/admin/audit-log" element={<A><AdminAuditLog /></A>} />
+              <Route path="/admin/reports" element={<A><AdminReports /></A>} />
 
               <Route path="*" element={<NotFound />} />
         </Routes>

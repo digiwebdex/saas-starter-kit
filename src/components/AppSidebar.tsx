@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Settings, Building2, LogOut, UserCheck, UserCog, Store, Target, ListTodo, Plane, Receipt, Wallet, Crown, Shield, BarChart3, Moon, Globe, Lock, UserCog2, FileText } from "lucide-react";
+import { LayoutDashboard, Users, Settings, Building2, LogOut, UserCheck, UserCog, Store, Target, ListTodo, Plane, Receipt, Wallet, Crown, Shield, BarChart3, Moon, Globe, Lock, UserCog2, FileText, Bell } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -46,6 +46,7 @@ const crmItems: MenuItem[] = [
   { title: "Invoices", url: "/invoices", icon: Receipt, module: "invoices" },
   { title: "Accounts", url: "/accounts", icon: Wallet, module: "accounts", requiredFeature: "hasEmailNotifications", minPlan: "basic" },
   { title: "Reports", url: "/reports", icon: BarChart3, module: "reports", requiredFeature: "hasAdvancedAnalytics", minPlan: "business" },
+  { title: "Notifications", url: "/notifications", icon: Bell, module: "reports" },
   { title: "Hajj/Umrah", url: "/hajj-umrah", icon: Moon, module: "hajj_umrah" },
 ];
 
