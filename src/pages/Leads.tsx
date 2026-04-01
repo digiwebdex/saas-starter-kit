@@ -60,6 +60,11 @@ const Leads = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortField, setSortField] = useState<"name" | "createdAt" | "budget">("createdAt");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [destinationFilter, setDestinationFilter] = useState("");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [showFilters, setShowFilters] = useState(false);
   const [followUpDate, setFollowUpDate] = useState<Date | undefined>();
   const [travelFrom, setTravelFrom] = useState<Date | undefined>();
   const [travelTo, setTravelTo] = useState<Date | undefined>();
