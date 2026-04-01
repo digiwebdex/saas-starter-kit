@@ -531,6 +531,9 @@ const Invoices = () => {
                               <Button variant="ghost" size="icon" title="View Details" onClick={() => { loadInvoiceDetails(inv.id); setDetailDialogOpen(true); }}>
                                 <Eye className="h-4 w-4" />
                               </Button>
+                              <Button variant="ghost" size="icon" title="View Receipt" onClick={() => navigate(`/invoices/${inv.id}/receipt`)}>
+                                <FileText className="h-4 w-4" />
+                              </Button>
                               {inv.status !== "paid" && inv.status !== "cancelled" && inv.status !== "refunded" && (
                                 <PermissionGate module="invoices" action="edit">
                                   <Button variant="ghost" size="icon" title="Add Payment" onClick={() => { setSelectedInvoiceId(inv.id); setPayDialogOpen(true); }}>
