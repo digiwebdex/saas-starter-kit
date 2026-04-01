@@ -6,21 +6,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
-import { Plus, Pencil, Check } from "lucide-react";
+import { Plus, Pencil, Check, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { PLANS } from "@/lib/plans";
+import { PLANS, getLimitLabel } from "@/lib/plans";
 
 interface Plan {
   id: string;
   name: string;
   slug: string;
   price: number;
+  yearlyPrice: number;
+  trialDays: number;
   maxBookings: number;
   maxUsers: number;
   maxClients: number;
+  maxBranches: number;
+  maxSmsPerMonth: number;
+  maxStorageMB: number;
+  maxReports: number;
+  maxLeads: number;
+  maxQuotations: number;
   features: string;
   paymentGateways: string[];
   hasCustomDomain: boolean;
@@ -31,6 +40,8 @@ interface Plan {
   hasAdvancedAnalytics: boolean;
   hasRefundSystem: boolean;
   hasApiAccess: boolean;
+  hasHajjUmrah: boolean;
+  hasPrioritySupport: boolean;
   active: boolean;
 }
 
@@ -39,9 +50,17 @@ const defaultPlans: Plan[] = PLANS.map((p) => ({
   name: p.name,
   slug: p.id,
   price: p.price === -1 ? 5000 : p.price,
+  yearlyPrice: p.yearlyPrice === -1 ? 50000 : p.yearlyPrice,
+  trialDays: p.trialDays,
   maxBookings: p.maxBookings,
   maxUsers: p.maxUsers,
   maxClients: p.maxClients,
+  maxBranches: p.maxBranches,
+  maxSmsPerMonth: p.maxSmsPerMonth,
+  maxStorageMB: p.maxStorageMB,
+  maxReports: p.maxReports,
+  maxLeads: p.maxLeads,
+  maxQuotations: p.maxQuotations,
   features: p.features.join(", "),
   paymentGateways: p.paymentGateways,
   hasCustomDomain: p.hasCustomDomain,
@@ -52,15 +71,20 @@ const defaultPlans: Plan[] = PLANS.map((p) => ({
   hasAdvancedAnalytics: p.hasAdvancedAnalytics,
   hasRefundSystem: p.hasRefundSystem,
   hasApiAccess: p.hasApiAccess,
+  hasHajjUmrah: p.hasHajjUmrah,
+  hasPrioritySupport: p.hasPrioritySupport,
   active: true,
 }));
 
 const emptyForm: Omit<Plan, "id"> = {
-  name: "", slug: "", price: 0, maxBookings: 0, maxUsers: 0, maxClients: 0,
-  features: "", paymentGateways: ["manual"], hasCustomDomain: false,
-  hasSmsIntegration: false, hasWhatsApp: false, hasEmailNotifications: false,
-  hasAgentCommission: false, hasAdvancedAnalytics: false, hasRefundSystem: false,
-  hasApiAccess: false, active: true,
+  name: "", slug: "", price: 0, yearlyPrice: 0, trialDays: 14,
+  maxBookings: 0, maxUsers: 0, maxClients: 0, maxBranches: 1,
+  maxSmsPerMonth: 0, maxStorageMB: 100, maxReports: 0, maxLeads: 0, maxQuotations: 0,
+  features: "", paymentGateways: ["manual"],
+  hasCustomDomain: false, hasSmsIntegration: false, hasWhatsApp: false,
+  hasEmailNotifications: false, hasAgentCommission: false, hasAdvancedAnalytics: false,
+  hasRefundSystem: false, hasApiAccess: false, hasHajjUmrah: false, hasPrioritySupport: false,
+  active: true,
 };
 
 const AdminPlans = () => {
@@ -105,22 +129,25 @@ const AdminPlans = () => {
     }));
   };
 
+  const yearlySavings = form.price > 0 ? (form.price * 12) - form.yearlyPrice : 0;
+
   return (
     <AdminLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Manage Plans</h1>
-            <p className="text-muted-foreground">Configure subscription plans, pricing, and feature restrictions</p>
+            <p className="text-muted-foreground">Configure pricing, limits, and features per plan</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
               <Button><Plus className="mr-2 h-4 w-4" />Add Plan</Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
               <DialogHeader><DialogTitle>{editingId ? "Edit" : "Create"} Plan</DialogTitle></DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Basic Info */}
+                <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>Plan Name</Label>
                     <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required />
@@ -129,65 +156,95 @@ const AdminPlans = () => {
                     <Label>Slug</Label>
                     <Input value={form.slug} onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} required />
                   </div>
-                </div>
-                <div className="grid grid-cols-4 gap-4">
                   <div className="space-y-2">
-                    <Label>Price (৳/mo)</Label>
-                    <Input type="number" min={0} value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: parseFloat(e.target.value) || 0 }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Max Bookings</Label>
-                    <Input type="number" value={form.maxBookings} onChange={(e) => setForm((f) => ({ ...f, maxBookings: parseInt(e.target.value) || 0 }))} placeholder="-1 = unlimited" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Max Users</Label>
-                    <Input type="number" value={form.maxUsers} onChange={(e) => setForm((f) => ({ ...f, maxUsers: parseInt(e.target.value) || 0 }))} placeholder="-1 = unlimited" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Max Clients</Label>
-                    <Input type="number" value={form.maxClients} onChange={(e) => setForm((f) => ({ ...f, maxClients: parseInt(e.target.value) || 0 }))} placeholder="-1 = unlimited" />
+                    <Label>Trial Days</Label>
+                    <Input type="number" min={0} value={form.trialDays} onChange={(e) => setForm((f) => ({ ...f, trialDays: parseInt(e.target.value) || 0 }))} />
                   </div>
                 </div>
+
+                {/* Pricing */}
+                <div>
+                  <h4 className="text-sm font-medium mb-3 flex items-center gap-1"><DollarSign className="h-4 w-4" /> Pricing</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>Monthly (৳)</Label>
+                      <Input type="number" min={0} value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: parseFloat(e.target.value) || 0 }))} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Yearly (৳)</Label>
+                      <Input type="number" min={0} value={form.yearlyPrice} onChange={(e) => setForm((f) => ({ ...f, yearlyPrice: parseFloat(e.target.value) || 0 }))} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Yearly Savings</Label>
+                      <div className="flex h-10 items-center rounded-md border px-3 text-sm font-medium text-green-600">
+                        {yearlySavings > 0 ? `৳${yearlySavings.toLocaleString()} saved` : "—"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Limits */}
+                <div>
+                  <h4 className="text-sm font-medium mb-3">Feature Limits (-1 = unlimited)</h4>
+                  <div className="grid grid-cols-4 gap-3">
+                    {[
+                      { key: "maxClients", label: "Clients" },
+                      { key: "maxBookings", label: "Bookings" },
+                      { key: "maxUsers", label: "Users" },
+                      { key: "maxBranches", label: "Branches" },
+                      { key: "maxSmsPerMonth", label: "SMS/month" },
+                      { key: "maxStorageMB", label: "Storage (MB)" },
+                      { key: "maxReports", label: "Reports" },
+                      { key: "maxLeads", label: "Leads" },
+                      { key: "maxQuotations", label: "Quotations" },
+                    ].map(({ key, label }) => (
+                      <div key={key} className="space-y-1">
+                        <Label className="text-xs">{label}</Label>
+                        <Input type="number" value={(form as any)[key]} onChange={(e) => setForm((f) => ({ ...f, [key]: parseInt(e.target.value) || 0 }))} className="h-8 text-sm" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Features & Gateways */}
                 <div className="space-y-2">
                   <Label>Features (comma-separated)</Label>
                   <Input value={form.features} onChange={(e) => setForm((f) => ({ ...f, features: e.target.value }))} placeholder="Feature A, Feature B" />
                 </div>
 
-                {/* Payment Gateways */}
                 <div className="space-y-2">
                   <Label>Payment Gateways</Label>
                   <div className="flex flex-wrap gap-4">
                     {["manual", "sslcommerz", "bkash", "custom"].map((gw) => (
                       <div key={gw} className="flex items-center gap-2">
-                        <Checkbox
-                          checked={form.paymentGateways.includes(gw)}
-                          onCheckedChange={() => toggleGateway(gw)}
-                        />
+                        <Checkbox checked={form.paymentGateways.includes(gw)} onCheckedChange={() => toggleGateway(gw)} />
                         <Label className="text-sm capitalize">{gw}</Label>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Feature Toggles */}
                 <div className="space-y-2">
                   <Label>Feature Access</Label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
                     {[
                       { key: "hasCustomDomain", label: "Custom Domain" },
-                      { key: "hasEmailNotifications", label: "Email Notifications" },
-                      { key: "hasSmsIntegration", label: "SMS Integration" },
+                      { key: "hasEmailNotifications", label: "Email" },
+                      { key: "hasSmsIntegration", label: "SMS" },
                       { key: "hasWhatsApp", label: "WhatsApp" },
                       { key: "hasAgentCommission", label: "Agent Commission" },
-                      { key: "hasAdvancedAnalytics", label: "Advanced Analytics" },
+                      { key: "hasAdvancedAnalytics", label: "Analytics" },
                       { key: "hasRefundSystem", label: "Refund System" },
                       { key: "hasApiAccess", label: "API Access" },
+                      { key: "hasHajjUmrah", label: "Hajj & Umrah" },
+                      { key: "hasPrioritySupport", label: "Priority Support" },
                     ].map(({ key, label }) => (
                       <div key={key} className="flex items-center gap-2">
-                        <Switch
-                          checked={form[key as keyof typeof form] as boolean}
-                          onCheckedChange={(v) => setForm((f) => ({ ...f, [key]: v }))}
-                        />
+                        <Switch checked={form[key as keyof typeof form] as boolean} onCheckedChange={(v) => setForm((f) => ({ ...f, [key]: v }))} />
                         <Label className="text-sm">{label}</Label>
                       </div>
                     ))}
@@ -215,11 +272,13 @@ const AdminPlans = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead className="text-right">Price (৳)</TableHead>
-                    <TableHead className="text-center">Bookings</TableHead>
+                    <TableHead className="text-right">Monthly</TableHead>
+                    <TableHead className="text-right">Yearly</TableHead>
+                    <TableHead className="text-center">Trial</TableHead>
                     <TableHead className="text-center">Users</TableHead>
-                    <TableHead className="text-center">Clients</TableHead>
-                    <TableHead>Gateways</TableHead>
+                    <TableHead className="text-center">Bookings</TableHead>
+                    <TableHead className="text-center">SMS</TableHead>
+                    <TableHead className="text-center">Storage</TableHead>
                     <TableHead>Features</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-[100px]">Actions</TableHead>
@@ -230,23 +289,20 @@ const AdminPlans = () => {
                     <TableRow key={p.id} className={!p.active ? "opacity-50" : ""}>
                       <TableCell className="font-medium">{p.name}</TableCell>
                       <TableCell className="text-right font-semibold">৳{p.price.toLocaleString()}</TableCell>
-                      <TableCell className="text-center">{p.maxBookings === -1 ? "∞" : p.maxBookings}</TableCell>
-                      <TableCell className="text-center">{p.maxUsers === -1 ? "∞" : p.maxUsers}</TableCell>
-                      <TableCell className="text-center">{p.maxClients === -1 ? "∞" : p.maxClients}</TableCell>
+                      <TableCell className="text-right text-sm">৳{p.yearlyPrice.toLocaleString()}/yr</TableCell>
+                      <TableCell className="text-center text-sm">{p.trialDays > 0 ? `${p.trialDays}d` : "—"}</TableCell>
+                      <TableCell className="text-center text-sm">{getLimitLabel(p.maxUsers)}</TableCell>
+                      <TableCell className="text-center text-sm">{getLimitLabel(p.maxBookings)}</TableCell>
+                      <TableCell className="text-center text-sm">{getLimitLabel(p.maxSmsPerMonth)}</TableCell>
+                      <TableCell className="text-center text-sm">{p.maxStorageMB === -1 ? "∞" : `${p.maxStorageMB} MB`}</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {p.paymentGateways.map((gw) => (
-                            <Badge key={gw} variant="outline" className="text-xs capitalize">{gw}</Badge>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {p.hasCustomDomain && <Badge variant="secondary" className="text-xs">Domain</Badge>}
-                          {p.hasSmsIntegration && <Badge variant="secondary" className="text-xs">SMS</Badge>}
-                          {p.hasWhatsApp && <Badge variant="secondary" className="text-xs">WhatsApp</Badge>}
-                          {p.hasAdvancedAnalytics && <Badge variant="secondary" className="text-xs">Analytics</Badge>}
-                          {p.hasApiAccess && <Badge variant="secondary" className="text-xs">API</Badge>}
+                          {p.hasCustomDomain && <Badge variant="secondary" className="text-[10px]">Domain</Badge>}
+                          {p.hasSmsIntegration && <Badge variant="secondary" className="text-[10px]">SMS</Badge>}
+                          {p.hasWhatsApp && <Badge variant="secondary" className="text-[10px]">WA</Badge>}
+                          {p.hasAdvancedAnalytics && <Badge variant="secondary" className="text-[10px]">Analytics</Badge>}
+                          {p.hasApiAccess && <Badge variant="secondary" className="text-[10px]">API</Badge>}
+                          {p.hasHajjUmrah && <Badge variant="secondary" className="text-[10px]">Hajj</Badge>}
                         </div>
                       </TableCell>
                       <TableCell>

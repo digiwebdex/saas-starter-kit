@@ -1,9 +1,8 @@
 import { useMemo } from "react";
-import { getPlan, type PlanType, type PlanConfig } from "@/lib/plans";
+import { getPlan, type PlanType, type PlanConfig, type BillingCycle, getPlanPrice, checkUsage, type TenantSubscription, type UsageCheck } from "@/lib/plans";
 
 /**
  * Hook to check feature access based on the current tenant's plan.
- * In production, `currentPlan` should come from auth context / API.
  */
 export function usePlanAccess(currentPlan: PlanType = "free") {
   const plan: PlanConfig = useMemo(() => getPlan(currentPlan), [currentPlan]);
@@ -13,10 +12,20 @@ export function usePlanAccess(currentPlan: PlanType = "free") {
     planId: plan.id,
     planName: plan.name,
 
+    // Prices
+    monthlyPrice: plan.monthlyPrice,
+    yearlyPrice: plan.yearlyPrice,
+    trialDays: plan.trialDays,
+
     // Limits
     maxClients: plan.maxClients,
     maxBookings: plan.maxBookings,
     maxUsers: plan.maxUsers,
+    maxDomains: plan.maxDomains,
+    maxBranches: plan.maxBranches,
+    maxSmsPerMonth: plan.maxSmsPerMonth,
+    maxStorageMB: plan.maxStorageMB,
+    maxReports: plan.maxReports,
     isUnlimitedClients: plan.maxClients === -1,
     isUnlimitedBookings: plan.maxBookings === -1,
 
@@ -35,6 +44,8 @@ export function usePlanAccess(currentPlan: PlanType = "free") {
     canUseMarketingTools: plan.hasMarketingTools,
     canUseApi: plan.hasApiAccess,
     canUseRefund: plan.hasRefundSystem,
+    canUseHajjUmrah: plan.hasHajjUmrah,
+    hasPrioritySupport: plan.hasPrioritySupport,
 
     // Helpers
     hasFeature: (feature: keyof PlanConfig) => !!plan[feature],
