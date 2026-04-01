@@ -24,9 +24,11 @@ import { emailApi } from "@/lib/emailApi";
 import PaymentGatewayDialog from "@/components/PaymentGatewayDialog";
 import { sendPaymentSms } from "@/lib/smsAutomation";
 import {
-  invoiceApi, paymentApi, type Invoice, type Payment, type InvoiceStatus,
-  type PaymentMethod, type InvoiceRefund, type InvoiceAuditEvent,
+  invoiceApi, paymentApi, bookingApi, type Invoice, type Payment, type InvoiceStatus,
+  type PaymentMethod, type InvoiceRefund, type InvoiceAuditEvent, type Booking,
 } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import EmptyState from "@/components/EmptyState";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
