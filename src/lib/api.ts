@@ -95,7 +95,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: "owner" | "admin" | "member";
+  role: "super_admin" | "tenant_owner" | "manager" | "sales_agent" | "accountant" | "operations" | "owner" | "admin" | "member";
   tenantId: string;
   createdAt: string;
 }

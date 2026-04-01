@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { mapLegacyRole } from "@/lib/permissions";
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -14,8 +15,8 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!user) return <Navigate to="/login" replace />;
 
-  // Only owners can access admin panel — in production, check a "superadmin" role from your backend
-  if (user.role !== "owner") {
+  const role = mapLegacyRole(user.role);
+  if (role !== "super_admin") {
     return <Navigate to="/dashboard" replace />;
   }
 
