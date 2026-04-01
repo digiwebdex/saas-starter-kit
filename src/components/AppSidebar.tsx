@@ -44,7 +44,7 @@ const crmItems: MenuItem[] = [
   { title: "Quotations", url: "/quotations", icon: FileText, module: "quotations" },
   { title: "Bookings", url: "/bookings", icon: Plane, module: "bookings" },
   { title: "Invoices", url: "/invoices", icon: Receipt, module: "invoices" },
-  { title: "Accounts", url: "/accounts", icon: Wallet, module: "accounts", requiredFeature: "hasEmailNotifications", minPlan: "basic" },
+  { title: "Accounts", url: "/accounts", icon: Wallet, module: "accounts", minPlan: "basic" },
   { title: "Reports", url: "/reports", icon: BarChart3, module: "reports", requiredFeature: "hasAdvancedAnalytics", minPlan: "business" },
   { title: "Notifications", url: "/notifications", icon: Bell, module: "reports" },
   { title: "Hajj/Umrah", url: "/hajj-umrah", icon: Moon, module: "hajj_umrah" },

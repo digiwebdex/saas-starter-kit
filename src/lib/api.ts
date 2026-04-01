@@ -187,8 +187,21 @@ export const invoiceApi = {
     }).then((r) => r.json()),
 };
 export const paymentApi = createCrudApi<Payment>("payments");
-export const accountApi = createCrudApi<Account>("accounts");
+export const accountApi = {
+  ...createCrudApi<Account>("accounts"),
+  getSummary: () => request<AccountsSummary>("/accounts/summary"),
+  getLedger: (params?: Record<string, string>) => {
+    const query = params ? "?" + new URLSearchParams(params).toString() : "";
+    return request<Transaction[]>(`/accounts/ledger${query}`);
+  },
+  getProfitability: () => request<BookingProfitability[]>("/accounts/profitability"),
+};
 export const transactionApi = createCrudApi<Transaction>("transactions");
+export const expenseApi = {
+  ...createCrudApi<Expense>("expenses"),
+  approve: (id: string) => request<Expense>(`/expenses/${id}/approve`, { method: "POST" }),
+  reject: (id: string, reason: string) => request<Expense>(`/expenses/${id}/reject`, { method: "POST", body: JSON.stringify({ reason }) }),
+};
 export const subscriptionApi = createCrudApi<Subscription>("subscriptions");
 export const paymentRequestApi = createCrudApi<PaymentRequest>("payment-requests");
 
