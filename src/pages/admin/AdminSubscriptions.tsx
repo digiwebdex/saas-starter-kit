@@ -306,7 +306,7 @@ const AdminSubscriptions = () => {
                           <div>{sub.startDate}</div>
                           <div className="flex items-center gap-1">
                             {sub.endDate || "—"}
-                            {expiringSoon && <AlertTriangle className="h-3 w-3 text-yellow-500" title={`${days}d left`} />}
+                            {expiringSoon && <AlertTriangle className="h-3 w-3 text-yellow-500" />}
                           </div>
                           {sub.status === "trial" && sub.trialEndDate && (
                             <div className="text-blue-600 text-[10px]">Trial ends: {sub.trialEndDate}</div>
