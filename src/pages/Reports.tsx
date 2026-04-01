@@ -386,6 +386,109 @@ const Reports = () => {
             </Card>
           </TabsContent>
 
+          {/* ═══ LEADS TAB ═══ */}
+          <TabsContent value="leads" className="space-y-4">
+            {(() => {
+              const totalLeads = mockLeads.length;
+              const won = mockLeads.filter((l) => l.status === "won").length;
+              const lost = mockLeads.filter((l) => l.status === "lost").length;
+              const conversionRate = totalLeads > 0 ? ((won / totalLeads) * 100).toFixed(1) : "0";
+              const bySource = ["Website", "Facebook", "Referral", "Walk-in"].map((s) => ({
+                name: s,
+                total: mockLeads.filter((l) => l.source === s).length,
+                won: mockLeads.filter((l) => l.source === s && l.status === "won").length,
+              }));
+              const byStatus = ["new", "contacted", "qualified", "quoted", "won", "lost"].map((s) => ({
+                name: s.charAt(0).toUpperCase() + s.slice(1),
+                value: mockLeads.filter((l) => l.status === s).length,
+              }));
+              return (
+                <>
+                  <div className="grid gap-4 md:grid-cols-4">
+                    <StatCard title="Total Leads" value={totalLeads.toString()} icon={Users} />
+                    <StatCard title="Won" value={won.toString()} icon={TrendingUp} variant="success" />
+                    <StatCard title="Lost" value={lost.toString()} icon={TrendingDown} variant="danger" />
+                    <StatCard title="Conversion Rate" value={`${conversionRate}%`} icon={TrendingUp} trend={parseFloat(conversionRate) > 30 ? 5 : -2} variant={parseFloat(conversionRate) > 30 ? "success" : "danger"} />
+                  </div>
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <Card>
+                      <CardHeader><CardTitle className="text-base">Leads by Status</CardTitle></CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={280}>
+                          <PieChart>
+                            <Pie data={byStatus} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                              {byStatus.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+                            </Pie>
+                            <Tooltip />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader><CardTitle className="text-base">Conversion by Source</CardTitle></CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={280}>
+                          <BarChart data={bySource}>
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                            <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                            <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                            <Tooltip />
+                            <Bar dataKey="total" name="Total" fill="#3b82f6" radius={[4,4,0,0]} />
+                            <Bar dataKey="won" name="Won" fill="#10b981" radius={[4,4,0,0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </>
+              );
+            })()}
+          </TabsContent>
+
+          {/* ═══ QUOTATIONS TAB ═══ */}
+          <TabsContent value="quotations" className="space-y-4">
+            {(() => {
+              const totalQ = mockQuotations.length;
+              const approved = mockQuotations.filter((q) => q.status === "approved").length;
+              const totalValue = mockQuotations.reduce((s, q) => s + q.amount, 0);
+              const approvedValue = mockQuotations.filter((q) => q.status === "approved").reduce((s, q) => s + q.amount, 0);
+              const convRate = totalQ > 0 ? ((approved / totalQ) * 100).toFixed(1) : "0";
+              const byStatus = ["draft", "sent", "approved", "rejected", "expired"].map((s) => ({
+                name: s.charAt(0).toUpperCase() + s.slice(1),
+                count: mockQuotations.filter((q) => q.status === s).length,
+                value: mockQuotations.filter((q) => q.status === s).reduce((sum, q) => sum + q.amount, 0),
+              }));
+              return (
+                <>
+                  <div className="grid gap-4 md:grid-cols-4">
+                    <StatCard title="Total Quotations" value={totalQ.toString()} icon={DollarSign} />
+                    <StatCard title="Approved" value={approved.toString()} icon={TrendingUp} variant="success" />
+                    <StatCard title="Total Value" value={`৳${totalValue.toLocaleString()}`} icon={DollarSign} />
+                    <StatCard title="Conversion Rate" value={`${convRate}%`} icon={TrendingUp} trend={parseFloat(convRate) > 40 ? 8 : -3} variant={parseFloat(convRate) > 40 ? "success" : "danger"} />
+                  </div>
+                  <Card>
+                    <CardHeader><CardTitle className="text-base">Quotation Status Breakdown</CardTitle></CardHeader>
+                    <CardContent>
+                      <Table>
+                        <TableHeader><TableRow><TableHead>Status</TableHead><TableHead className="text-right">Count</TableHead><TableHead className="text-right">Total Value</TableHead><TableHead className="text-right">% of Total</TableHead></TableRow></TableHeader>
+                        <TableBody>
+                          {byStatus.map((s) => (
+                            <TableRow key={s.name}>
+                              <TableCell><Badge variant="secondary" className="capitalize">{s.name}</Badge></TableCell>
+                              <TableCell className="text-right">{s.count}</TableCell>
+                              <TableCell className="text-right font-semibold">৳{s.value.toLocaleString()}</TableCell>
+                              <TableCell className="text-right text-muted-foreground">{totalValue > 0 ? ((s.value/totalValue)*100).toFixed(1) : 0}%</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
+                </>
+              );
+            })()}
+          </TabsContent>
+
           {/* ═══ EXPENSE TAB ═══ */}
           <TabsContent value="expense" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
