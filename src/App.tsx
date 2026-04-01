@@ -100,6 +100,7 @@ const AppContent = () => (
               <Route path="/quotations/:id/edit" element={<P><QuotationBuilder /></P>} />
               <Route path="/quotations/:id/print" element={<QuotationPrint />} />
               <Route path="/bookings" element={<P><Bookings /></P>} />
+              <Route path="/bookings/:id" element={<P><BookingDetails /></P>} />
               <Route path="/invoices" element={<P><Invoices /></P>} />
               <Route path="/accounts" element={<P><Accounts /></P>} />
               <Route path="/reports" element={<P><Reports /></P>} />
