@@ -338,6 +338,7 @@ export const MODULE_METADATA: ModuleMeta[] = [
   { id: "vendors", label: "Vendors", category: "crm" },
   { id: "leads", label: "Leads", category: "crm" },
   { id: "tasks", label: "Tasks", category: "crm" },
+  { id: "quotations", label: "Quotations", category: "crm" },
   { id: "bookings", label: "Bookings", category: "operations" },
   { id: "invoices", label: "Invoices", category: "finance" },
   { id: "accounts", label: "Accounts", category: "finance" },
