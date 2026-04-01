@@ -323,6 +323,7 @@ const Bookings = () => {
               </DialogContent>
             </Dialog>
           </PermissionGate>
+          </div>
         </div>
 
         {/* Dashboard Widgets */}
