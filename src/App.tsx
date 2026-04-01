@@ -18,6 +18,8 @@ import Clients from "./pages/Clients";
 import Agents from "./pages/Agents";
 import Vendors from "./pages/Vendors";
 import Leads from "./pages/Leads";
+import LeadDetails from "./pages/LeadDetails";
+import ClientProfile from "./pages/ClientProfile";
 import Tasks from "./pages/Tasks";
 import Bookings from "./pages/Bookings";
 import Invoices from "./pages/Invoices";
