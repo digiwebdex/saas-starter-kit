@@ -30,6 +30,7 @@ export type Module =
   | "vendors"
   | "leads"
   | "tasks"
+  | "quotations"
   | "bookings"
   | "invoices"
   | "accounts"
