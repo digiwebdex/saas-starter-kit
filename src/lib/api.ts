@@ -90,7 +90,22 @@ export const clientApi = {
     }).then((r) => r.json()),
 };
 export const agentApi = createCrudApi<Agent>("agents");
-export const vendorApi = createCrudApi<Vendor>("vendors");
+export const vendorApi = {
+  ...createCrudApi<Vendor>("vendors"),
+  getBills: (id: string) => request<VendorBill[]>(`/vendors/${id}/bills`),
+  addBill: (id: string, data: Omit<VendorBill, "id" | "createdAt">) =>
+    request<VendorBill>(`/vendors/${id}/bills`, { method: "POST", body: JSON.stringify(data) }),
+  updateBill: (id: string, billId: string, data: Partial<VendorBill>) =>
+    request<VendorBill>(`/vendors/${id}/bills/${billId}`, { method: "PATCH", body: JSON.stringify(data) }),
+  deleteBill: (id: string, billId: string) =>
+    request<void>(`/vendors/${id}/bills/${billId}`, { method: "DELETE" }),
+  addBillPayment: (id: string, billId: string, data: { amount: number; method: string; reference?: string; date: string; notes?: string }) =>
+    request<VendorBillPayment>(`/vendors/${id}/bills/${billId}/payments`, { method: "POST", body: JSON.stringify(data) }),
+  getNotes: (id: string) => request<VendorNote[]>(`/vendors/${id}/notes`),
+  addNote: (id: string, data: { content: string; type?: string }) =>
+    request<VendorNote>(`/vendors/${id}/notes`, { method: "POST", body: JSON.stringify(data) }),
+  getPayableReport: () => request<VendorBill[]>("/vendors/reports/payables"),
+};
 export const leadApi = {
   ...createCrudApi<Lead>("leads"),
   updateStatus: (id: string, status: string) =>
