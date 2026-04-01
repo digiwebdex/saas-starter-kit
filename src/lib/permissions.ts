@@ -174,6 +174,7 @@ export const DEFAULT_PERMISSIONS: Record<AppRole, PermissionMatrix> = {
     vendors: VIEW_CREATE_EDIT,
     leads: NONE,
     tasks: VIEW_CREATE_EDIT,
+    quotations: VIEW_ONLY,
     bookings: VIEW_CREATE_EDIT_EXPORT,
     invoices: VIEW_ONLY,
     accounts: NONE,
