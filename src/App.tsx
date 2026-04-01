@@ -127,6 +127,7 @@ const AppContent = () => (
               <Route path="/admin/roles" element={<A><AdminRoles /></A>} />
               <Route path="/admin/sms-templates" element={<A><AdminSmsTemplates /></A>} />
               <Route path="/admin/sms-logs" element={<A><AdminSmsLogs /></A>} />
+              <Route path="/admin/audit-log" element={<A><AdminAuditLog /></A>} />
 
               <Route path="*" element={<NotFound />} />
         </Routes>

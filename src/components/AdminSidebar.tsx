@@ -27,6 +27,7 @@ const adminItems = [
   { title: "Roles & Permissions", url: "/admin/roles", icon: UserCog },
   { title: "SMS Templates", url: "/admin/sms-templates", icon: MessageSquare },
   { title: "SMS Logs", url: "/admin/sms-logs", icon: ScrollText },
+  { title: "Audit Log", url: "/admin/audit-log", icon: FileText },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
