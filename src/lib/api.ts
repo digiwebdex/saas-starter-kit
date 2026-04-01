@@ -77,10 +77,31 @@ export const dashboardApi = {
 };
 
 // ── Resource APIs ──
-export const clientApi = createCrudApi<Client>("clients");
+export const clientApi = {
+  ...createCrudApi<Client>("clients"),
+  getBookings: (id: string) => request<Booking[]>(`/clients/${id}/bookings`),
+  getInvoices: (id: string) => request<Invoice[]>(`/clients/${id}/invoices`),
+  getPayments: (id: string) => request<Payment[]>(`/clients/${id}/payments`),
+  uploadDocument: (id: string, data: FormData) =>
+    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/clients/${id}/documents`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      body: data,
+    }).then((r) => r.json()),
+};
 export const agentApi = createCrudApi<Agent>("agents");
 export const vendorApi = createCrudApi<Vendor>("vendors");
-export const leadApi = createCrudApi<Lead>("leads");
+export const leadApi = {
+  ...createCrudApi<Lead>("leads"),
+  updateStatus: (id: string, status: string) =>
+    request<Lead>(`/leads/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  getActivities: (id: string) =>
+    request<LeadActivity[]>(`/leads/${id}/activities`),
+  addActivity: (id: string, data: { type: string; content: string }) =>
+    request<LeadActivity>(`/leads/${id}/activities`, { method: "POST", body: JSON.stringify(data) }),
+  convertToClient: (id: string) =>
+    request<Client>(`/leads/${id}/convert`, { method: "POST" }),
+};
 export const taskApi = createCrudApi<Task>("tasks");
 export const bookingApi = createCrudApi<Booking>("bookings");
 export const invoiceApi = createCrudApi<Invoice>("invoices");
@@ -115,8 +136,30 @@ export interface Client {
   name: string;
   phone: string;
   email: string;
+  alternatePhone?: string;
+  address?: string;
+  dateOfBirth?: string;
+  passportNumber?: string;
+  passportExpiry?: string;
+  nidNumber?: string;
+  nationality?: string;
+  emergencyContact?: string;
+  emergencyPhone?: string;
+  notes?: string;
+  tags?: string[];
+  documents?: ClientDocument[];
   tenantId: string;
   createdAt: string;
+  updatedAt?: string;
+}
+
+export interface ClientDocument {
+  id: string;
+  clientId: string;
+  name: string;
+  type: string;
+  url: string;
+  uploadedAt: string;
 }
 
 export interface Agent {
@@ -137,12 +180,39 @@ export interface Vendor {
   createdAt: string;
 }
 
+export type LeadStatus = "new" | "contacted" | "qualified" | "quoted" | "won" | "lost";
+
 export interface Lead {
   id: string;
   name: string;
   phone: string;
   email: string;
+  status: LeadStatus;
+  source?: string;
+  destination?: string;
+  travelDateFrom?: string;
+  travelDateTo?: string;
+  travelerCount?: number;
+  budget?: number;
+  assignedTo?: string;
+  assignedToName?: string;
+  nextFollowUp?: string;
+  notes?: string;
+  tags?: string[];
   tenantId: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface LeadActivity {
+  id: string;
+  leadId: string;
+  type: "note" | "status_change" | "follow_up" | "call" | "email" | "meeting";
+  content: string;
+  oldStatus?: LeadStatus;
+  newStatus?: LeadStatus;
+  createdBy?: string;
+  createdByName?: string;
   createdAt: string;
 }
 
