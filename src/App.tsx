@@ -59,6 +59,13 @@ import SiteContact from "./pages/site/SiteContact";
 import SitePricing from "./pages/site/SitePricing";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
+import Features from "./pages/marketing/Features";
+import Pricing from "./pages/marketing/Pricing";
+import Demo from "./pages/marketing/Demo";
+import ContactUs from "./pages/marketing/ContactUs";
+import FAQ from "./pages/marketing/FAQ";
+import Privacy from "./pages/marketing/Privacy";
+import Terms from "./pages/marketing/Terms";
 
 const queryClient = new QueryClient();
 
