@@ -298,10 +298,14 @@ const Reports = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="sales" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="flex w-full overflow-x-auto">
             <TabsTrigger value="sales">Sales</TabsTrigger>
+            <TabsTrigger value="leads">Leads</TabsTrigger>
+            <TabsTrigger value="quotations">Quotations</TabsTrigger>
             <TabsTrigger value="expense">Expense</TabsTrigger>
             <TabsTrigger value="profit">Profit</TabsTrigger>
+            <TabsTrigger value="due">Due Payments</TabsTrigger>
+            <TabsTrigger value="staff">Staff</TabsTrigger>
             <TabsTrigger value="commission">Commission</TabsTrigger>
           </TabsList>
 
