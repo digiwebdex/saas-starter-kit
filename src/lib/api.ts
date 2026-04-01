@@ -135,7 +135,26 @@ export const bookingApi = {
   deleteDocument: (id: string, docId: string) =>
     request<void>(`/bookings/${id}/documents/${docId}`, { method: "DELETE" }),
 };
-export const invoiceApi = createCrudApi<Invoice>("invoices");
+export const invoiceApi = {
+  ...createCrudApi<Invoice>("invoices"),
+  updateStatus: (id: string, status: InvoiceStatus) =>
+    request<Invoice>(`/invoices/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  getPayments: (id: string) => request<Payment[]>(`/invoices/${id}/payments`),
+  addPayment: (id: string, data: Omit<Payment, "id" | "createdAt">) =>
+    request<Payment>(`/invoices/${id}/payments`, { method: "POST", body: JSON.stringify(data) }),
+  deletePayment: (id: string, payId: string) =>
+    request<void>(`/invoices/${id}/payments/${payId}`, { method: "DELETE" }),
+  addRefund: (id: string, data: { amount: number; reason: string; method?: string }) =>
+    request<InvoiceRefund>(`/invoices/${id}/refunds`, { method: "POST", body: JSON.stringify(data) }),
+  getRefunds: (id: string) => request<InvoiceRefund[]>(`/invoices/${id}/refunds`),
+  getAuditTrail: (id: string) => request<InvoiceAuditEvent[]>(`/invoices/${id}/audit`),
+  uploadProof: (id: string, payId: string, data: FormData) =>
+    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/invoices/${id}/payments/${payId}/proof`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      body: data,
+    }).then((r) => r.json()),
+};
 export const paymentApi = createCrudApi<Payment>("payments");
 export const accountApi = createCrudApi<Account>("accounts");
 export const transactionApi = createCrudApi<Transaction>("transactions");
