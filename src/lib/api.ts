@@ -111,6 +111,19 @@ export const transactionApi = createCrudApi<Transaction>("transactions");
 export const subscriptionApi = createCrudApi<Subscription>("subscriptions");
 export const paymentRequestApi = createCrudApi<PaymentRequest>("payment-requests");
 
+// ── Quotation API ──
+export const quotationApi = {
+  ...createCrudApi<Quotation>("quotations"),
+  updateStatus: (id: string, status: QuotationStatus) =>
+    request<Quotation>(`/quotations/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  getVersions: (id: string) =>
+    request<QuotationVersion[]>(`/quotations/${id}/versions`),
+  duplicate: (id: string) =>
+    request<Quotation>(`/quotations/${id}/duplicate`, { method: "POST" }),
+  convertToBooking: (id: string) =>
+    request<Booking>(`/quotations/${id}/convert-to-booking`, { method: "POST" }),
+};
+
 // ── Types ──
 export interface User {
   id: string;
