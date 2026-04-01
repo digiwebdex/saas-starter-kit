@@ -21,6 +21,10 @@ import Leads from "./pages/Leads";
 import LeadDetails from "./pages/LeadDetails";
 import ClientProfile from "./pages/ClientProfile";
 import Tasks from "./pages/Tasks";
+import Quotations from "./pages/Quotations";
+import QuotationBuilder from "./pages/QuotationBuilder";
+import QuotationDetails from "./pages/QuotationDetails";
+import QuotationPrint from "./pages/QuotationPrint";
 import Bookings from "./pages/Bookings";
 import Invoices from "./pages/Invoices";
 import Accounts from "./pages/Accounts";
@@ -89,6 +93,11 @@ const AppContent = () => (
               <Route path="/leads" element={<P><Leads /></P>} />
               <Route path="/leads/:id" element={<P><LeadDetails /></P>} />
               <Route path="/tasks" element={<P><Tasks /></P>} />
+              <Route path="/quotations" element={<P><Quotations /></P>} />
+              <Route path="/quotations/new" element={<P><QuotationBuilder /></P>} />
+              <Route path="/quotations/:id" element={<P><QuotationDetails /></P>} />
+              <Route path="/quotations/:id/edit" element={<P><QuotationBuilder /></P>} />
+              <Route path="/quotations/:id/print" element={<QuotationPrint />} />
               <Route path="/bookings" element={<P><Bookings /></P>} />
               <Route path="/invoices" element={<P><Invoices /></P>} />
               <Route path="/accounts" element={<P><Accounts /></P>} />

@@ -30,6 +30,7 @@ export type Module =
   | "vendors"
   | "leads"
   | "tasks"
+  | "quotations"
   | "bookings"
   | "invoices"
   | "accounts"
@@ -68,6 +69,7 @@ export const DEFAULT_PERMISSIONS: Record<AppRole, PermissionMatrix> = {
     vendors: ALL_ACTIONS,
     leads: ALL_ACTIONS,
     tasks: ALL_ACTIONS,
+    quotations: ALL_ACTIONS,
     bookings: ALL_ACTIONS,
     invoices: ALL_ACTIONS,
     accounts: ALL_ACTIONS,
@@ -88,6 +90,7 @@ export const DEFAULT_PERMISSIONS: Record<AppRole, PermissionMatrix> = {
     vendors: ALL_ACTIONS,
     leads: ALL_ACTIONS,
     tasks: ALL_ACTIONS,
+    quotations: ALL_ACTIONS,
     bookings: ALL_ACTIONS,
     invoices: ALL_ACTIONS,
     accounts: ALL_ACTIONS,
@@ -108,6 +111,7 @@ export const DEFAULT_PERMISSIONS: Record<AppRole, PermissionMatrix> = {
     vendors: ALL_ACTIONS,
     leads: ALL_ACTIONS,
     tasks: ALL_ACTIONS,
+    quotations: ALL_ACTIONS,
     bookings: ALL_ACTIONS,
     invoices: { view: true, create: true, edit: true, approve: true, export: true },
     accounts: { view: true, create: true, edit: true, export: true },
@@ -128,6 +132,7 @@ export const DEFAULT_PERMISSIONS: Record<AppRole, PermissionMatrix> = {
     vendors: VIEW_ONLY,
     leads: { view: true, create: true, edit: true, delete: true },
     tasks: VIEW_CREATE_EDIT,
+    quotations: { view: true, create: true, edit: true, export: true },
     bookings: VIEW_CREATE_EDIT,
     invoices: VIEW_ONLY,
     accounts: NONE,
@@ -148,6 +153,7 @@ export const DEFAULT_PERMISSIONS: Record<AppRole, PermissionMatrix> = {
     vendors: VIEW_ONLY,
     leads: NONE,
     tasks: VIEW_ONLY,
+    quotations: { view: true, export: true },
     bookings: VIEW_ONLY,
     invoices: { view: true, create: true, edit: true, approve: true, export: true },
     accounts: { view: true, create: true, edit: true, export: true },
@@ -168,6 +174,7 @@ export const DEFAULT_PERMISSIONS: Record<AppRole, PermissionMatrix> = {
     vendors: VIEW_CREATE_EDIT,
     leads: NONE,
     tasks: VIEW_CREATE_EDIT,
+    quotations: VIEW_ONLY,
     bookings: VIEW_CREATE_EDIT_EXPORT,
     invoices: VIEW_ONLY,
     accounts: NONE,
@@ -241,7 +248,7 @@ export function getAccessibleModules(
   overrides?: Partial<Record<AppRole, Partial<PermissionMatrix>>>
 ): Module[] {
   const allModules: Module[] = [
-    "dashboard", "clients", "agents", "vendors", "leads", "tasks",
+    "dashboard", "clients", "agents", "vendors", "leads", "tasks", "quotations",
     "bookings", "invoices", "accounts", "reports", "hajj_umrah",
     "subscription", "team", "organization", "settings", "website", "admin_panel",
   ];
@@ -331,6 +338,7 @@ export const MODULE_METADATA: ModuleMeta[] = [
   { id: "vendors", label: "Vendors", category: "crm" },
   { id: "leads", label: "Leads", category: "crm" },
   { id: "tasks", label: "Tasks", category: "crm" },
+  { id: "quotations", label: "Quotations", category: "crm" },
   { id: "bookings", label: "Bookings", category: "operations" },
   { id: "invoices", label: "Invoices", category: "finance" },
   { id: "accounts", label: "Accounts", category: "finance" },

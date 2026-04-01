@@ -111,6 +111,19 @@ export const transactionApi = createCrudApi<Transaction>("transactions");
 export const subscriptionApi = createCrudApi<Subscription>("subscriptions");
 export const paymentRequestApi = createCrudApi<PaymentRequest>("payment-requests");
 
+// ── Quotation API ──
+export const quotationApi = {
+  ...createCrudApi<Quotation>("quotations"),
+  updateStatus: (id: string, status: QuotationStatus) =>
+    request<Quotation>(`/quotations/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  getVersions: (id: string) =>
+    request<QuotationVersion[]>(`/quotations/${id}/versions`),
+  duplicate: (id: string) =>
+    request<Quotation>(`/quotations/${id}/duplicate`, { method: "POST" }),
+  convertToBooking: (id: string) =>
+    request<Booking>(`/quotations/${id}/convert-to-booking`, { method: "POST" }),
+};
+
 // ── Types ──
 export interface User {
   id: string;
@@ -303,4 +316,78 @@ export interface PaymentRequest {
   trxId: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
+}
+
+// ── Quotation Types ──
+export type QuotationStatus = "draft" | "sent" | "approved" | "rejected" | "expired";
+
+export type QuotationItemType =
+  | "hotel" | "flight" | "visa" | "transport" | "tour"
+  | "activity" | "insurance" | "service_fee" | "discount" | "tax";
+
+export interface QuotationItem {
+  id: string;
+  type: QuotationItemType;
+  day?: number;
+  description: string;
+  details?: string;
+  supplier?: string;
+  costPrice: number;
+  markupPercent: number;
+  sellingPrice: number;
+  quantity: number;
+  nights?: number;
+  subtotal: number;
+}
+
+export interface ItineraryDay {
+  dayNumber: number;
+  date?: string;
+  title: string;
+  description: string;
+  meals?: string;
+  accommodation?: string;
+  activities?: string[];
+}
+
+export interface QuotationVersion {
+  id: string;
+  quotationId: string;
+  versionNumber: number;
+  snapshot: string;
+  changeNote?: string;
+  changedBy?: string;
+  changedByName?: string;
+  createdAt: string;
+}
+
+export interface Quotation {
+  id: string;
+  title: string;
+  clientId?: string;
+  clientName?: string;
+  leadId?: string;
+  leadName?: string;
+  destination: string;
+  travelDateFrom?: string;
+  travelDateTo?: string;
+  travelerCount: number;
+  status: QuotationStatus;
+  version: number;
+  items: QuotationItem[];
+  itinerary: ItineraryDay[];
+  totalCost: number;
+  totalSelling: number;
+  totalProfit: number;
+  discountAmount: number;
+  taxAmount: number;
+  grandTotal: number;
+  validUntil?: string;
+  notes?: string;
+  termsAndConditions?: string;
+  createdBy?: string;
+  createdByName?: string;
+  tenantId: string;
+  createdAt: string;
+  updatedAt?: string;
 }
