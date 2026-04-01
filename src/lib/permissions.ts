@@ -132,6 +132,7 @@ export const DEFAULT_PERMISSIONS: Record<AppRole, PermissionMatrix> = {
     vendors: VIEW_ONLY,
     leads: { view: true, create: true, edit: true, delete: true },
     tasks: VIEW_CREATE_EDIT,
+    quotations: { view: true, create: true, edit: true, export: true },
     bookings: VIEW_CREATE_EDIT,
     invoices: VIEW_ONLY,
     accounts: NONE,
