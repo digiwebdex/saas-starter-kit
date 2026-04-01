@@ -39,6 +39,7 @@ const defaultPlans: Plan[] = PLANS.map((p) => ({
   name: p.name,
   slug: p.id,
   price: p.price === -1 ? 5000 : p.price,
+  yearlyPrice: p.yearlyPrice === -1 ? 50000 : p.yearlyPrice,
   maxBookings: p.maxBookings,
   maxUsers: p.maxUsers,
   maxClients: p.maxClients,
