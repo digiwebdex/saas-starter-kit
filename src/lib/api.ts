@@ -253,12 +253,68 @@ export interface Agent {
   createdAt: string;
 }
 
+export type VendorCategory = "hotel" | "airline" | "transport" | "visa_partner" | "guide" | "tour_operator" | "other";
+export type VendorBillStatus = "unpaid" | "partial" | "paid" | "overdue";
+
 export interface Vendor {
   id: string;
   name: string;
   phone: string;
   email: string;
+  category: VendorCategory;
+  contactPerson?: string;
+  address?: string;
+  serviceAreas?: string;
+  website?: string;
+  bankDetails?: string;
+  notes?: string;
+  status: "active" | "inactive";
   tenantId: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface VendorBill {
+  id: string;
+  vendorId: string;
+  vendorName?: string;
+  bookingId?: string;
+  bookingTitle?: string;
+  segmentId?: string;
+  description: string;
+  totalAmount: number;
+  paidAmount: number;
+  dueAmount: number;
+  status: VendorBillStatus;
+  dueDate?: string;
+  invoiceRef?: string;
+  notes?: string;
+  payments?: VendorBillPayment[];
+  tenantId: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface VendorBillPayment {
+  id: string;
+  billId: string;
+  amount: number;
+  method: string;
+  reference?: string;
+  date: string;
+  notes?: string;
+  paidBy?: string;
+  paidByName?: string;
+  createdAt: string;
+}
+
+export interface VendorNote {
+  id: string;
+  vendorId: string;
+  type: "note" | "call" | "email" | "meeting" | "issue";
+  content: string;
+  createdBy?: string;
+  createdByName?: string;
   createdAt: string;
 }
 
