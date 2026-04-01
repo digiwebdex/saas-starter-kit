@@ -137,12 +137,39 @@ export interface Vendor {
   createdAt: string;
 }
 
+export type LeadStatus = "new" | "contacted" | "qualified" | "quoted" | "won" | "lost";
+
 export interface Lead {
   id: string;
   name: string;
   phone: string;
   email: string;
+  status: LeadStatus;
+  source?: string;
+  destination?: string;
+  travelDateFrom?: string;
+  travelDateTo?: string;
+  travelerCount?: number;
+  budget?: number;
+  assignedTo?: string;
+  assignedToName?: string;
+  nextFollowUp?: string;
+  notes?: string;
+  tags?: string[];
   tenantId: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface LeadActivity {
+  id: string;
+  leadId: string;
+  type: "note" | "status_change" | "follow_up" | "call" | "email" | "meeting";
+  content: string;
+  oldStatus?: LeadStatus;
+  newStatus?: LeadStatus;
+  createdBy?: string;
+  createdByName?: string;
   createdAt: string;
 }
 
