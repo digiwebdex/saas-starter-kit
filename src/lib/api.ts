@@ -272,17 +272,96 @@ export interface Task {
   createdAt: string;
 }
 
+export type BookingStatus = "pending" | "confirmed" | "ticketed" | "traveling" | "completed" | "cancelled";
+export type BookingType = "tour" | "ticket" | "hotel" | "visa" | "package";
+
 export interface Booking {
   id: string;
-  type: "tour" | "ticket" | "hotel" | "visa";
+  type: BookingType;
+  title?: string;
   clientId: string;
+  clientName?: string;
   agentId: string;
+  agentName?: string;
+  quotationId?: string;
+  destination?: string;
+  travelDateFrom?: string;
+  travelDateTo?: string;
+  travelerCount?: number;
   amount: number;
   cost: number;
   profit: number;
-  status: "pending" | "confirmed" | "completed" | "cancelled";
+  paidAmount?: number;
+  dueAmount?: number;
+  paymentStatus?: "unpaid" | "partial" | "paid";
+  status: BookingStatus;
+  assignedTo?: string;
+  assignedToName?: string;
+  supplierName?: string;
+  supplierRef?: string;
+  internalNotes?: string;
   tenantId: string;
   createdAt: string;
+  updatedAt?: string;
+}
+
+export interface BookingSegment {
+  id: string;
+  bookingId?: string;
+  type: "hotel" | "flight" | "transfer" | "visa" | "activity" | "package";
+  description: string;
+  supplier?: string;
+  supplierRef?: string;
+  startDate?: string;
+  endDate?: string;
+  details?: string;
+  cost: number;
+  sellingPrice: number;
+  status?: "pending" | "confirmed" | "cancelled";
+}
+
+export interface BookingTraveler {
+  id: string;
+  bookingId?: string;
+  name: string;
+  passportNumber?: string;
+  passportExpiry?: string;
+  nationality?: string;
+  dateOfBirth?: string;
+  phone?: string;
+  email?: string;
+  notes?: string;
+}
+
+export interface BookingChecklistItem {
+  id: string;
+  bookingId?: string;
+  label: string;
+  done: boolean;
+  doneAt?: string;
+  doneBy?: string;
+}
+
+export interface BookingTimelineEvent {
+  id: string;
+  bookingId?: string;
+  type: "status_change" | "note" | "payment" | "document" | "checklist" | "system";
+  content: string;
+  oldStatus?: string;
+  newStatus?: string;
+  createdBy?: string;
+  createdByName?: string;
+  createdAt: string;
+}
+
+export interface BookingDocument {
+  id: string;
+  bookingId?: string;
+  name: string;
+  type: string;
+  url: string;
+  uploadedAt: string;
+  uploadedBy?: string;
 }
 
 export interface Invoice {
