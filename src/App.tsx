@@ -111,6 +111,7 @@ const AppContent = () => (
               <Route path="/subscription" element={<P><Subscriptions /></P>} />
               <Route path="/payment/callback" element={<P><PaymentCallback /></P>} />
               <Route path="/roles" element={<P><RoleManagement /></P>} />
+              <Route path="/notifications" element={<P><NotificationLog /></P>} />
               <Route path="/team" element={<P><Team /></P>} />
               <Route path="/organization" element={<P><Organization /></P>} />
               <Route path="/settings" element={<P><SettingsPage /></P>} />
