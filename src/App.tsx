@@ -17,6 +17,7 @@ import WebsiteCustomizer from "./pages/WebsiteCustomizer";
 import Clients from "./pages/Clients";
 import Agents from "./pages/Agents";
 import Vendors from "./pages/Vendors";
+import VendorDetails from "./pages/VendorDetails";
 import Leads from "./pages/Leads";
 import LeadDetails from "./pages/LeadDetails";
 import ClientProfile from "./pages/ClientProfile";
