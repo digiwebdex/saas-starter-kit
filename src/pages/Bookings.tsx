@@ -549,6 +549,47 @@ const Bookings = () => {
           </Card>
         )}
       </div>
+
+      {/* Create from Quotation Dialog */}
+      <Dialog open={quotationDialogOpen} onOpenChange={setQuotationDialogOpen}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create Booking from Quotation</DialogTitle>
+          </DialogHeader>
+          {loadingQuotations ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">Loading approved quotations...</div>
+          ) : approvedQuotations.length === 0 ? (
+            <div className="py-8 text-center space-y-2">
+              <p className="text-sm text-muted-foreground">No approved quotations available.</p>
+              <p className="text-xs text-muted-foreground">Quotations must be in "Approved" status to convert into bookings.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Select an approved quotation to convert into a booking:</p>
+              {approvedQuotations.map((q) => (
+                <div
+                  key={q.id}
+                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent/50 cursor-pointer transition-colors"
+                  onClick={() => handleConvertQuotation(q)}
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm truncate">{q.title || q.destination}</p>
+                    <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
+                      {q.clientName && <span>{q.clientName}</span>}
+                      {q.destination && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{q.destination}</span>}
+                      <span>{q.travelerCount} travelers</span>
+                    </div>
+                  </div>
+                  <div className="text-right ml-3">
+                    <p className="text-sm font-medium">৳{q.grandTotal?.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">v{q.version}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
