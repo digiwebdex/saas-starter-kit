@@ -77,7 +77,18 @@ export const dashboardApi = {
 };
 
 // ── Resource APIs ──
-export const clientApi = createCrudApi<Client>("clients");
+export const clientApi = {
+  ...createCrudApi<Client>("clients"),
+  getBookings: (id: string) => request<Booking[]>(`/clients/${id}/bookings`),
+  getInvoices: (id: string) => request<Invoice[]>(`/clients/${id}/invoices`),
+  getPayments: (id: string) => request<Payment[]>(`/clients/${id}/payments`),
+  uploadDocument: (id: string, data: FormData) =>
+    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/clients/${id}/documents`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      body: data,
+    }).then((r) => r.json()),
+};
 export const agentApi = createCrudApi<Agent>("agents");
 export const vendorApi = createCrudApi<Vendor>("vendors");
 export const leadApi = {
