@@ -83,9 +83,11 @@ const AppContent = () => (
               {/* App routes (protected) */}
               <Route path="/dashboard" element={<P><Dashboard /></P>} />
               <Route path="/clients" element={<P><Clients /></P>} />
+              <Route path="/clients/:id" element={<P><ClientProfile /></P>} />
               <Route path="/agents" element={<P><Agents /></P>} />
               <Route path="/vendors" element={<P><Vendors /></P>} />
               <Route path="/leads" element={<P><Leads /></P>} />
+              <Route path="/leads/:id" element={<P><LeadDetails /></P>} />
               <Route path="/tasks" element={<P><Tasks /></P>} />
               <Route path="/bookings" element={<P><Bookings /></P>} />
               <Route path="/invoices" element={<P><Invoices /></P>} />
