@@ -103,7 +103,38 @@ export const leadApi = {
     request<Client>(`/leads/${id}/convert`, { method: "POST" }),
 };
 export const taskApi = createCrudApi<Task>("tasks");
-export const bookingApi = createCrudApi<Booking>("bookings");
+export const bookingApi = {
+  ...createCrudApi<Booking>("bookings"),
+  updateStatus: (id: string, status: BookingStatus) =>
+    request<Booking>(`/bookings/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  getSegments: (id: string) => request<BookingSegment[]>(`/bookings/${id}/segments`),
+  addSegment: (id: string, data: Omit<BookingSegment, "id">) =>
+    request<BookingSegment>(`/bookings/${id}/segments`, { method: "POST", body: JSON.stringify(data) }),
+  deleteSegment: (id: string, segId: string) =>
+    request<void>(`/bookings/${id}/segments/${segId}`, { method: "DELETE" }),
+  getTravelers: (id: string) => request<BookingTraveler[]>(`/bookings/${id}/travelers`),
+  addTraveler: (id: string, data: Omit<BookingTraveler, "id">) =>
+    request<BookingTraveler>(`/bookings/${id}/travelers`, { method: "POST", body: JSON.stringify(data) }),
+  deleteTraveler: (id: string, tId: string) =>
+    request<void>(`/bookings/${id}/travelers/${tId}`, { method: "DELETE" }),
+  getChecklist: (id: string) => request<BookingChecklistItem[]>(`/bookings/${id}/checklist`),
+  updateChecklistItem: (id: string, itemId: string, done: boolean) =>
+    request<BookingChecklistItem>(`/bookings/${id}/checklist/${itemId}`, { method: "PATCH", body: JSON.stringify({ done }) }),
+  addChecklistItem: (id: string, data: { label: string }) =>
+    request<BookingChecklistItem>(`/bookings/${id}/checklist`, { method: "POST", body: JSON.stringify(data) }),
+  getTimeline: (id: string) => request<BookingTimelineEvent[]>(`/bookings/${id}/timeline`),
+  addTimelineEvent: (id: string, data: { type: string; content: string }) =>
+    request<BookingTimelineEvent>(`/bookings/${id}/timeline`, { method: "POST", body: JSON.stringify(data) }),
+  getDocuments: (id: string) => request<BookingDocument[]>(`/bookings/${id}/documents`),
+  uploadDocument: (id: string, data: FormData) =>
+    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:4000/api"}/bookings/${id}/documents`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      body: data,
+    }).then((r) => r.json()),
+  deleteDocument: (id: string, docId: string) =>
+    request<void>(`/bookings/${id}/documents/${docId}`, { method: "DELETE" }),
+};
 export const invoiceApi = createCrudApi<Invoice>("invoices");
 export const paymentApi = createCrudApi<Payment>("payments");
 export const accountApi = createCrudApi<Account>("accounts");
