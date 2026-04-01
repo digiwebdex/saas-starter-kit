@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { mapLegacyRole } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +21,8 @@ const Login = () => {
     setLoading(true);
     try {
       const loggedInUser = await login(email, password);
-      navigate(loggedInUser.role === "owner" ? "/admin" : "/dashboard");
+      const role = mapLegacyRole(loggedInUser.role);
+      navigate(role === "super_admin" ? "/admin" : "/dashboard");
     } catch (err: any) {
       toast({ variant: "destructive", title: "Login failed", description: err.message });
     } finally {

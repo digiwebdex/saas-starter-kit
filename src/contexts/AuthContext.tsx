@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { authApi, tenantApi, type User, type Tenant } from "@/lib/api";
 import type { PlanType } from "@/lib/plans";
+import { mapLegacyRole, type AppRole } from "@/lib/permissions";
 
 interface AuthContextType {
   user: User | null;
   tenant: Tenant | null;
   currentPlan: PlanType;
+  appRole: AppRole;
   isSubscriptionExpired: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
@@ -28,10 +30,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const currentPlan: PlanType = (tenant?.subscriptionPlan as PlanType) || "free";
+  const appRole: AppRole = user ? mapLegacyRole(user.role) : "sales_agent";
 
   const isSubscriptionExpired = (() => {
     if (!tenant) return false;
-    if (currentPlan === "free") return false; // Free never expires
+    if (currentPlan === "free") return false;
     if (tenant.subscriptionStatus === "expired" || tenant.subscriptionStatus === "cancelled") return true;
     if (tenant.subscriptionExpiry) {
       return new Date(tenant.subscriptionExpiry) < new Date();
@@ -93,7 +96,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, tenant, currentPlan, isSubscriptionExpired, loading, login, register, logout, refreshTenant }}>
+    <AuthContext.Provider value={{ user, tenant, currentPlan, appRole, isSubscriptionExpired, loading, login, register, logout, refreshTenant }}>
       {children}
     </AuthContext.Provider>
   );

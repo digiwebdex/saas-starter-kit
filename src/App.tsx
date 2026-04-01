@@ -26,6 +26,7 @@ import Reports from "./pages/Reports";
 import HajjUmrah from "./pages/HajjUmrah";
 import Subscriptions from "./pages/Subscriptions";
 import PaymentCallback from "./pages/PaymentCallback";
+import RoleManagement from "./pages/RoleManagement";
 import Onboarding from "./pages/Onboarding";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
@@ -38,6 +39,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AdminFeatures from "./pages/admin/AdminFeatures";
 import AdminSmsTemplates from "./pages/admin/AdminSmsTemplates";
 import AdminSmsLogs from "./pages/admin/AdminSmsLogs";
+import AdminRoles from "./pages/admin/AdminRoles";
 import SiteHome from "./pages/site/SiteHome";
 import SiteAbout from "./pages/site/SiteAbout";
 import SitePackages from "./pages/site/SitePackages";
@@ -90,6 +92,7 @@ const AppContent = () => (
               <Route path="/hajj-umrah" element={<P><HajjUmrah /></P>} />
               <Route path="/subscription" element={<P><Subscriptions /></P>} />
               <Route path="/payment/callback" element={<P><PaymentCallback /></P>} />
+              <Route path="/roles" element={<P><RoleManagement /></P>} />
               <Route path="/team" element={<P><Team /></P>} />
               <Route path="/organization" element={<P><Organization /></P>} />
               <Route path="/settings" element={<P><SettingsPage /></P>} />
@@ -105,6 +108,7 @@ const AppContent = () => (
               <Route path="/admin/subscriptions" element={<A><AdminSubscriptions /></A>} />
               <Route path="/admin/settings" element={<A><AdminSettings /></A>} />
               <Route path="/admin/features" element={<A><AdminFeatures /></A>} />
+              <Route path="/admin/roles" element={<A><AdminRoles /></A>} />
               <Route path="/admin/sms-templates" element={<A><AdminSmsTemplates /></A>} />
               <Route path="/admin/sms-logs" element={<A><AdminSmsLogs /></A>} />
 

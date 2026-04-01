@@ -51,8 +51,8 @@ const Subscription_Page = () => {
   const [selectedPlan, setSelectedPlan] = useState<PlanType | null>(null);
   const [payForm, setPayForm] = useState({ trxId: "", method: "manual" as "manual" | "bkash" | "sslcommerz" });
   const [payDialogOpen, setPayDialogOpen] = useState(false);
-  const { user } = useAuth();
-  const isAdmin = user?.role === "owner";
+  const { user, appRole } = useAuth();
+  const isAdmin = appRole === "tenant_owner" || appRole === "super_admin";
   const { toast } = useToast();
 
   const access = usePlanAccess(currentSub.plan);
