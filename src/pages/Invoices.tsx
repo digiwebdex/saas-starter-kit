@@ -60,6 +60,8 @@ const Invoices = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Dialogs
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -69,6 +71,9 @@ const Invoices = () => {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [payGatewayOpen, setPayGatewayOpen] = useState(false);
   const [payGatewayInvoice, setPayGatewayInvoice] = useState<{ id: string; amount: number } | null>(null);
+  const [fromBookingOpen, setFromBookingOpen] = useState(false);
+  const [bookingsList, setBookingsList] = useState<Booking[]>([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
 
   // Selection & sub-data
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
@@ -86,7 +91,8 @@ const Invoices = () => {
     bookingCost: 0, dueDate: "", notes: "",
   });
   const [paymentForm, setPaymentForm] = useState({
-    amount: 0, method: "cash" as PaymentMethod, transactionRef: "", date: new Date().toISOString().split("T")[0], notes: "",
+    amount: 0, method: "cash" as PaymentMethod, transactionRef: "",
+    date: new Date().toISOString().split("T")[0], notes: "", receivedBy: "",
   });
   const [refundForm, setRefundForm] = useState({ amount: 0, reason: "", method: "" });
   const [cancelReason, setCancelReason] = useState("");
