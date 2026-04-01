@@ -91,6 +91,8 @@ const mockDuePayments = [
 const clients = [...new Map(mockBookings.map((b) => [b.clientId, { id: b.clientId, name: b.clientName }])).values()];
 const agents = [...new Map(mockBookings.map((b) => [b.agentId, { id: b.agentId, name: b.agentName }])).values()];
 
+const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444"];
+
 // ── Helper: Date Picker ──
 function DatePicker({ date, onChange, label }: { date: Date | undefined; onChange: (d: Date | undefined) => void; label: string }) {
   return (
