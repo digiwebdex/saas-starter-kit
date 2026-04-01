@@ -59,6 +59,13 @@ const Bookings = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
+  const [destinationFilter, setDestinationFilter] = useState("");
+  const [travelDateFrom, setTravelDateFrom] = useState<Date | undefined>();
+  const [travelDateTo, setTravelDateTo] = useState<Date | undefined>();
+  const [showFilters, setShowFilters] = useState(false);
+  const [quotationDialogOpen, setQuotationDialogOpen] = useState(false);
+  const [approvedQuotations, setApprovedQuotations] = useState<Quotation[]>([]);
+  const [loadingQuotations, setLoadingQuotations] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
