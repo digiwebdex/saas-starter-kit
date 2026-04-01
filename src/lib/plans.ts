@@ -93,7 +93,7 @@ export const PLANS: PlanConfig[] = [
     hasRefundSystem: false, hasHajjUmrah: true, hasPrioritySupport: false,
   },
   {
-    id: "business", name: "Business", monthlyPrice: 3000, yearlyPrice: yearly(3000),
+    id: "business", name: "Business", price: 3000, monthlyPrice: 3000, yearlyPrice: yearly(3000),
     description: "For large agencies & enterprises", trialDays: 14,
     maxClients: -1, maxBookings: -1, maxUsers: -1, maxDomains: -1,
     maxBranches: -1, maxSmsPerMonth: 2000, maxStorageMB: 10240, maxReports: -1,
