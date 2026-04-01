@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import PermissionGate from "@/components/PermissionGate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,11 +18,11 @@ import { format, isAfter, isBefore, addDays, parseISO } from "date-fns";
 import {
   Plus, Pencil, Trash2, Plane, Mail, Search, Eye, DollarSign,
   CalendarIcon, MapPin, Users, AlertTriangle, Clock, CheckCircle2, XCircle,
-  Ticket, Hotel, Stamp, Package,
+  Ticket, Hotel, Stamp, Package, Filter, FileText,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { emailApi } from "@/lib/emailApi";
-import { bookingApi, type Booking, type BookingStatus, type BookingType } from "@/lib/api";
+import { bookingApi, quotationApi, type Booking, type BookingStatus, type BookingType, type Quotation } from "@/lib/api";
 import { sendBookingSms } from "@/lib/smsAutomation";
 import EmptyState from "@/components/EmptyState";
 import LoadingState from "@/components/LoadingState";
@@ -59,6 +59,13 @@ const Bookings = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
+  const [destinationFilter, setDestinationFilter] = useState("");
+  const [travelDateFrom, setTravelDateFrom] = useState<Date | undefined>();
+  const [travelDateTo, setTravelDateTo] = useState<Date | undefined>();
+  const [showFilters, setShowFilters] = useState(false);
+  const [quotationDialogOpen, setQuotationDialogOpen] = useState(false);
+  const [approvedQuotations, setApprovedQuotations] = useState<Quotation[]>([]);
+  const [loadingQuotations, setLoadingQuotations] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -128,6 +135,32 @@ const Bookings = () => {
     });
   };
 
+  // Fetch approved quotations for "Create from Quotation" flow
+  const handleOpenQuotationDialog = async () => {
+    setQuotationDialogOpen(true);
+    setLoadingQuotations(true);
+    try {
+      const all = await quotationApi.list();
+      setApprovedQuotations((all as Quotation[]).filter((q) => q.status === "approved"));
+    } catch {
+      setApprovedQuotations([]);
+    } finally {
+      setLoadingQuotations(false);
+    }
+  };
+
+  const handleConvertQuotation = async (quotation: Quotation) => {
+    try {
+      const booking = await quotationApi.convertToBooking(quotation.id);
+      setItems((prev) => [booking, ...prev]);
+      setQuotationDialogOpen(false);
+      toast({ title: "Booking created from quotation", description: `${quotation.title || quotation.destination} converted successfully.` });
+      navigate(`/bookings/${booking.id}`);
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Conversion failed", description: err.message });
+    }
+  };
+
   // Filters
   const filtered = useMemo(() => {
     return items.filter((b) => {
@@ -138,9 +171,20 @@ const Bookings = () => {
         b.clientId?.toLowerCase().includes(search.toLowerCase());
       const matchStatus = statusFilter === "all" || b.status === statusFilter;
       const matchPayment = paymentFilter === "all" || b.paymentStatus === paymentFilter;
-      return matchSearch && matchStatus && matchPayment;
+      const matchDest = !destinationFilter || (b.destination || "").toLowerCase().includes(destinationFilter.toLowerCase());
+      const matchTravelFrom = !travelDateFrom || (b.travelDateFrom && new Date(b.travelDateFrom) >= travelDateFrom);
+      const matchTravelTo = !travelDateTo || (b.travelDateFrom && new Date(b.travelDateFrom) <= travelDateTo);
+      return matchSearch && matchStatus && matchPayment && matchDest && matchTravelFrom && matchTravelTo;
     });
-  }, [items, search, statusFilter, paymentFilter]);
+  }, [items, search, statusFilter, paymentFilter, destinationFilter, travelDateFrom, travelDateTo]);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (destinationFilter) count++;
+    if (travelDateFrom) count++;
+    if (travelDateTo) count++;
+    return count;
+  }, [destinationFilter, travelDateFrom, travelDateTo]);
 
   // Dashboard widgets
   const now = new Date();
@@ -177,11 +221,17 @@ const Bookings = () => {
             </h1>
             <p className="text-muted-foreground">Manage tours, tickets, hotels, visas & packages</p>
           </div>
-          <PermissionGate module="bookings" action="create">
-            <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
-              <DialogTrigger asChild>
-                <Button><Plus className="mr-2 h-4 w-4" />New Booking</Button>
-              </DialogTrigger>
+          <div className="flex gap-2">
+            <PermissionGate module="bookings" action="create">
+              <Button variant="outline" onClick={handleOpenQuotationDialog}>
+                <FileText className="mr-2 h-4 w-4" /> From Quotation
+              </Button>
+            </PermissionGate>
+            <PermissionGate module="bookings" action="create">
+              <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
+                <DialogTrigger asChild>
+                  <Button><Plus className="mr-2 h-4 w-4" />New Booking</Button>
+                </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{editingId ? "Edit" : "New"} Booking</DialogTitle>
@@ -273,6 +323,7 @@ const Bookings = () => {
               </DialogContent>
             </Dialog>
           </PermissionGate>
+          </div>
         </div>
 
         {/* Dashboard Widgets */}
@@ -350,8 +401,61 @@ const Bookings = () => {
                 <SelectItem value="paid">Paid</SelectItem>
               </SelectContent>
             </Select>
+            <Button variant="outline" size="sm" onClick={() => setShowFilters((v) => !v)} className="gap-1.5">
+              <Filter className="h-4 w-4" /> Filters
+              {activeFilterCount > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">{activeFilterCount}</Badge>
+              )}
+            </Button>
+            {activeFilterCount > 0 && (
+              <Button variant="ghost" size="sm" onClick={() => { setDestinationFilter(""); setTravelDateFrom(undefined); setTravelDateTo(undefined); }}>
+                Clear filters
+              </Button>
+            )}
           </div>
         </div>
+
+        {/* Advanced Filter Bar */}
+        {showFilters && (
+          <Card>
+            <CardContent className="p-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Destination</Label>
+                  <Input className="h-8 text-xs" placeholder="e.g. Dubai, Thailand" value={destinationFilter} onChange={(e) => setDestinationFilter(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Travel Date From</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className={cn("w-full justify-start text-left font-normal h-8 text-xs", !travelDateFrom && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-1 h-3 w-3" />
+                        {travelDateFrom ? format(travelDateFrom, "PP") : "Any"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={travelDateFrom} onSelect={setTravelDateFrom} initialFocus className="p-3 pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Travel Date To</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className={cn("w-full justify-start text-left font-normal h-8 text-xs", !travelDateTo && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-1 h-3 w-3" />
+                        {travelDateTo ? format(travelDateTo, "PP") : "Any"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={travelDateTo} onSelect={setTravelDateTo} initialFocus className="p-3 pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Table */}
         {loading ? (
@@ -445,6 +549,47 @@ const Bookings = () => {
           </Card>
         )}
       </div>
+
+      {/* Create from Quotation Dialog */}
+      <Dialog open={quotationDialogOpen} onOpenChange={setQuotationDialogOpen}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create Booking from Quotation</DialogTitle>
+          </DialogHeader>
+          {loadingQuotations ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">Loading approved quotations...</div>
+          ) : approvedQuotations.length === 0 ? (
+            <div className="py-8 text-center space-y-2">
+              <p className="text-sm text-muted-foreground">No approved quotations available.</p>
+              <p className="text-xs text-muted-foreground">Quotations must be in "Approved" status to convert into bookings.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Select an approved quotation to convert into a booking:</p>
+              {approvedQuotations.map((q) => (
+                <div
+                  key={q.id}
+                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent/50 cursor-pointer transition-colors"
+                  onClick={() => handleConvertQuotation(q)}
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm truncate">{q.title || q.destination}</p>
+                    <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
+                      {q.clientName && <span>{q.clientName}</span>}
+                      {q.destination && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{q.destination}</span>}
+                      <span>{q.travelerCount} travelers</span>
+                    </div>
+                  </div>
+                  <div className="text-right ml-3">
+                    <p className="text-sm font-medium">৳{q.grandTotal?.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">v{q.version}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
