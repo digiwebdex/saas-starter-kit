@@ -115,8 +115,30 @@ export interface Client {
   name: string;
   phone: string;
   email: string;
+  alternatePhone?: string;
+  address?: string;
+  dateOfBirth?: string;
+  passportNumber?: string;
+  passportExpiry?: string;
+  nidNumber?: string;
+  nationality?: string;
+  emergencyContact?: string;
+  emergencyPhone?: string;
+  notes?: string;
+  tags?: string[];
+  documents?: ClientDocument[];
   tenantId: string;
   createdAt: string;
+  updatedAt?: string;
+}
+
+export interface ClientDocument {
+  id: string;
+  clientId: string;
+  name: string;
+  type: string;
+  url: string;
+  uploadedAt: string;
 }
 
 export interface Agent {
