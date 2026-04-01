@@ -248,7 +248,7 @@ export function getAccessibleModules(
   overrides?: Partial<Record<AppRole, Partial<PermissionMatrix>>>
 ): Module[] {
   const allModules: Module[] = [
-    "dashboard", "clients", "agents", "vendors", "leads", "tasks",
+    "dashboard", "clients", "agents", "vendors", "leads", "tasks", "quotations",
     "bookings", "invoices", "accounts", "reports", "hajj_umrah",
     "subscription", "team", "organization", "settings", "website", "admin_panel",
   ];
