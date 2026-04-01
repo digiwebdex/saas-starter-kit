@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import {
-  Plus, Receipt, CreditCard, Eye, Mail, Wallet, Search, Download,
+  Plus, Receipt, CreditCard, Eye, Mail, Wallet, Search, Download, Plane,
   DollarSign, AlertTriangle, Clock, CheckCircle2, XCircle, RefreshCcw,
   Upload, Trash2, ArrowLeft, FileText, RotateCcw, Ban, Send, TrendingUp,
 } from "lucide-react";
