@@ -28,6 +28,7 @@ import QuotationPrint from "./pages/QuotationPrint";
 import Bookings from "./pages/Bookings";
 import BookingDetails from "./pages/BookingDetails";
 import Invoices from "./pages/Invoices";
+import InvoiceReceipt from "./pages/InvoiceReceipt";
 import Accounts from "./pages/Accounts";
 import Reports from "./pages/Reports";
 import HajjUmrah from "./pages/HajjUmrah";
@@ -105,6 +106,7 @@ const AppContent = () => (
               <Route path="/bookings" element={<P><Bookings /></P>} />
               <Route path="/bookings/:id" element={<P><BookingDetails /></P>} />
               <Route path="/invoices" element={<P><Invoices /></P>} />
+              <Route path="/invoices/:id/receipt" element={<P><InvoiceReceipt /></P>} />
               <Route path="/accounts" element={<P><Accounts /></P>} />
               <Route path="/reports" element={<P><Reports /></P>} />
               <Route path="/hajj-umrah" element={<P><HajjUmrah /></P>} />

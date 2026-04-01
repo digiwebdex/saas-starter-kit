@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import {
-  Plus, Receipt, CreditCard, Eye, Mail, Wallet, Search, Download,
+  Plus, Receipt, CreditCard, Eye, Mail, Wallet, Search, Download, Plane,
   DollarSign, AlertTriangle, Clock, CheckCircle2, XCircle, RefreshCcw,
   Upload, Trash2, ArrowLeft, FileText, RotateCcw, Ban, Send, TrendingUp,
 } from "lucide-react";
@@ -24,9 +24,11 @@ import { emailApi } from "@/lib/emailApi";
 import PaymentGatewayDialog from "@/components/PaymentGatewayDialog";
 import { sendPaymentSms } from "@/lib/smsAutomation";
 import {
-  invoiceApi, paymentApi, type Invoice, type Payment, type InvoiceStatus,
-  type PaymentMethod, type InvoiceRefund, type InvoiceAuditEvent,
+  invoiceApi, paymentApi, bookingApi, type Invoice, type Payment, type InvoiceStatus,
+  type PaymentMethod, type InvoiceRefund, type InvoiceAuditEvent, type Booking,
 } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import EmptyState from "@/components/EmptyState";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
@@ -58,6 +60,8 @@ const Invoices = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Dialogs
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -67,6 +71,9 @@ const Invoices = () => {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [payGatewayOpen, setPayGatewayOpen] = useState(false);
   const [payGatewayInvoice, setPayGatewayInvoice] = useState<{ id: string; amount: number } | null>(null);
+  const [fromBookingOpen, setFromBookingOpen] = useState(false);
+  const [bookingsList, setBookingsList] = useState<Booking[]>([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
 
   // Selection & sub-data
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
@@ -84,7 +91,8 @@ const Invoices = () => {
     bookingCost: 0, dueDate: "", notes: "",
   });
   const [paymentForm, setPaymentForm] = useState({
-    amount: 0, method: "cash" as PaymentMethod, transactionRef: "", date: new Date().toISOString().split("T")[0], notes: "",
+    amount: 0, method: "cash" as PaymentMethod, transactionRef: "",
+    date: new Date().toISOString().split("T")[0], notes: "", receivedBy: "",
   });
   const [refundForm, setRefundForm] = useState({ amount: 0, reason: "", method: "" });
   const [cancelReason, setCancelReason] = useState("");
@@ -179,6 +187,8 @@ const Invoices = () => {
         transactionRef: paymentForm.transactionRef,
         date: paymentForm.date,
         notes: paymentForm.notes,
+        receivedBy: paymentForm.receivedBy || user?.name || "",
+        receivedByName: paymentForm.receivedBy || user?.name || "",
         tenantId: selectedInvoice.tenantId,
       } as any);
       setInvoicePayments((p) => [...p, payment]);
@@ -190,7 +200,7 @@ const Invoices = () => {
         const newStatus: InvoiceStatus = newDue <= 0 ? "paid" : newPaid > 0 ? "partial" : "unpaid";
         return { ...inv, paidAmount: newPaid, dueAmount: Math.max(0, newDue), status: newStatus };
       }));
-      setPaymentForm({ amount: 0, method: "cash", transactionRef: "", date: new Date().toISOString().split("T")[0], notes: "" });
+      setPaymentForm({ amount: 0, method: "cash", transactionRef: "", date: new Date().toISOString().split("T")[0], notes: "", receivedBy: "" });
       setPayDialogOpen(false);
       toast({ title: "Payment recorded", description: `৳${payAmount.toLocaleString()} via ${paymentForm.method}` });
       sendPaymentSms({
@@ -309,6 +319,19 @@ const Invoices = () => {
             <PermissionGate module="invoices" action="export">
               <Button variant="outline" size="sm" onClick={handleExport} disabled={!filtered.length}>
                 <Download className="mr-1 h-4 w-4" /> Export CSV
+              </Button>
+            </PermissionGate>
+            <PermissionGate module="invoices" action="create">
+              <Button variant="outline" onClick={async () => {
+                setFromBookingOpen(true);
+                setBookingsLoading(true);
+                try {
+                  const bks = await bookingApi.list();
+                  setBookingsList(bks);
+                } catch { setBookingsList([]); }
+                finally { setBookingsLoading(false); }
+              }}>
+                <Plane className="mr-2 h-4 w-4" /> From Booking
               </Button>
             </PermissionGate>
             <PermissionGate module="invoices" action="create">
@@ -509,6 +532,9 @@ const Invoices = () => {
                             <div className="flex gap-1">
                               <Button variant="ghost" size="icon" title="View Details" onClick={() => { loadInvoiceDetails(inv.id); setDetailDialogOpen(true); }}>
                                 <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" title="View Receipt" onClick={() => navigate(`/invoices/${inv.id}/receipt`)}>
+                                <FileText className="h-4 w-4" />
                               </Button>
                               {inv.status !== "paid" && inv.status !== "cancelled" && inv.status !== "refunded" && (
                                 <PermissionGate module="invoices" action="edit">
@@ -743,9 +769,15 @@ const Invoices = () => {
                   <Input value={paymentForm.transactionRef} onChange={(e) => setPaymentForm((f) => ({ ...f, transactionRef: e.target.value }))} placeholder="e.g. TXN-12345" />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Notes</Label>
-                <Input value={paymentForm.notes} onChange={(e) => setPaymentForm((f) => ({ ...f, notes: e.target.value }))} placeholder="Optional payment notes..." />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Received By</Label>
+                  <Input value={paymentForm.receivedBy} onChange={(e) => setPaymentForm((f) => ({ ...f, receivedBy: e.target.value }))} placeholder={user?.name || "Staff name"} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Notes</Label>
+                  <Input value={paymentForm.notes} onChange={(e) => setPaymentForm((f) => ({ ...f, notes: e.target.value }))} placeholder="Optional payment notes..." />
+                </div>
               </div>
               <div className="flex gap-2">
                 <Button type="submit" className="flex-1">Record Payment</Button>
@@ -807,6 +839,49 @@ const Invoices = () => {
                 <DialogClose asChild><Button variant="outline">Keep Invoice</Button></DialogClose>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* ═══════ FROM BOOKING DIALOG ═══════ */}
+        <Dialog open={fromBookingOpen} onOpenChange={setFromBookingOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>Create Invoice from Booking</DialogTitle></DialogHeader>
+            {bookingsLoading ? (
+              <div className="py-8 text-center text-muted-foreground">Loading bookings...</div>
+            ) : bookingsList.length === 0 ? (
+              <div className="py-8 text-center text-muted-foreground">No bookings found.</div>
+            ) : (
+              <div className="max-h-[400px] overflow-y-auto space-y-2">
+                {bookingsList.map((bk) => (
+                  <div
+                    key={bk.id}
+                    className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/50 cursor-pointer"
+                    onClick={() => {
+                      setInvoiceForm({
+                        bookingId: bk.id,
+                        bookingTitle: bk.title || `${bk.type} — ${bk.destination || "Trip"}`,
+                        clientName: bk.clientName || "",
+                        totalAmount: bk.amount || 0,
+                        bookingCost: bk.cost || 0,
+                        dueDate: "",
+                        notes: "",
+                      });
+                      setFromBookingOpen(false);
+                      setCreateDialogOpen(true);
+                    }}
+                  >
+                    <div>
+                      <p className="text-sm font-medium">{bk.title || `${bk.type} — ${bk.destination || "Trip"}`}</p>
+                      <p className="text-xs text-muted-foreground">{bk.clientName || "No client"} · {bk.status}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold">৳{(bk.amount || 0).toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground">{bk.createdAt?.slice(0, 10)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </DialogContent>
         </Dialog>
 
