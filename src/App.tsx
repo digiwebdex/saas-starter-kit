@@ -28,6 +28,7 @@ import QuotationPrint from "./pages/QuotationPrint";
 import Bookings from "./pages/Bookings";
 import BookingDetails from "./pages/BookingDetails";
 import Invoices from "./pages/Invoices";
+import InvoiceReceipt from "./pages/InvoiceReceipt";
 import Accounts from "./pages/Accounts";
 import Reports from "./pages/Reports";
 import HajjUmrah from "./pages/HajjUmrah";
