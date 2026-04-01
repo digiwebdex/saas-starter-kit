@@ -187,8 +187,21 @@ export const invoiceApi = {
     }).then((r) => r.json()),
 };
 export const paymentApi = createCrudApi<Payment>("payments");
-export const accountApi = createCrudApi<Account>("accounts");
+export const accountApi = {
+  ...createCrudApi<Account>("accounts"),
+  getSummary: () => request<AccountsSummary>("/accounts/summary"),
+  getLedger: (params?: Record<string, string>) => {
+    const query = params ? "?" + new URLSearchParams(params).toString() : "";
+    return request<Transaction[]>(`/accounts/ledger${query}`);
+  },
+  getProfitability: () => request<BookingProfitability[]>("/accounts/profitability"),
+};
 export const transactionApi = createCrudApi<Transaction>("transactions");
+export const expenseApi = {
+  ...createCrudApi<Expense>("expenses"),
+  approve: (id: string) => request<Expense>(`/expenses/${id}/approve`, { method: "POST" }),
+  reject: (id: string, reason: string) => request<Expense>(`/expenses/${id}/reject`, { method: "POST", body: JSON.stringify({ reason }) }),
+};
 export const subscriptionApi = createCrudApi<Subscription>("subscriptions");
 export const paymentRequestApi = createCrudApi<PaymentRequest>("payment-requests");
 
@@ -543,21 +556,96 @@ export interface Account {
   name: string;
   type: "cash" | "bank";
   balance: number;
+  accountNumber?: string;
+  bankName?: string;
+  notes?: string;
+  status: "active" | "inactive";
   tenantId: string;
   createdAt: string;
+  updatedAt?: string;
 }
+
+export type TransactionType = "income" | "expense" | "refund" | "vendor_payment";
 
 export interface Transaction {
   id: string;
-  accountId: string;
-  type: "income" | "expense";
+  accountId?: string;
+  accountName?: string;
+  type: TransactionType;
   category: string;
   description: string;
   amount: number;
-  referenceId: string;
+  referenceId?: string;
+  referenceType?: "invoice" | "payment" | "booking" | "vendor_bill" | "expense" | "refund";
+  clientId?: string;
+  clientName?: string;
+  bookingId?: string;
+  bookingTitle?: string;
+  vendorId?: string;
+  vendorName?: string;
+  invoiceId?: string;
+  invoiceNumber?: string;
+  paymentMethod?: PaymentMethod;
+  status?: "completed" | "pending" | "failed" | "reversed";
   date: string;
   tenantId: string;
+  createdBy?: string;
+  createdByName?: string;
   createdAt: string;
+}
+
+export type ExpenseCategory = "office" | "travel" | "salary" | "marketing" | "utilities" | "rent" | "insurance" | "supplies" | "commission" | "bank_charges" | "taxes" | "miscellaneous";
+
+export interface Expense {
+  id: string;
+  category: ExpenseCategory;
+  description: string;
+  amount: number;
+  date: string;
+  paymentMethod: PaymentMethod;
+  reference?: string;
+  notes?: string;
+  attachmentUrl?: string;
+  vendorId?: string;
+  vendorName?: string;
+  accountId?: string;
+  accountName?: string;
+  approvedBy?: string;
+  approvedByName?: string;
+  status: "pending" | "approved" | "rejected";
+  tenantId: string;
+  createdBy?: string;
+  createdByName?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface AccountsSummary {
+  totalReceivable: number;
+  totalReceived: number;
+  totalPayable: number;
+  overdueReceivable: number;
+  overduePayable: number;
+  cashBankBalance: number;
+  totalExpenses: number;
+  netProfit: number;
+  receivableCount: number;
+  payableCount: number;
+  overdueReceivableCount: number;
+  overduePayableCount: number;
+}
+
+export interface BookingProfitability {
+  bookingId: string;
+  bookingTitle: string;
+  clientName: string;
+  sellingAmount: number;
+  vendorCosts: number;
+  expenses: number;
+  grossProfit: number;
+  marginPercent: number;
+  status: BookingStatus;
+  date: string;
 }
 
 export interface Subscription {
