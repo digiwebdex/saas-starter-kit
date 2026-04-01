@@ -198,7 +198,7 @@ const Invoices = () => {
         const newStatus: InvoiceStatus = newDue <= 0 ? "paid" : newPaid > 0 ? "partial" : "unpaid";
         return { ...inv, paidAmount: newPaid, dueAmount: Math.max(0, newDue), status: newStatus };
       }));
-      setPaymentForm({ amount: 0, method: "cash", transactionRef: "", date: new Date().toISOString().split("T")[0], notes: "" });
+      setPaymentForm({ amount: 0, method: "cash", transactionRef: "", date: new Date().toISOString().split("T")[0], notes: "", receivedBy: "" });
       setPayDialogOpen(false);
       toast({ title: "Payment recorded", description: `৳${payAmount.toLocaleString()} via ${paymentForm.method}` });
       sendPaymentSms({
