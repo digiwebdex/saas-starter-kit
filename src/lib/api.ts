@@ -101,6 +101,10 @@ export const leadApi = {
     request<LeadActivity>(`/leads/${id}/activities`, { method: "POST", body: JSON.stringify(data) }),
   convertToClient: (id: string) =>
     request<Client>(`/leads/${id}/convert`, { method: "POST" }),
+  getQuotations: (id: string) =>
+    request<Quotation[]>(`/leads/${id}/quotations`).catch(() => []),
+  checkDuplicateClient: (email: string, phone: string) =>
+    request<{ exists: boolean; client?: Client }>(`/leads/check-duplicate?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}`).catch(() => ({ exists: false })),
 };
 export const taskApi = createCrudApi<Task>("tasks");
 export const bookingApi = {
