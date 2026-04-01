@@ -111,6 +111,7 @@ export const DEFAULT_PERMISSIONS: Record<AppRole, PermissionMatrix> = {
     vendors: ALL_ACTIONS,
     leads: ALL_ACTIONS,
     tasks: ALL_ACTIONS,
+    quotations: ALL_ACTIONS,
     bookings: ALL_ACTIONS,
     invoices: { view: true, create: true, edit: true, approve: true, export: true },
     accounts: { view: true, create: true, edit: true, export: true },
