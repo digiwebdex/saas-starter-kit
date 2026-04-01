@@ -39,6 +39,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AdminFeatures from "./pages/admin/AdminFeatures";
 import AdminSmsTemplates from "./pages/admin/AdminSmsTemplates";
 import AdminSmsLogs from "./pages/admin/AdminSmsLogs";
+import AdminRoles from "./pages/admin/AdminRoles";
 import SiteHome from "./pages/site/SiteHome";
 import SiteAbout from "./pages/site/SiteAbout";
 import SitePackages from "./pages/site/SitePackages";
