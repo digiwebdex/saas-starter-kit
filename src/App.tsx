@@ -26,6 +26,7 @@ import Reports from "./pages/Reports";
 import HajjUmrah from "./pages/HajjUmrah";
 import Subscriptions from "./pages/Subscriptions";
 import PaymentCallback from "./pages/PaymentCallback";
+import RoleManagement from "./pages/RoleManagement";
 import Onboarding from "./pages/Onboarding";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
