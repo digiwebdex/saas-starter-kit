@@ -7,16 +7,21 @@ import PermissionGate from "@/components/PermissionGate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { leadApi, type Lead, type LeadActivity, type LeadStatus } from "@/lib/api";
+import { leadApi, taskApi, type Lead, type LeadActivity, type LeadStatus, type Quotation } from "@/lib/api";
 import {
   ArrowLeft, Phone, Mail, MapPin, CalendarIcon, Users, DollarSign, UserPlus,
-  MessageSquare, Clock, ArrowRight, RefreshCw, Send,
+  MessageSquare, Clock, ArrowRight, RefreshCw, Send, FileText, CheckSquare,
+  AlertTriangle, ExternalLink,
 } from "lucide-react";
 
 const LEAD_STATUSES: { value: LeadStatus; label: string; color: string }[] = [
@@ -43,28 +48,46 @@ const activityIcon = (type: string) => {
   return found ? found.icon : MessageSquare;
 };
 
+const QUOTATION_STATUS_COLORS: Record<string, string> = {
+  draft: "bg-muted text-muted-foreground",
+  sent: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+  approved: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+  rejected: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+  expired: "bg-muted text-muted-foreground",
+};
+
 const LeadDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [lead, setLead] = useState<Lead | null>(null);
   const [activities, setActivities] = useState<LeadActivity[]>([]);
+  const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activityType, setActivityType] = useState("note");
   const [activityContent, setActivityContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [convertDialogOpen, setConvertDialogOpen] = useState(false);
+  const [duplicateClient, setDuplicateClient] = useState<{ exists: boolean; client?: any } | null>(null);
+  const [converting, setConverting] = useState(false);
+  const [followUpDialogOpen, setFollowUpDialogOpen] = useState(false);
+  const [followUpDate, setFollowUpDate] = useState<Date | undefined>();
+  const [followUpNote, setFollowUpNote] = useState("");
+  const [creatingTask, setCreatingTask] = useState(false);
   const { toast } = useToast();
 
   const fetchData = useCallback(async () => {
     if (!id) return;
     setLoading(true);
     try {
-      const [leadData, actData] = await Promise.all([
+      const [leadData, actData, quotData] = await Promise.all([
         leadApi.get(id),
         leadApi.getActivities(id).catch(() => []),
+        leadApi.getQuotations(id).catch(() => []),
       ]);
       setLead(leadData);
       setActivities(actData);
+      setQuotations(quotData);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -97,10 +120,9 @@ const LeadDetails = () => {
       setActivities((prev) => [created, ...prev]);
       setActivityContent("");
       toast({ title: "Activity added" });
-    } catch (err: any) {
-      // Fallback: add locally
+    } catch {
       setActivities((prev) => [
-        { id: `local-${Date.now()}`, leadId: lead.id, type: activityType as LeadActivity["type"], content: activityContent, createdAt: new Date().toISOString() },
+        { id: `local-${Date.now()}`, leadId: lead!.id, type: activityType as LeadActivity["type"], content: activityContent, createdAt: new Date().toISOString() },
         ...prev,
       ]);
       setActivityContent("");
@@ -109,14 +131,71 @@ const LeadDetails = () => {
     }
   };
 
-  const handleConvert = async () => {
+  // ── Convert to Client with duplicate check ──
+  const handleConvertClick = async () => {
     if (!lead) return;
+    const dup = await leadApi.checkDuplicateClient(lead.email || "", lead.phone || "");
+    setDuplicateClient(dup);
+    setConvertDialogOpen(true);
+  };
+
+  const handleConfirmConvert = async () => {
+    if (!lead) return;
+    setConverting(true);
     try {
       await leadApi.convertToClient(lead.id);
       toast({ title: "Lead converted to client!", description: `${lead.name} is now a client.` });
       navigate("/clients");
     } catch (err: any) {
       toast({ variant: "destructive", title: "Error", description: err.message });
+    } finally {
+      setConverting(false);
+      setConvertDialogOpen(false);
+    }
+  };
+
+  // ── Create Quotation ──
+  const handleCreateQuotation = () => {
+    if (!lead) return;
+    const params = new URLSearchParams();
+    params.set("leadId", lead.id);
+    params.set("leadName", lead.name);
+    if (lead.destination) params.set("destination", lead.destination);
+    if (lead.travelDateFrom) params.set("travelDateFrom", lead.travelDateFrom);
+    if (lead.travelDateTo) params.set("travelDateTo", lead.travelDateTo);
+    if (lead.travelerCount) params.set("travelerCount", String(lead.travelerCount));
+    if (lead.budget) params.set("budget", String(lead.budget));
+    navigate(`/quotations/new?${params.toString()}`);
+  };
+
+  // ── Schedule Follow-up Task ──
+  const handleCreateFollowUp = async () => {
+    if (!lead || !followUpDate) return;
+    setCreatingTask(true);
+    try {
+      await taskApi.create({
+        title: `Follow up with ${lead.name}`,
+        description: followUpNote || `Follow-up for lead: ${lead.name}${lead.destination ? ` — ${lead.destination}` : ""}`,
+        status: "todo",
+        priority: "medium",
+        dueDate: format(followUpDate, "yyyy-MM-dd"),
+      } as any);
+      // Also add activity
+      const act = await leadApi.addActivity(lead.id, {
+        type: "follow_up",
+        content: `Follow-up scheduled for ${format(followUpDate, "PPP")}${followUpNote ? `: ${followUpNote}` : ""}`,
+      }).catch(() => ({
+        id: `local-${Date.now()}`, leadId: lead.id, type: "follow_up" as const, content: `Follow-up scheduled for ${format(followUpDate, "PPP")}`, createdAt: new Date().toISOString(),
+      }));
+      setActivities((prev) => [act, ...prev]);
+      toast({ title: "Follow-up task created", description: `Scheduled for ${format(followUpDate, "PPP")}` });
+      setFollowUpDialogOpen(false);
+      setFollowUpDate(undefined);
+      setFollowUpNote("");
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Error", description: err.message });
+    } finally {
+      setCreatingTask(false);
     }
   };
 
@@ -143,7 +222,7 @@ const LeadDetails = () => {
               <span className="text-xs text-muted-foreground">Created {lead.createdAt?.slice(0, 10)}</span>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <PermissionGate module="leads" action="edit">
               <Select value={lead.status} onValueChange={(v) => handleStatusChange(v as LeadStatus)}>
                 <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
@@ -152,9 +231,19 @@ const LeadDetails = () => {
                 </SelectContent>
               </Select>
             </PermissionGate>
+            <PermissionGate module="quotations" action="create">
+              <Button variant="outline" onClick={handleCreateQuotation}>
+                <FileText className="mr-2 h-4 w-4" /> Create Quotation
+              </Button>
+            </PermissionGate>
+            <PermissionGate module="leads" action="edit">
+              <Button variant="outline" onClick={() => setFollowUpDialogOpen(true)}>
+                <CheckSquare className="mr-2 h-4 w-4" /> Schedule Follow-up
+              </Button>
+            </PermissionGate>
             {lead.status === "won" && (
               <PermissionGate module="leads" action="approve">
-                <Button onClick={handleConvert}><UserPlus className="mr-2 h-4 w-4" /> Convert to Client</Button>
+                <Button onClick={handleConvertClick}><UserPlus className="mr-2 h-4 w-4" /> Convert to Client</Button>
               </PermissionGate>
             )}
           </div>
@@ -203,6 +292,46 @@ const LeadDetails = () => {
                 <CardContent><p className="text-sm text-muted-foreground whitespace-pre-wrap">{lead.notes}</p></CardContent>
               </Card>
             )}
+
+            {/* Linked Quotations */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm">Quotations ({quotations.length})</CardTitle>
+                  <PermissionGate module="quotations" action="create">
+                    <Button variant="ghost" size="sm" onClick={handleCreateQuotation}>
+                      <FileText className="h-3.5 w-3.5" />
+                    </Button>
+                  </PermissionGate>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {quotations.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-2">No quotations linked yet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {quotations.map((q) => (
+                      <div
+                        key={q.id}
+                        className="flex items-center justify-between p-2 rounded border cursor-pointer hover:bg-accent/50 transition-colors"
+                        onClick={() => navigate(`/quotations/${q.id}`)}
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{q.title || q.destination}</p>
+                          <p className="text-xs text-muted-foreground">৳{q.grandTotal?.toLocaleString()} • v{q.version}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`inline-flex items-center rounded-full px-1.5 py-0 text-[10px] font-medium ${QUOTATION_STATUS_COLORS[q.status] || "bg-muted text-muted-foreground"}`}>
+                            {q.status}
+                          </span>
+                          <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Status Pipeline */}
             <Card>
@@ -296,6 +425,93 @@ const LeadDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Convert to Client Dialog with duplicate check */}
+      <Dialog open={convertDialogOpen} onOpenChange={setConvertDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Convert Lead to Client</DialogTitle>
+          </DialogHeader>
+          {duplicateClient?.exists ? (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-3 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+                <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-amber-800 dark:text-amber-200">Duplicate client detected</p>
+                  <p className="text-amber-700 dark:text-amber-300 mt-1">
+                    A client with matching contact information already exists:
+                    <strong className="block mt-1">{duplicateClient.client?.name}</strong>
+                    {duplicateClient.client?.email && <span className="block text-xs">{duplicateClient.client.email}</span>}
+                    {duplicateClient.client?.phone && <span className="block text-xs">{duplicateClient.client.phone}</span>}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={() => {
+                  setConvertDialogOpen(false);
+                  if (duplicateClient.client?.id) navigate(`/clients/${duplicateClient.client.id}`);
+                }}>
+                  View Existing Client
+                </Button>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                This will create a new client record for <strong>{lead?.name}</strong> and mark the lead as Won. All contact details will be copied to the client profile.
+              </p>
+              <div className="flex gap-2">
+                <Button className="flex-1" onClick={handleConfirmConvert} disabled={converting}>
+                  <UserPlus className="mr-2 h-4 w-4" /> {converting ? "Converting..." : "Confirm & Convert"}
+                </Button>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Follow-up Dialog */}
+      <Dialog open={followUpDialogOpen} onOpenChange={setFollowUpDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Schedule Follow-up</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Follow-up Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !followUpDate && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {followUpDate ? format(followUpDate, "PPP") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={followUpDate} onSelect={setFollowUpDate} initialFocus className="p-3 pointer-events-auto" disabled={(d) => d < new Date()} />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-2">
+              <Label>Note (optional)</Label>
+              <Textarea placeholder="Discuss pricing, send updated itinerary..." value={followUpNote} onChange={(e) => setFollowUpNote(e.target.value)} rows={2} />
+            </div>
+            <div className="flex gap-2">
+              <Button className="flex-1" onClick={handleCreateFollowUp} disabled={!followUpDate || creatingTask}>
+                <CheckSquare className="mr-2 h-4 w-4" /> {creatingTask ? "Creating..." : "Create Task"}
+              </Button>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
