@@ -1,0 +1,49 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            echo "═══ Pulling latest code ═══"
+            cd /var/www/skyline-frontend
+            git pull origin main
+
+            echo "═══ Building frontend ═══"
+            npm install
+            npm run build
+
+            echo "═══ Deploying backend ═══"
+            cd /var/www/skyline-frontend/backend
+
+            # Create .env if not exists
+            if [ ! -f .env ]; then
+              echo "⚠️  Backend .env not found! Run SETUP-VPS.sh first."
+              exit 1
+            fi
+
+            npm install
+            npx prisma generate
+            npx prisma db push --accept-data-loss
+
+            # Restart PM2
+            pm2 describe skyline-api > /dev/null 2>&1 && pm2 restart skyline-api || pm2 start src/index.js --name "skyline-api"
+            pm2 save
+
+            echo "═══ Reloading Nginx ═══"
+            sudo nginx -t && sudo systemctl reload nginx
+
+            echo "✅ Deployment complete!"
