@@ -892,3 +892,48 @@ export const hajjApi = {
   addPilgrimPayment: (pilgrimId: string, data: Omit<HajjPilgrimPayment, "id" | "createdAt">) =>
     request<HajjPilgrimPayment>(`/hajj/pilgrims/${pilgrimId}/payments`, { method: "POST", body: JSON.stringify(data) }),
 };
+
+// ── Admin API (Super Admin only) ──
+export interface AdminStats {
+  totalTenants: number;
+  totalUsers: number;
+  totalBookings: number;
+  totalRevenue: number;
+}
+
+export interface AdminTenant {
+  id: string;
+  name: string;
+  subscriptionPlan: string;
+  subscriptionStatus: string;
+  subscriptionExpiry: string | null;
+  ownerId: string | null;
+  createdAt: string;
+  _count?: { users: number; bookings: number };
+  users?: { id: string; name: string; email: string; role: string; createdAt: string }[];
+}
+
+export interface AdminPaymentRequest {
+  id: string;
+  tenantId: string;
+  plan: string;
+  amount: number;
+  method: string;
+  trxId: string;
+  proofUrl: string;
+  status: string;
+  reviewerComment?: string;
+  createdAt: string;
+  processedAt?: string;
+}
+
+export const adminApi = {
+  getStats: () => request<AdminStats>("/admin/stats"),
+  getTenants: () => request<AdminTenant[]>("/admin/tenants"),
+  getTenant: (id: string) => request<AdminTenant>(`/admin/tenants/${id}`),
+  updateTenant: (id: string, data: Partial<AdminTenant>) =>
+    request<AdminTenant>(`/admin/tenants/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  getPaymentRequests: () => request<AdminPaymentRequest[]>("/admin/payment-requests"),
+  updatePaymentRequest: (id: string, data: Partial<AdminPaymentRequest>) =>
+    request<AdminPaymentRequest>(`/admin/payment-requests/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+};
