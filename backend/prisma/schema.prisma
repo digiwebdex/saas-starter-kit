@@ -630,6 +630,7 @@ model Subscription {
 model PaymentRequest {
   id        String   @id @default(uuid())
   tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   plan      String
   amount    Float
   trxId     String
