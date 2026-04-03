@@ -1,0 +1,62 @@
+const router = require("express").Router();
+const { authenticate, prisma } = require("../middleware/auth");
+
+router.use(authenticate);
+
+router.get("/", async (req, res) => {
+  try { res.json(await prisma.quotation.findMany({ where: { tenantId: req.tenantId }, orderBy: { createdAt: "desc" } })); }
+  catch (err) { res.status(500).json({ message: err.message }); }
+});
+router.get("/:id", async (req, res) => {
+  try {
+    const q = await prisma.quotation.findFirst({ where: { id: req.params.id, tenantId: req.tenantId } });
+    if (!q) return res.status(404).json({ message: "Not found" });
+    res.json(q);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+router.post("/", async (req, res) => {
+  try { res.status(201).json(await prisma.quotation.create({ data: { ...req.body, createdBy: req.userId, tenantId: req.tenantId } })); }
+  catch (err) { res.status(500).json({ message: err.message }); }
+});
+router.patch("/:id", async (req, res) => {
+  try {
+    await prisma.quotation.updateMany({ where: { id: req.params.id, tenantId: req.tenantId }, data: req.body });
+    res.json(await prisma.quotation.findFirst({ where: { id: req.params.id } }));
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+router.delete("/:id", async (req, res) => {
+  try { await prisma.quotation.deleteMany({ where: { id: req.params.id, tenantId: req.tenantId } }); res.json({ success: true }); }
+  catch (err) { res.status(500).json({ message: err.message }); }
+});
+router.patch("/:id/status", async (req, res) => {
+  try {
+    await prisma.quotation.updateMany({ where: { id: req.params.id, tenantId: req.tenantId }, data: { status: req.body.status } });
+    res.json(await prisma.quotation.findFirst({ where: { id: req.params.id } }));
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+router.get("/:id/versions", async (req, res) => {
+  try { res.json(await prisma.quotationVersion.findMany({ where: { quotationId: req.params.id }, orderBy: { versionNumber: "desc" } })); }
+  catch (err) { res.status(500).json({ message: err.message }); }
+});
+router.post("/:id/duplicate", async (req, res) => {
+  try {
+    const orig = await prisma.quotation.findFirst({ where: { id: req.params.id, tenantId: req.tenantId } });
+    if (!orig) return res.status(404).json({ message: "Not found" });
+    const { id, createdAt, updatedAt, ...data } = orig;
+    const dup = await prisma.quotation.create({ data: { ...data, title: `${data.title} (Copy)`, status: "draft", version: 1 } });
+    res.status(201).json(dup);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+router.post("/:id/convert-to-booking", async (req, res) => {
+  try {
+    const q = await prisma.quotation.findFirst({ where: { id: req.params.id, tenantId: req.tenantId } });
+    if (!q) return res.status(404).json({ message: "Not found" });
+    const booking = await prisma.booking.create({
+      data: { title: q.title, clientId: q.clientId || "", quotationId: q.id, destination: q.destination, travelDateFrom: q.travelDateFrom, travelDateTo: q.travelDateTo, travelerCount: q.travelerCount, amount: q.grandTotal, cost: q.totalCost, profit: q.totalProfit, status: "pending", tenantId: req.tenantId },
+    });
+    await prisma.quotation.update({ where: { id: q.id }, data: { status: "approved" } });
+    res.status(201).json(booking);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+module.exports = router;
