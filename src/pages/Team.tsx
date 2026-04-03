@@ -46,7 +46,7 @@ const Team = () => {
     e.preventDefault();
     setInviting(true);
     try {
-      await tenantApi.inviteMember(inviteEmail, inviteRole);
+      await tenantApi.inviteMember(inviteEmail, inviteRole, inviteName || undefined);
       toast({ title: "Member added", description: `${inviteEmail} has been added to the team.` });
       setInviteEmail("");
       setInviteName("");

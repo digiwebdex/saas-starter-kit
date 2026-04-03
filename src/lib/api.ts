@@ -53,10 +53,10 @@ export const tenantApi = {
   update: (data: Partial<Tenant>) =>
     request<Tenant>("/tenants/me", { method: "PATCH", body: JSON.stringify(data) }),
   getMembers: () => request<User[]>("/tenants/me/members"),
-  inviteMember: (email: string, role: string) =>
+  inviteMember: (email: string, role: string, name?: string) =>
     request<User>("/tenants/me/members", {
       method: "POST",
-      body: JSON.stringify({ email, role }),
+      body: JSON.stringify({ email, role, name }),
     }),
   removeMember: (userId: string) =>
     request<void>(`/tenants/me/members/${userId}`, { method: "DELETE" }),
