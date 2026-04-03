@@ -68,4 +68,4 @@ echo "3. Copy nginx config: sudo cp $APP_DIR/nginx.conf /etc/nginx/sites-availab
 echo "4. Enable: sudo ln -s /etc/nginx/sites-available/skyline /etc/nginx/sites-enabled/"
 echo "5. Test: sudo nginx -t"
 echo "6. Reload: sudo systemctl reload nginx"
-echo "7. SSL: sudo certbot --nginx -d yourdomain.com -d api.yourdomain.com -d '*.yourdomain.com'"
+echo "7. SSL: sudo certbot --nginx -d travelagencyweb.com -d api.travelagencyweb.com -d '*.travelagencyweb.com'"
