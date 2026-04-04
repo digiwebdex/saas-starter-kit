@@ -59,6 +59,20 @@ router.post("/:id/convert", requirePermission("leads", "edit"), async (req, res)
     if (existing) return res.json(existing);
     const client = await prisma.client.create({ data: { name: lead.name, phone: lead.phone, email: lead.email, tenantId: req.tenantId } });
     await prisma.lead.update({ where: { id: lead.id }, data: { status: "won", clientId: client.id } });
+
+    // Audit log — lead conversion
+    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { name: true, email: true, role: true } });
+    const tenant = await prisma.tenant.findUnique({ where: { id: req.tenantId }, select: { name: true } });
+    await prisma.auditLog.create({
+      data: {
+        actorId: req.userId, actorName: user?.name || "", actorEmail: user?.email || "", actorRole: user?.role || "",
+        tenantId: req.tenantId, tenantName: tenant?.name || null,
+        module: "lead", action: "converted",
+        targetType: "lead", targetId: lead.id, targetLabel: lead.name,
+        newValue: JSON.stringify({ clientId: client.id, clientName: client.name }),
+      },
+    }).catch(() => {});
+
     res.json(client);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });

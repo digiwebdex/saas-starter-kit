@@ -1,13 +1,13 @@
 const router = require("express").Router();
-const { authenticate, prisma } = require("../middleware/auth");
+const { authenticate, requirePermission, prisma } = require("../middleware/auth");
 
 router.use(authenticate);
 
-router.get("/", async (req, res) => {
+router.get("/", requirePermission("accounts", "view"), async (req, res) => {
   try { res.json(await prisma.account.findMany({ where: { tenantId: req.tenantId }, orderBy: { createdAt: "desc" } })); }
   catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.get("/summary", async (req, res) => {
+router.get("/summary", requirePermission("accounts", "view"), async (req, res) => {
   try {
     const tid = req.tenantId;
     const [invoices, vendorBills, accounts, expenses] = await Promise.all([
@@ -35,40 +35,86 @@ router.get("/summary", async (req, res) => {
     });
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.get("/ledger", async (req, res) => {
+router.get("/ledger", requirePermission("accounts", "view"), async (req, res) => {
   try { res.json(await prisma.transaction.findMany({ where: { tenantId: req.tenantId }, orderBy: { createdAt: "desc" } })); }
   catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.get("/profitability", async (req, res) => {
+router.get("/profitability", requirePermission("accounts", "view"), async (req, res) => {
   try {
-    const bookings = await prisma.booking.findMany({ where: { tenantId: req.tenantId } });
-    const result = bookings.map(b => ({
-      bookingId: b.id, bookingTitle: b.title || "", clientName: b.clientName || "",
-      sellingAmount: b.amount, vendorCosts: b.cost, expenses: 0,
-      grossProfit: b.profit, marginPercent: b.amount > 0 ? (b.profit / b.amount) * 100 : 0,
-      status: b.status, date: b.createdAt.toISOString(),
+    const tid = req.tenantId;
+    const { from, to } = req.query;
+
+    // Build date filter
+    const dateFilter = {};
+    if (from) dateFilter.gte = new Date(from);
+    if (to) dateFilter.lte = new Date(to);
+    const where = { tenantId: tid };
+    if (from || to) where.createdAt = dateFilter;
+
+    const [bookings, expenses] = await Promise.all([
+      prisma.booking.findMany({ where }),
+      prisma.expense.findMany({ where: { ...where, status: "approved" } }),
+    ]);
+
+    // Map expenses to bookings where possible
+    const expensesByBooking = {};
+    for (const e of expenses) {
+      const key = e.bookingId || "unassigned";
+      expensesByBooking[key] = (expensesByBooking[key] || 0) + e.amount;
+    }
+
+    const bookingProfitability = bookings.map(b => ({
+      bookingId: b.id,
+      bookingTitle: b.title || b.destination || "",
+      clientName: b.clientName || "",
+      sellingAmount: b.amount,
+      vendorCosts: b.cost,
+      expenses: expensesByBooking[b.id] || 0,
+      grossProfit: b.profit,
+      netProfit: b.profit - (expensesByBooking[b.id] || 0),
+      marginPercent: b.amount > 0 ? ((b.profit - (expensesByBooking[b.id] || 0)) / b.amount) * 100 : 0,
+      status: b.status,
+      date: b.createdAt.toISOString(),
     }));
-    res.json(result);
+
+    const totalRevenue = bookings.reduce((s, b) => s + b.amount, 0);
+    const totalCost = bookings.reduce((s, b) => s + b.cost, 0);
+    const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
+    const totalGrossProfit = bookings.reduce((s, b) => s + b.profit, 0);
+    const totalNetProfit = totalGrossProfit - totalExpenses;
+
+    res.json({
+      bookings: bookingProfitability,
+      summary: {
+        totalRevenue,
+        totalCost,
+        totalExpenses,
+        totalGrossProfit,
+        totalNetProfit,
+        overallMargin: totalRevenue > 0 ? (totalNetProfit / totalRevenue) * 100 : 0,
+        bookingCount: bookings.length,
+      },
+    });
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.get("/:id", async (req, res) => {
+router.get("/:id", requirePermission("accounts", "view"), async (req, res) => {
   try {
     const a = await prisma.account.findFirst({ where: { id: req.params.id, tenantId: req.tenantId } });
     if (!a) return res.status(404).json({ message: "Not found" });
     res.json(a);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.post("/", async (req, res) => {
+router.post("/", requirePermission("accounts", "create"), async (req, res) => {
   try { res.status(201).json(await prisma.account.create({ data: { ...req.body, tenantId: req.tenantId } })); }
   catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", requirePermission("accounts", "edit"), async (req, res) => {
   try {
     await prisma.account.updateMany({ where: { id: req.params.id, tenantId: req.tenantId }, data: req.body });
     res.json(await prisma.account.findFirst({ where: { id: req.params.id } }));
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requirePermission("accounts", "delete"), async (req, res) => {
   try { await prisma.account.deleteMany({ where: { id: req.params.id, tenantId: req.tenantId } }); res.json({ success: true }); }
   catch (err) { res.status(500).json({ message: err.message }); }
 });

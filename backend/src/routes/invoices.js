@@ -21,7 +21,22 @@ router.post("/", requirePermission("invoices", "create"), async (req, res) => {
   try {
     const count = await prisma.invoice.count({ where: { tenantId: req.tenantId } });
     const invoiceNumber = `INV-${String(count + 1).padStart(5, "0")}`;
-    res.status(201).json(await prisma.invoice.create({ data: { ...req.body, invoiceNumber, createdBy: req.userId, tenantId: req.tenantId } }));
+    const invoice = await prisma.invoice.create({ data: { ...req.body, invoiceNumber, createdBy: req.userId, tenantId: req.tenantId } });
+
+    // Audit log — invoice create
+    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { name: true, email: true, role: true } });
+    const tenant = await prisma.tenant.findUnique({ where: { id: req.tenantId }, select: { name: true } });
+    await prisma.auditLog.create({
+      data: {
+        actorId: req.userId, actorName: user?.name || "", actorEmail: user?.email || "", actorRole: user?.role || "",
+        tenantId: req.tenantId, tenantName: tenant?.name || null,
+        module: "invoice", action: "created",
+        targetType: "invoice", targetId: invoice.id, targetLabel: invoiceNumber,
+        newValue: JSON.stringify({ totalAmount: invoice.totalAmount, clientId: invoice.clientId }),
+      },
+    }).catch(() => {});
+
+    res.status(201).json(invoice);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
 router.patch("/:id", requirePermission("invoices", "edit"), async (req, res) => {
@@ -43,7 +58,7 @@ router.patch("/:id/status", requirePermission("invoices", "edit"), async (req, r
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// Payments
+// Payments — with auto-create Transaction
 router.get("/:id/payments", requirePermission("invoices", "view"), async (req, res) => {
   try { res.json(await prisma.payment.findMany({ where: { invoiceId: req.params.id }, orderBy: { createdAt: "desc" } })); }
   catch (err) { res.status(500).json({ message: err.message }); }
@@ -53,14 +68,49 @@ router.post("/:id/payments", requirePermission("invoices", "create"), async (req
     const payment = await prisma.payment.create({ data: { ...req.body, invoiceId: req.params.id, receivedBy: req.userId, tenantId: req.tenantId } });
     const inv = await prisma.invoice.findUnique({ where: { id: req.params.id }, include: { payments: true } });
     const paid = inv.payments.reduce((s, p) => s + p.amount, 0);
-    await prisma.invoice.update({ where: { id: req.params.id }, data: { paidAmount: paid, dueAmount: inv.totalAmount - paid, status: paid >= inv.totalAmount ? "paid" : paid > 0 ? "partial" : "unpaid" } });
+    const newStatus = paid >= inv.totalAmount ? "paid" : paid > 0 ? "partial" : "unpaid";
+    await prisma.invoice.update({ where: { id: req.params.id }, data: { paidAmount: paid, dueAmount: inv.totalAmount - paid, status: newStatus } });
+
     if (req.body.bookingId) {
       const bInvoices = await prisma.invoice.findMany({ where: { bookingId: req.body.bookingId } });
       const bPaid = bInvoices.reduce((s, i) => s + i.paidAmount, 0);
       const bTotal = bInvoices.reduce((s, i) => s + i.totalAmount, 0);
       await prisma.booking.update({ where: { id: req.body.bookingId }, data: { paidAmount: bPaid, dueAmount: bTotal - bPaid, paymentStatus: bPaid >= bTotal ? "paid" : bPaid > 0 ? "partial" : "unpaid" } });
     }
+
+    // Auto-create Transaction record in ledger
+    await prisma.transaction.create({
+      data: {
+        type: "income",
+        category: "invoice_payment",
+        description: `Payment received for ${inv.invoiceNumber || inv.id} via ${payment.method}`,
+        amount: payment.amount,
+        referenceId: payment.id,
+        referenceType: "payment",
+        invoiceId: req.params.id,
+        bookingId: req.body.bookingId || inv.bookingId || null,
+        paymentMethod: payment.method,
+        status: "completed",
+        date: payment.date || new Date().toISOString().slice(0, 10),
+        tenantId: req.tenantId,
+      },
+    }).catch(e => console.error("Auto-transaction error:", e.message));
+
     await prisma.invoiceAuditEvent.create({ data: { invoiceId: req.params.id, type: "payment", content: `Payment of ${payment.amount} received via ${payment.method}`, amount: payment.amount, createdBy: req.userId } });
+
+    // Audit log — invoice payment
+    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { name: true, email: true, role: true } });
+    const tenant = await prisma.tenant.findUnique({ where: { id: req.tenantId }, select: { name: true } });
+    await prisma.auditLog.create({
+      data: {
+        actorId: req.userId, actorName: user?.name || "", actorEmail: user?.email || "", actorRole: user?.role || "",
+        tenantId: req.tenantId, tenantName: tenant?.name || null,
+        module: "invoice", action: "payment_received",
+        targetType: "invoice", targetId: req.params.id, targetLabel: inv.invoiceNumber || req.params.id,
+        newValue: JSON.stringify({ amount: payment.amount, method: payment.method, paymentId: payment.id }),
+      },
+    }).catch(() => {});
+
     res.status(201).json(payment);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });

@@ -99,6 +99,20 @@ router.patch("/payment-requests/:id", async (req, res) => {
         },
       });
     }
+
+    // Audit log — subscription approval/rejection
+    const actor = await prisma.user.findUnique({ where: { id: req.userId }, select: { name: true, email: true, role: true } });
+    const tenant = await prisma.tenant.findUnique({ where: { id: pr.tenantId }, select: { name: true } });
+    await prisma.auditLog.create({
+      data: {
+        actorId: req.userId, actorName: actor?.name || "", actorEmail: actor?.email || "", actorRole: actor?.role || "",
+        tenantId: pr.tenantId, tenantName: tenant?.name || null,
+        module: "subscription", action: status === "approved" ? "payment_approved" : "payment_rejected",
+        targetType: "paymentRequest", targetId: pr.id, targetLabel: `${pr.plan} - ${pr.amount}`,
+        newValue: JSON.stringify({ status, plan: pr.plan, amount: pr.amount, reviewerComment }),
+      },
+    }).catch(() => {});
+
     res.json(pr);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
