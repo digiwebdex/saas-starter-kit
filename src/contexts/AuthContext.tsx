@@ -32,6 +32,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const currentPlan: PlanType = (tenant?.subscriptionPlan as PlanType) || "free";
   const appRole: AppRole = user ? mapLegacyRole(user.role) : "sales_agent";
 
+  const isTrialActive = tenant?.subscriptionStatus === "trial";
+  const trialDaysLeft = (() => {
+    if (!isTrialActive || !tenant?.subscriptionExpiry) return 0;
+    const diff = new Date(tenant.subscriptionExpiry).getTime() - Date.now();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  })();
+
   const isSubscriptionExpired = (() => {
     if (!tenant) return false;
     if (currentPlan === "free") return false;
