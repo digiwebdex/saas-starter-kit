@@ -42,6 +42,7 @@ app.use("/api/expenses", require("./routes/expenses"));
 app.use("/api/hajj", require("./routes/hajj"));
 app.use("/api/subscriptions", require("./routes/crud")("subscription"));
 app.use("/api/payment-requests", require("./routes/crud")("paymentRequest"));
+app.use("/api/audit-logs", require("./routes/auditLogs"));
 
 // Admin routes
 app.use("/api/admin", require("./routes/admin"));
