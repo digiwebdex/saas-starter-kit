@@ -1,46 +1,39 @@
 
-# P0 + P1 Fix Plan
+# P2 Fix Plan
 
-## P0 — Critical
+## 1. Forgot Password Flow
+- Add `POST /api/auth/forgot-password` — generates a reset token, stores it in DB
+- Add `POST /api/auth/reset-password` — validates token, updates password
+- Add `resetToken` and `resetTokenExpiry` fields to User model in schema.prisma
+- Add frontend `/forgot-password` and `/reset-password` pages
+- **Email**: Since no SMTP is configured, the reset token/link will be returned in response for now (log to console on server). Add `SMTP_*` env vars as optional — when configured, sends real email.
 
-### 1. Sitemap domain fix
-- **Root cause**: sitemap.xml uses `globexconnect.com` instead of `travelagencyweb.com`
-- **Fix**: Update all URLs in `public/sitemap.xml`
+## 2. Auto-Create Transaction on Invoice Payment
+- In `invoices.js` POST `/:id/payments` handler, after recording payment, auto-create a Transaction record linked to the invoice/booking
+- No schema change needed — Transaction model already has `invoiceId`, `bookingId`, `referenceId`, `referenceType` fields
 
-### 2. Invoice schema mismatch
-- **Root cause**: Frontend sends `clientName`/`bookingTitle` but Prisma `Invoice` model lacks these fields
-- **Fix**: Add `clientName` and `bookingTitle` as optional String fields to Invoice model in schema.prisma
+## 3. Accounts Profitability Endpoint
+- Check `backend/src/routes/accounts.js` for existing endpoints
+- Add/verify `GET /api/accounts/profitability` — aggregates booking profit, expenses, net profit by period
 
-### 3. Payment-request tenant isolation
-- **Root cause**: `payment-requests` uses generic CRUD (`crud.js`) which correctly filters by `tenantId` on reads, but the issue is that the admin route for payment-requests doesn't scope properly, and the generic CRUD doesn't validate ownership on updates
-- **Fix**: Create a dedicated `paymentRequests.js` route with strict tenant filtering, replacing the generic CRUD
-
-### 4. Subscription/trial expiry cron
-- **Root cause**: No mechanism to auto-expire trials/subscriptions after their expiry date
-- **Fix**: Add a `/api/cron/process-expiry` endpoint protected by a secret key, plus provide cron setup instructions
-
-## P1 — Important
-
-### 5. Backend role middleware
-- **Root cause**: Only `requireSuperAdmin` exists; no middleware checks tenant-level roles
-- **Fix**: Add `requireRole(...roles)` and `requirePermission(module, action)` middleware functions in `auth.js`, apply to sensitive routes
-
-### 6. Backend plan-limit enforcement
-- **Root cause**: Plan limits (max clients, bookings, team members, domains) only checked on frontend
-- **Fix**: Add `checkPlanLimit(tenantId, resource)` middleware, apply to POST routes for clients, bookings, team members, domains
+## 4. Expanded Audit Log Coverage
+- **Login**: Add audit log in `POST /api/auth/login`
+- **Invoice create**: Add audit log in `POST /api/invoices`
+- **Invoice payment**: Add audit log in `POST /api/invoices/:id/payments`
+- **Lead conversion**: Add audit log in `POST /api/leads/:id/convert`
+- **Team member add/remove**: Already added in P1 tenants.js ✓
+- **Subscription approval**: Add audit log in admin `PATCH /api/admin/payment-requests/:id`
 
 ## Files to change:
-- `public/sitemap.xml` — domain fix
-- `backend/prisma/schema.prisma` — add Invoice fields
-- `backend/src/routes/paymentRequests.js` — NEW dedicated route
-- `backend/src/index.js` — swap generic CRUD for dedicated route, add cron route
-- `backend/src/middleware/auth.js` — add role/permission/plan-limit middleware
-- `backend/src/routes/cron.js` — NEW expiry processing
-- `backend/src/routes/clients.js` — add plan limit check
-- `backend/src/routes/bookings.js` — add plan limit check
-- `backend/src/routes/tenants.js` — add plan limit check on member creation
+- `backend/prisma/schema.prisma` — add resetToken/resetTokenExpiry to User
+- `backend/src/routes/auth.js` — forgot-password + reset-password + login audit
+- `backend/src/routes/invoices.js` — auto-create transaction + audit logs
+- `backend/src/routes/leads.js` — lead conversion audit log
+- `backend/src/routes/accounts.js` — profitability endpoint
+- `backend/src/routes/admin.js` — subscription approval audit log
+- `src/pages/ForgotPassword.tsx` — NEW frontend page
+- `src/pages/ResetPassword.tsx` — NEW frontend page
+- `src/App.tsx` — add routes
+- `src/lib/api.ts` — add forgotPassword/resetPassword API calls
 
-## Schema changes:
-- `prisma db push` needed after adding `clientName`/`bookingTitle` to Invoice
-
-## No breaking changes — all existing API contracts preserved.
+## No breaking changes to existing flows.
