@@ -908,6 +908,7 @@ export interface AdminStats {
 export interface AdminTenant {
   id: string;
   name: string;
+  slug?: string;
   subscriptionPlan: string;
   subscriptionStatus: string;
   subscriptionExpiry: string | null;
