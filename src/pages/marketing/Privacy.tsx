@@ -8,7 +8,7 @@ const Privacy = () => (
     <section className="py-16 md:py-20">
       <div className="container mx-auto px-4 max-w-3xl">
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Privacy Policy</h1>
-        <p className="text-white/40 text-sm mb-10">Last updated: {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
+        <p className="text-white/40 text-sm mb-10">Last updated: April 1, 2026</p>
 
         <div className="prose prose-invert max-w-none space-y-8 text-white/60 text-sm leading-relaxed">
           <section>
