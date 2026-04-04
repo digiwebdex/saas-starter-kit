@@ -663,8 +663,12 @@ export interface PaymentRequest {
   tenantId: string;
   plan: string;
   amount: number;
+  method: string;
   trxId: string;
+  proofUrl?: string;
   status: "pending" | "approved" | "rejected";
+  reviewerComment?: string;
+  processedAt?: string;
   createdAt: string;
 }
 
