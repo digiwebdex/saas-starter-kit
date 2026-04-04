@@ -34,10 +34,16 @@ const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ children }) => {
           <div className="rounded-full bg-destructive/10 p-4 mb-4">
             <AlertTriangle className="h-10 w-10 text-destructive" />
           </div>
-          <h2 className="text-2xl font-bold mb-2">Subscription Expired</h2>
+          <h2 className="text-2xl font-bold mb-2">
+            {trialExpired ? "Trial Period Ended" : "Subscription Expired"}
+          </h2>
           <p className="text-muted-foreground mb-2">
-            Your <strong className="capitalize">{currentPlan}</strong> plan expired on{" "}
-            <strong>{expiryDate}</strong>.
+            {trialExpired ? (
+              <>Your <strong>14-day Pro trial</strong> has ended. Subscribe to a plan to continue using all features.</>
+            ) : (
+              <>Your <strong className="capitalize">{currentPlan}</strong> plan expired on{" "}
+              <strong>{expiryDate}</strong>.</>
+            )}
           </p>
           <p className="text-sm text-muted-foreground mb-6">
             Please renew your subscription to continue using the platform. Your data is safe and will be available once you reactivate.
