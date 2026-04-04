@@ -13,10 +13,13 @@ interface SubscriptionGateProps {
  * Free plan users are never blocked (free never expires).
  */
 const SubscriptionGate: React.FC<SubscriptionGateProps> = ({ children }) => {
-  const { isSubscriptionExpired, tenant, currentPlan } = useAuth();
+  const { isSubscriptionExpired, isTrialActive, trialDaysLeft, tenant, currentPlan } = useAuth();
   const navigate = useNavigate();
 
-  if (!isSubscriptionExpired) {
+  // Trial expired → show upgrade prompt (not block)
+  const trialExpired = tenant?.subscriptionStatus === "trial" && tenant?.subscriptionExpiry && new Date(tenant.subscriptionExpiry) < new Date();
+
+  if (!isSubscriptionExpired && !trialExpired) {
     return <>{children}</>;
   }
 
