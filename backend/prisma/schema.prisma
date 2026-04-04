@@ -628,12 +628,16 @@ model Subscription {
 }
 
 model PaymentRequest {
-  id        String   @id @default(uuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  plan      String
-  amount    Float
-  trxId     String
-  status    String   @default("pending")
-  createdAt DateTime @default(now())
+  id              String   @id @default(uuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan            String
+  amount          Float
+  method          String   @default("manual")
+  trxId           String
+  proofUrl        String?
+  status          String   @default("pending")
+  reviewerComment String?
+  processedAt     DateTime?
+  createdAt       DateTime @default(now())
 }

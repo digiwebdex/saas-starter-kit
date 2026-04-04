@@ -53,10 +53,10 @@ export const tenantApi = {
   update: (data: Partial<Tenant>) =>
     request<Tenant>("/tenants/me", { method: "PATCH", body: JSON.stringify(data) }),
   getMembers: () => request<User[]>("/tenants/me/members"),
-  inviteMember: (email: string, role: string) =>
+  inviteMember: (email: string, role: string, name?: string) =>
     request<User>("/tenants/me/members", {
       method: "POST",
-      body: JSON.stringify({ email, role }),
+      body: JSON.stringify({ email, role, name }),
     }),
   removeMember: (userId: string) =>
     request<void>(`/tenants/me/members/${userId}`, { method: "DELETE" }),
@@ -663,8 +663,12 @@ export interface PaymentRequest {
   tenantId: string;
   plan: string;
   amount: number;
+  method: string;
   trxId: string;
+  proofUrl?: string;
   status: "pending" | "approved" | "rejected";
+  reviewerComment?: string;
+  processedAt?: string;
   createdAt: string;
 }
 
@@ -891,4 +895,49 @@ export const hajjApi = {
     request<HajjPilgrimPayment[]>(`/hajj/pilgrims/${pilgrimId}/payments`),
   addPilgrimPayment: (pilgrimId: string, data: Omit<HajjPilgrimPayment, "id" | "createdAt">) =>
     request<HajjPilgrimPayment>(`/hajj/pilgrims/${pilgrimId}/payments`, { method: "POST", body: JSON.stringify(data) }),
+};
+
+// ── Admin API (Super Admin only) ──
+export interface AdminStats {
+  totalTenants: number;
+  totalUsers: number;
+  totalBookings: number;
+  totalRevenue: number;
+}
+
+export interface AdminTenant {
+  id: string;
+  name: string;
+  subscriptionPlan: string;
+  subscriptionStatus: string;
+  subscriptionExpiry: string | null;
+  ownerId: string | null;
+  createdAt: string;
+  _count?: { users: number; bookings: number };
+  users?: { id: string; name: string; email: string; role: string; createdAt: string }[];
+}
+
+export interface AdminPaymentRequest {
+  id: string;
+  tenantId: string;
+  plan: string;
+  amount: number;
+  method: string;
+  trxId: string;
+  proofUrl: string;
+  status: string;
+  reviewerComment?: string;
+  createdAt: string;
+  processedAt?: string;
+}
+
+export const adminApi = {
+  getStats: () => request<AdminStats>("/admin/stats"),
+  getTenants: () => request<AdminTenant[]>("/admin/tenants"),
+  getTenant: (id: string) => request<AdminTenant>(`/admin/tenants/${id}`),
+  updateTenant: (id: string, data: Partial<AdminTenant>) =>
+    request<AdminTenant>(`/admin/tenants/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  getPaymentRequests: () => request<AdminPaymentRequest[]>("/admin/payment-requests"),
+  updatePaymentRequest: (id: string, data: Partial<AdminPaymentRequest>) =>
+    request<AdminPaymentRequest>(`/admin/payment-requests/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
 };

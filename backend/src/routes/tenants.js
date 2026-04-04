@@ -3,6 +3,20 @@ const { authenticate, prisma } = require("../middleware/auth");
 
 router.use(authenticate);
 
+// Allowed fields for tenant self-update (prevents privilege escalation)
+const ALLOWED_TENANT_FIELDS = [
+  "name", "logo", "phone", "address", "city", "country",
+  "currency", "timezone", "websiteConfig",
+];
+
+function pickAllowed(body, allowedFields) {
+  const result = {};
+  for (const key of allowedFields) {
+    if (body[key] !== undefined) result[key] = body[key];
+  }
+  return result;
+}
+
 router.get("/me", async (req, res) => {
   try {
     const tenant = await prisma.tenant.findUnique({ where: { id: req.tenantId } });
@@ -13,7 +27,11 @@ router.get("/me", async (req, res) => {
 
 router.patch("/me", async (req, res) => {
   try {
-    const tenant = await prisma.tenant.update({ where: { id: req.tenantId }, data: req.body });
+    const data = pickAllowed(req.body, ALLOWED_TENANT_FIELDS);
+    if (Object.keys(data).length === 0) {
+      return res.status(400).json({ message: "No allowed fields provided" });
+    }
+    const tenant = await prisma.tenant.update({ where: { id: req.tenantId }, data });
     res.json(tenant);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -30,11 +48,21 @@ router.get("/me/members", async (req, res) => {
 
 router.post("/me/members", async (req, res) => {
   try {
+    // Only tenant_owner can add members
+    if (req.userRole !== "tenant_owner" && req.userRole !== "super_admin") {
+      return res.status(403).json({ message: "Only tenant owner can add members" });
+    }
     const bcrypt = require("bcryptjs");
     const { email, role, name } = req.body;
+    if (!email) return res.status(400).json({ message: "Email is required" });
+    // Prevent creating super_admin or tenant_owner via this route
+    const allowedRoles = ["manager", "sales_agent", "accountant", "operations"];
+    const safeRole = allowedRoles.includes(role) ? role : "sales_agent";
+    const exists = await prisma.user.findUnique({ where: { email } });
+    if (exists) return res.status(400).json({ message: "Email already registered" });
     const hashed = await bcrypt.hash("changeme123", 10);
     const user = await prisma.user.create({
-      data: { name: name || email.split("@")[0], email, password: hashed, role: role || "sales_agent", tenantId: req.tenantId },
+      data: { name: name || email.split("@")[0], email, password: hashed, role: safeRole, tenantId: req.tenantId },
     });
     const { password: _, ...safe } = user;
     res.status(201).json(safe);
@@ -43,6 +71,13 @@ router.post("/me/members", async (req, res) => {
 
 router.delete("/me/members/:userId", async (req, res) => {
   try {
+    if (req.userRole !== "tenant_owner" && req.userRole !== "super_admin") {
+      return res.status(403).json({ message: "Only tenant owner can remove members" });
+    }
+    // Prevent removing yourself
+    if (req.params.userId === req.userId) {
+      return res.status(400).json({ message: "Cannot remove yourself" });
+    }
     await prisma.user.deleteMany({ where: { id: req.params.userId, tenantId: req.tenantId } });
     res.json({ success: true });
   } catch (err) { res.status(500).json({ message: err.message }); }

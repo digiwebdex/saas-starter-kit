@@ -1,80 +1,63 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Check, Crown, Zap, Rocket, Star, Gem, AlertTriangle, ArrowUpRight } from "lucide-react";
+import { Check, Crown, Zap, Rocket, Star, Gem, AlertTriangle, ArrowUpRight, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { PLANS, type PlanType } from "@/lib/plans";
 import { usePlanAccess } from "@/hooks/usePlanAccess";
-
-type SubStatus = "active" | "expired" | "pending" | "cancelled";
-type PayReqStatus = "pending" | "approved" | "rejected";
-
-interface Subscription {
-  id: string;
-  plan: PlanType;
-  startDate: string;
-  endDate: string;
-  status: SubStatus;
-}
-
-interface PaymentRequest {
-  id: string;
-  plan: PlanType;
-  amount: number;
-  trxId: string;
-  method: "manual" | "bkash" | "sslcommerz";
-  status: PayReqStatus;
-  createdAt: string;
-}
+import { paymentRequestApi, type PaymentRequest } from "@/lib/api";
 
 const planIcons: Record<string, React.ElementType> = {
   free: Star, basic: Zap, pro: Crown, business: Rocket, enterprise: Gem,
 };
 
 const Subscription_Page = () => {
-  const [currentSub, setCurrentSub] = useState<Subscription>({
-    id: "1",
-    plan: "free",
-    startDate: new Date().toISOString().split("T")[0],
-    endDate: "",
-    status: "active",
-  });
   const [payRequests, setPayRequests] = useState<PaymentRequest[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<PlanType | null>(null);
-  const [payForm, setPayForm] = useState({ trxId: "", method: "manual" as "manual" | "bkash" | "sslcommerz" });
+  const [payForm, setPayForm] = useState({ trxId: "", method: "manual" as string });
   const [payDialogOpen, setPayDialogOpen] = useState(false);
-  const { user, appRole } = useAuth();
-  const isAdmin = appRole === "tenant_owner" || appRole === "super_admin";
+  const [submitting, setSubmitting] = useState(false);
+  const { tenant, currentPlan, refreshTenant } = useAuth();
   const { toast } = useToast();
 
-  const access = usePlanAccess(currentSub.plan);
+  const access = usePlanAccess(currentPlan);
   const selectedPlanInfo = PLANS.find((p) => p.id === selectedPlan);
   const hasPendingRequest = payRequests.some((r) => r.status === "pending");
 
-  // Check if subscription is expiring soon (within 7 days)
+  const fetchRequests = async () => {
+    setLoading(true);
+    try {
+      const data = await paymentRequestApi.list();
+      setPayRequests(data);
+    } catch {
+      // Might 404 if no requests yet
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchRequests(); }, []);
+
   const daysUntilExpiry = useMemo(() => {
-    if (!currentSub.endDate) return null;
-    const diff = new Date(currentSub.endDate).getTime() - Date.now();
+    if (!tenant?.subscriptionExpiry) return null;
+    const diff = new Date(tenant.subscriptionExpiry).getTime() - Date.now();
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
-  }, [currentSub.endDate]);
+  }, [tenant?.subscriptionExpiry]);
 
   const handleSelectPlan = (plan: PlanType) => {
-    if (plan === currentSub.plan) return;
-    if (plan === "free") {
-      setCurrentSub((s) => ({ ...s, plan: "free", status: "active", endDate: "" }));
-      toast({ title: "Downgraded to Free" });
-      return;
-    }
+    if (plan === currentPlan) return;
     if (plan === "enterprise") {
-      toast({ title: "Contact Sales", description: "Enterprise plans require custom pricing. Please contact us at support@globexconnect.com" });
+      toast({ title: "Contact Sales", description: "Enterprise plans require custom pricing." });
       return;
     }
     if (hasPendingRequest) {
@@ -85,45 +68,28 @@ const Subscription_Page = () => {
     setPayDialogOpen(true);
   };
 
-  const handleSubmitPayment = (e: React.FormEvent) => {
+  const handleSubmitPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPlanInfo) return;
-    const req: PaymentRequest = {
-      id: crypto.randomUUID(),
-      plan: selectedPlanInfo.id,
-      amount: selectedPlanInfo.price,
-      trxId: payForm.trxId,
-      method: payForm.method,
-      status: "pending",
-      createdAt: new Date().toISOString(),
-    };
-    setPayRequests((prev) => [...prev, req]);
-    setPayForm({ trxId: "", method: "manual" });
-    setSelectedPlan(null);
-    setPayDialogOpen(false);
-    toast({ title: "Payment submitted", description: "Waiting for admin approval to activate your plan." });
-  };
-
-  const handleApprove = (reqId: string) => {
-    const req = payRequests.find((r) => r.id === reqId);
-    if (!req) return;
-    setPayRequests((prev) => prev.map((r) => r.id === reqId ? { ...r, status: "approved" as PayReqStatus } : r));
-    const start = new Date();
-    const end = new Date();
-    end.setMonth(end.getMonth() + 1);
-    setCurrentSub({
-      id: crypto.randomUUID(),
-      plan: req.plan,
-      startDate: start.toISOString().split("T")[0],
-      endDate: end.toISOString().split("T")[0],
-      status: "active",
-    });
-    toast({ title: "Plan activated!", description: `${req.plan} plan is now active until ${end.toISOString().split("T")[0]}.` });
-  };
-
-  const handleReject = (reqId: string) => {
-    setPayRequests((prev) => prev.map((r) => r.id === reqId ? { ...r, status: "rejected" as PayReqStatus } : r));
-    toast({ title: "Payment rejected", variant: "destructive" });
+    setSubmitting(true);
+    try {
+      const newReq = await paymentRequestApi.create({
+        plan: selectedPlanInfo.id,
+        amount: selectedPlanInfo.price,
+        trxId: payForm.trxId,
+        method: payForm.method,
+        status: "pending",
+      } as any);
+      setPayRequests((prev) => [newReq, ...prev]);
+      setPayForm({ trxId: "", method: "manual" });
+      setSelectedPlan(null);
+      setPayDialogOpen(false);
+      toast({ title: "Payment submitted", description: "Waiting for admin approval to activate your plan." });
+    } catch (err: any) {
+      toast({ title: "Submission failed", description: err.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const statusBadge = (status: string) => {
@@ -133,7 +99,6 @@ const Subscription_Page = () => {
       pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
       approved: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
       rejected: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-      cancelled: "bg-muted text-muted-foreground",
     };
     return <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${map[status] || ""}`}>{status}</span>;
   };
@@ -141,9 +106,14 @@ const Subscription_Page = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Subscription</h1>
-          <p className="text-muted-foreground">Choose a plan and manage your subscription</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Subscription</h1>
+            <p className="text-muted-foreground">Choose a plan and manage your subscription</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => { fetchRequests(); refreshTenant(); }} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh
+          </Button>
         </div>
 
         {/* Expiry Warning */}
@@ -156,9 +126,6 @@ const Subscription_Page = () => {
               </p>
               <p className="text-sm text-yellow-600 dark:text-yellow-300">Renew now to avoid service interruption.</p>
             </div>
-            <Button size="sm" variant="outline" className="ml-auto border-yellow-500 text-yellow-700" onClick={() => handleSelectPlan(currentSub.plan === "free" ? "basic" : currentSub.plan)}>
-              Renew Now
-            </Button>
           </div>
         )}
 
@@ -169,17 +136,17 @@ const Subscription_Page = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4 flex-wrap">
-              <Badge className="text-base px-3 py-1 capitalize">{currentSub.plan}</Badge>
-              {statusBadge(currentSub.status)}
-              {currentSub.endDate && (
-                <span className="text-sm text-muted-foreground">Expires: {currentSub.endDate}</span>
+              <Badge className="text-base px-3 py-1 capitalize">{currentPlan}</Badge>
+              {statusBadge(tenant?.subscriptionStatus || "active")}
+              {tenant?.subscriptionExpiry && (
+                <span className="text-sm text-muted-foreground">
+                  Expires: {new Date(tenant.subscriptionExpiry).toLocaleDateString()}
+                </span>
               )}
               <div className="ml-auto text-sm text-muted-foreground">
-                <span className="font-medium">Plan Features: </span>
                 {access.canUsePaymentGateway && <Badge variant="outline" className="mr-1 text-xs">Payment Gateway</Badge>}
                 {access.canUseCustomDomain && <Badge variant="outline" className="mr-1 text-xs">Custom Domain</Badge>}
                 {access.canUseSms && <Badge variant="outline" className="mr-1 text-xs">SMS</Badge>}
-                {access.canUseWhatsApp && <Badge variant="outline" className="mr-1 text-xs">WhatsApp</Badge>}
               </div>
             </div>
           </CardContent>
@@ -188,7 +155,7 @@ const Subscription_Page = () => {
         {/* Plans Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {PLANS.map((p) => {
-            const isCurrent = currentSub.plan === p.id;
+            const isCurrent = currentPlan === p.id;
             const Icon = planIcons[p.id] || Star;
             const isHighlighted = p.badge === "Most Popular" || p.badge === "Best Value";
             return (
@@ -249,56 +216,45 @@ const Subscription_Page = () => {
         <Card>
           <CardHeader>
             <CardTitle>Payment Requests</CardTitle>
-            <CardDescription>
-              {isAdmin ? "Review and approve payment requests" : "Your payment request history"}
-            </CardDescription>
+            <CardDescription>Your payment request history</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Plan</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Transaction ID</TableHead>
-                  <TableHead>Status</TableHead>
-                  {isAdmin && <TableHead className="w-[140px]">Actions</TableHead>}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {payRequests.length === 0 ? (
+            {loading ? (
+              <div className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-10 w-full" />)}</div>
+            ) : (
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={isAdmin ? 7 : 6} className="text-center text-muted-foreground py-8">
-                      No payment requests yet.
-                    </TableCell>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Plan</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead>Method</TableHead>
+                    <TableHead>Transaction ID</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
-                ) : (
-                  [...payRequests].reverse().map((req) => (
-                    <TableRow key={req.id}>
-                      <TableCell>{new Date(req.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell className="capitalize font-medium">{req.plan}</TableCell>
-                      <TableCell className="text-right">৳{req.amount.toLocaleString()}</TableCell>
-                      <TableCell className="capitalize">{req.method}</TableCell>
-                      <TableCell className="font-mono text-xs">{req.trxId}</TableCell>
-                      <TableCell>{statusBadge(req.status)}</TableCell>
-                      {isAdmin && (
-                        <TableCell>
-                          {req.status === "pending" ? (
-                            <div className="flex gap-1">
-                              <Button size="sm" onClick={() => handleApprove(req.id)}>Approve</Button>
-                              <Button size="sm" variant="destructive" onClick={() => handleReject(req.id)}>Reject</Button>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
-                          )}
-                        </TableCell>
-                      )}
+                </TableHeader>
+                <TableBody>
+                  {payRequests.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                        No payment requests yet.
+                      </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : (
+                    [...payRequests].reverse().map((req) => (
+                      <TableRow key={req.id}>
+                        <TableCell>{new Date(req.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell className="capitalize font-medium">{req.plan}</TableCell>
+                        <TableCell className="text-right">৳{(req.amount || 0).toLocaleString()}</TableCell>
+                        <TableCell className="capitalize">{req.method || "manual"}</TableCell>
+                        <TableCell className="font-mono text-xs">{req.trxId}</TableCell>
+                        <TableCell>{statusBadge(req.status)}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
 
@@ -327,10 +283,8 @@ const Subscription_Page = () => {
             <form onSubmit={handleSubmitPayment} className="space-y-4">
               <div className="space-y-2">
                 <Label>Payment Method</Label>
-                <Select value={payForm.method} onValueChange={(v) => setPayForm((f) => ({ ...f, method: v as "manual" | "bkash" | "sslcommerz" }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                <Select value={payForm.method} onValueChange={(v) => setPayForm((f) => ({ ...f, method: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="manual">Manual (Bank Transfer / Cash)</SelectItem>
                     <SelectItem value="bkash">bKash</SelectItem>
@@ -349,7 +303,9 @@ const Subscription_Page = () => {
                 />
               </div>
               <div className="flex gap-2">
-                <Button type="submit" className="flex-1">Submit Payment</Button>
+                <Button type="submit" className="flex-1" disabled={submitting}>
+                  {submitting ? "Submitting..." : "Submit Payment"}
+                </Button>
                 <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
               </div>
             </form>
