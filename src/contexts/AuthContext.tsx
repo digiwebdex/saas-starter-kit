@@ -99,6 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const logout = useCallback(() => {
+    authApi.logout().catch(() => {}); // fire-and-forget audit log
     localStorage.removeItem("token");
     setUser(null);
     setTenant(null);
