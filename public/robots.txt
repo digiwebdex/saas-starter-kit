@@ -30,4 +30,4 @@ Disallow: /website
 Disallow: /subscription
 Disallow: /onboarding
 
-Sitemap: https://globexconnect.com/sitemap.xml
+Sitemap: https://travelagencyweb.com/sitemap.xml
