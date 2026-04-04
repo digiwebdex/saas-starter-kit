@@ -1,51 +1,46 @@
 
-# Production QA & Verification Plan
+# P0 + P1 Fix Plan
 
-## Approach
-Read all critical source files, trace each flow from UI → API → DB, identify gaps between frontend expectations and backend reality. No new features — only audit and fix.
+## P0 — Critical
 
-## Flows to Verify
+### 1. Sitemap domain fix
+- **Root cause**: sitemap.xml uses `globexconnect.com` instead of `travelagencyweb.com`
+- **Fix**: Update all URLs in `public/sitemap.xml`
 
-### 1. Registration & Trial Flow
-- Register page → POST /auth/register → tenant created with trial → redirect → TrialBanner shows
-- Check: trial expiry logic, SubscriptionGate blocking after expiry
+### 2. Invoice schema mismatch
+- **Root cause**: Frontend sends `clientName`/`bookingTitle` but Prisma `Invoice` model lacks these fields
+- **Fix**: Add `clientName` and `bookingTitle` as optional String fields to Invoice model in schema.prisma
 
-### 2. Login / Logout / Forgot Password
-- Login → JWT → /auth/me → role routing
-- Logout → clear token
-- Forgot password — does endpoint exist?
+### 3. Payment-request tenant isolation
+- **Root cause**: `payment-requests` uses generic CRUD (`crud.js`) which correctly filters by `tenantId` on reads, but the issue is that the admin route for payment-requests doesn't scope properly, and the generic CRUD doesn't validate ownership on updates
+- **Fix**: Create a dedicated `paymentRequests.js` route with strict tenant filtering, replacing the generic CRUD
 
-### 3. Role-Based Permissions
-- UI: PermissionGate, usePermissions, AdminRoute
-- API: authenticate middleware, requireSuperAdmin
-- Gap check: are tenant-level roles enforced server-side?
+### 4. Subscription/trial expiry cron
+- **Root cause**: No mechanism to auto-expire trials/subscriptions after their expiry date
+- **Fix**: Add a `/api/cron/process-expiry` endpoint protected by a secret key, plus provide cron setup instructions
 
-### 4. Lead → Quotation → Booking → Invoice → Payment
-- Each CRUD endpoint exists? Connected in frontend?
-- Conversion flows (quotation→booking, booking→invoice)
+## P1 — Important
 
-### 5. Payment Request → Admin Approve → Subscription Update
-- POST /subscriptions/payment-request → admin PATCH → tenant plan update
-- Frontend: Subscriptions page, AdminPayments page
+### 5. Backend role middleware
+- **Root cause**: Only `requireSuperAdmin` exists; no middleware checks tenant-level roles
+- **Fix**: Add `requireRole(...roles)` and `requirePermission(module, action)` middleware functions in `auth.js`, apply to sensitive routes
 
-### 6. Dashboard & Reports
-- /dashboard/stats — does it return real data?
-- Reports pages — real API or demo data?
+### 6. Backend plan-limit enforcement
+- **Root cause**: Plan limits (max clients, bookings, team members, domains) only checked on frontend
+- **Fix**: Add `checkPlanLimit(tenantId, resource)` middleware, apply to POST routes for clients, bookings, team members, domains
 
-### 7. Accounts
-- /accounts/summary, /accounts/ledger — real queries?
+## Files to change:
+- `public/sitemap.xml` — domain fix
+- `backend/prisma/schema.prisma` — add Invoice fields
+- `backend/src/routes/paymentRequests.js` — NEW dedicated route
+- `backend/src/index.js` — swap generic CRUD for dedicated route, add cron route
+- `backend/src/middleware/auth.js` — add role/permission/plan-limit middleware
+- `backend/src/routes/cron.js` — NEW expiry processing
+- `backend/src/routes/clients.js` — add plan limit check
+- `backend/src/routes/bookings.js` — add plan limit check
+- `backend/src/routes/tenants.js` — add plan limit check on member creation
 
-### 8. Audit Logs
-- Which actions are logged? Which are missing?
+## Schema changes:
+- `prisma db push` needed after adding `clientName`/`bookingTitle` to Invoice
 
-### 9. Custom Domain Flow
-- Full CRUD + verification + SSL + primary
-
-### 10. Plan/Feature Gating
-- FeatureGate, SubscriptionGate — connected to real plan data?
-
-### 11. Marketing Website
-- CTAs link to /register? Forms submit? Pricing matches plans.ts?
-
-## Deliverable
-Structured QA report with pass/fail, issues, root causes, fixes, and manual infra tasks.
+## No breaking changes — all existing API contracts preserved.
