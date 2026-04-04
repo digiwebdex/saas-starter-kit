@@ -641,3 +641,24 @@ model PaymentRequest {
   processedAt     DateTime?
   createdAt       DateTime @default(now())
 }
+
+// ── Audit Logs ──
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorId     String
+  actorName   String
+  actorEmail  String
+  actorRole   String
+  tenantId    String?
+  tenantName  String?
+  module      String
+  action      String
+  targetType  String?
+  targetId    String?
+  targetLabel String?
+  oldValue    String?
+  newValue    String?
+  metadata    Json?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+}

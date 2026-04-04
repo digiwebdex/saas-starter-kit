@@ -234,7 +234,7 @@ export interface Tenant {
   ownerId: string;
   subscriptionPlan: "free" | "basic" | "pro" | "business" | "enterprise";
   subscriptionExpiry?: string;
-  subscriptionStatus?: "active" | "expired" | "cancelled" | "pending";
+  subscriptionStatus?: "active" | "trial" | "expired" | "cancelled" | "pending" | "suspended" | "overdue";
   createdAt: string;
 }
 
@@ -940,4 +940,31 @@ export const adminApi = {
   getPaymentRequests: () => request<AdminPaymentRequest[]>("/admin/payment-requests"),
   updatePaymentRequest: (id: string, data: Partial<AdminPaymentRequest>) =>
     request<AdminPaymentRequest>(`/admin/payment-requests/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+};
+
+// ── Audit Log API ──
+export interface AuditLogEntry {
+  id: string;
+  actorId: string;
+  actorName: string;
+  actorEmail: string;
+  actorRole: string;
+  tenantId?: string;
+  tenantName?: string;
+  module: string;
+  action: string;
+  targetType?: string;
+  targetId?: string;
+  targetLabel?: string;
+  oldValue?: string;
+  newValue?: string;
+  metadata?: Record<string, string>;
+  ipAddress?: string;
+  createdAt: string;
+}
+
+export const auditLogApi = {
+  list: () => request<AuditLogEntry[]>("/audit-logs"),
+  create: (data: Omit<AuditLogEntry, "id" | "actorId" | "actorName" | "actorEmail" | "actorRole" | "createdAt">) =>
+    request<AuditLogEntry>("/audit-logs", { method: "POST", body: JSON.stringify(data) }),
 };

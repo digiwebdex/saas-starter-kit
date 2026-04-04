@@ -19,18 +19,42 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Register (creates tenant + user)
+// Register (creates tenant + user with 14-day Pro trial)
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password, tenantName } = req.body;
     const exists = await prisma.user.findUnique({ where: { email } });
     if (exists) return res.status(400).json({ message: "Email already registered" });
     const hashed = await bcrypt.hash(password, 10);
-    const tenant = await prisma.tenant.create({ data: { name: tenantName || name + "'s Agency" } });
+
+    // 14-day Pro trial
+    const trialEnd = new Date();
+    trialEnd.setDate(trialEnd.getDate() + 14);
+
+    const tenant = await prisma.tenant.create({
+      data: {
+        name: tenantName || name + "'s Agency",
+        subscriptionPlan: "pro",
+        subscriptionStatus: "trial",
+        subscriptionExpiry: trialEnd,
+      },
+    });
     const user = await prisma.user.create({
       data: { name, email, password: hashed, role: "tenant_owner", tenantId: tenant.id },
     });
     await prisma.tenant.update({ where: { id: tenant.id }, data: { ownerId: user.id } });
+
+    // Audit log
+    await prisma.auditLog.create({
+      data: {
+        actorId: user.id, actorName: name, actorEmail: email, actorRole: "tenant_owner",
+        tenantId: tenant.id, tenantName: tenant.name,
+        module: "auth", action: "created",
+        targetType: "tenant", targetId: tenant.id, targetLabel: tenant.name,
+        newValue: "pro (14-day trial)",
+      },
+    }).catch(() => {});
+
     const token = jwt.sign({ userId: user.id, tenantId: tenant.id, role: user.role }, SECRET, { expiresIn: "7d" });
     const { password: _, ...safeUser } = user;
     res.json({ token, user: safeUser });

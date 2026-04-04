@@ -9,6 +9,8 @@ interface AuthContextType {
   currentPlan: PlanType;
   appRole: AppRole;
   isSubscriptionExpired: boolean;
+  isTrialActive: boolean;
+  trialDaysLeft: number;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
   register: (data: { name: string; email: string; password: string; tenantName: string }) => Promise<User>;
@@ -31,6 +33,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const currentPlan: PlanType = (tenant?.subscriptionPlan as PlanType) || "free";
   const appRole: AppRole = user ? mapLegacyRole(user.role) : "sales_agent";
+
+  const isTrialActive = tenant?.subscriptionStatus === "trial";
+  const trialDaysLeft = (() => {
+    if (!isTrialActive || !tenant?.subscriptionExpiry) return 0;
+    const diff = new Date(tenant.subscriptionExpiry).getTime() - Date.now();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  })();
 
   const isSubscriptionExpired = (() => {
     if (!tenant) return false;
@@ -96,7 +105,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, tenant, currentPlan, appRole, isSubscriptionExpired, loading, login, register, logout, refreshTenant }}>
+    <AuthContext.Provider value={{ user, tenant, currentPlan, appRole, isSubscriptionExpired, isTrialActive, trialDaysLeft, loading, login, register, logout, refreshTenant }}>
       {children}
     </AuthContext.Provider>
   );

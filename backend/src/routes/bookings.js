@@ -18,7 +18,21 @@ router.get("/:id", async (req, res) => {
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
 router.post("/", async (req, res) => {
-  try { res.status(201).json(await prisma.booking.create({ data: { ...req.body, tenantId: req.tenantId } })); }
+  try {
+    const booking = await prisma.booking.create({ data: { ...req.body, tenantId: req.tenantId } });
+    // Audit log
+    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { name: true, email: true, role: true } });
+    const tenant = await prisma.tenant.findUnique({ where: { id: req.tenantId }, select: { name: true } });
+    await prisma.auditLog.create({
+      data: {
+        actorId: req.userId, actorName: user?.name || "", actorEmail: user?.email || "", actorRole: user?.role || "",
+        tenantId: req.tenantId, tenantName: tenant?.name || null,
+        module: "booking", action: "created",
+        targetType: "booking", targetId: booking.id, targetLabel: booking.clientName || booking.destination || booking.id,
+      },
+    }).catch(() => {});
+    res.status(201).json(booking);
+  }
   catch (err) { res.status(500).json({ message: err.message }); }
 });
 router.patch("/:id", async (req, res) => {
@@ -36,6 +50,18 @@ router.patch("/:id/status", async (req, res) => {
     const old = await prisma.booking.findFirst({ where: { id: req.params.id, tenantId: req.tenantId } });
     await prisma.booking.updateMany({ where: { id: req.params.id, tenantId: req.tenantId }, data: { status: req.body.status } });
     await prisma.bookingTimelineEvent.create({ data: { bookingId: req.params.id, type: "status_change", content: `Status: ${old.status} → ${req.body.status}`, oldStatus: old.status, newStatus: req.body.status, createdBy: req.userId } });
+    // Audit log
+    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { name: true, email: true, role: true } });
+    const tenant = await prisma.tenant.findUnique({ where: { id: req.tenantId }, select: { name: true } });
+    await prisma.auditLog.create({
+      data: {
+        actorId: req.userId, actorName: user?.name || "", actorEmail: user?.email || "", actorRole: user?.role || "",
+        tenantId: req.tenantId, tenantName: tenant?.name || null,
+        module: "booking", action: "status_changed",
+        targetType: "booking", targetId: req.params.id, targetLabel: old?.clientName || old?.destination || req.params.id,
+        oldValue: old?.status, newValue: req.body.status,
+      },
+    }).catch(() => {});
     res.json(await prisma.booking.findFirst({ where: { id: req.params.id } }));
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
