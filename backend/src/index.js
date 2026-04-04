@@ -41,12 +41,16 @@ app.use("/api/transactions", require("./routes/crud")("transaction"));
 app.use("/api/expenses", require("./routes/expenses"));
 app.use("/api/hajj", require("./routes/hajj"));
 app.use("/api/subscriptions", require("./routes/crud")("subscription"));
-app.use("/api/payment-requests", require("./routes/crud")("paymentRequest"));
+// Payment requests — dedicated tenant-isolated route (replaces generic CRUD)
+app.use("/api/payment-requests", require("./routes/paymentRequests"));
 app.use("/api/audit-logs", require("./routes/auditLogs"));
 
 // Admin routes
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/admin/domains", require("./routes/domains"));
+
+// Cron routes (protected by CRON_SECRET, not JWT)
+app.use("/api/cron", require("./routes/cron"));
 
 // Health check
 app.get("/api/health", (_, res) => res.json({ status: "ok", time: new Date().toISOString() }));
