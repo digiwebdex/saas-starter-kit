@@ -234,7 +234,7 @@ export interface Tenant {
   ownerId: string;
   subscriptionPlan: "free" | "basic" | "pro" | "business" | "enterprise";
   subscriptionExpiry?: string;
-  subscriptionStatus?: "active" | "expired" | "cancelled" | "pending";
+  subscriptionStatus?: "active" | "trial" | "expired" | "cancelled" | "pending" | "suspended" | "overdue";
   createdAt: string;
 }
 

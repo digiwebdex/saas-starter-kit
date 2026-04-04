@@ -9,6 +9,8 @@ interface AuthContextType {
   currentPlan: PlanType;
   appRole: AppRole;
   isSubscriptionExpired: boolean;
+  isTrialActive: boolean;
+  trialDaysLeft: number;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
   register: (data: { name: string; email: string; password: string; tenantName: string }) => Promise<User>;
