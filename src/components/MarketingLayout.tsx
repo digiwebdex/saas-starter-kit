@@ -27,8 +27,13 @@ const MarketingLayout = ({ children, title, description }: Props) => {
       if (!meta) { meta = document.createElement("meta"); meta.setAttribute("name", "description"); document.head.appendChild(meta); }
       meta.setAttribute("content", description);
     }
+    // Set canonical for each page
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) {
+      canonical.setAttribute("href", `https://globexconnect.com${location.pathname === "/" ? "" : location.pathname}`);
+    }
     return () => { document.title = "Globex Connect — Travel Agency Management Software"; };
-  }, [title, description]);
+  }, [title, description, location.pathname]);
 
   useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
