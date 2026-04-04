@@ -31,9 +31,18 @@ router.post("/register", async (req, res) => {
     const trialEnd = new Date();
     trialEnd.setDate(trialEnd.getDate() + 14);
 
+    // Generate slug from tenant name
+    const rawSlug = (tenantName || name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 50);
+    let slug = rawSlug;
+    let suffix = 1;
+    while (await prisma.tenant.findUnique({ where: { slug } })) {
+      slug = `${rawSlug}-${suffix++}`;
+    }
+
     const tenant = await prisma.tenant.create({
       data: {
         name: tenantName || name + "'s Agency",
+        slug,
         subscriptionPlan: "pro",
         subscriptionStatus: "trial",
         subscriptionExpiry: trialEnd,

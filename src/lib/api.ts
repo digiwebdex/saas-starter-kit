@@ -908,6 +908,7 @@ export interface AdminStats {
 export interface AdminTenant {
   id: string;
   name: string;
+  slug?: string;
   subscriptionPlan: string;
   subscriptionStatus: string;
   subscriptionExpiry: string | null;
@@ -940,6 +941,39 @@ export const adminApi = {
   getPaymentRequests: () => request<AdminPaymentRequest[]>("/admin/payment-requests"),
   updatePaymentRequest: (id: string, data: Partial<AdminPaymentRequest>) =>
     request<AdminPaymentRequest>(`/admin/payment-requests/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+};
+
+// ── Domain Management API ──
+export interface TenantDomainRecord {
+  id: string;
+  tenantId: string;
+  domain: string;
+  wwwRedirect: "www-to-root" | "root-to-www";
+  status: "active" | "pending" | "error";
+  sslStatus: "active" | "pending" | "none";
+  verificationStatus: "unverified" | "verifying" | "verified";
+  verificationToken: string;
+  isPrimary: boolean;
+  lastDnsCheck?: string;
+  createdAt: string;
+  updatedAt: string;
+  tenant?: { id: string; name: string; slug?: string; subscriptionPlan: string };
+}
+
+export const domainApi = {
+  list: () => request<TenantDomainRecord[]>("/admin/domains"),
+  add: (data: { tenantId: string; domain: string; wwwRedirect?: string }) =>
+    request<TenantDomainRecord>("/admin/domains", { method: "POST", body: JSON.stringify(data) }),
+  verify: (id: string) =>
+    request<{ verified: boolean; domain: TenantDomainRecord }>(`/admin/domains/${id}/verify`, { method: "POST" }),
+  updateSsl: (id: string, sslStatus: string) =>
+    request<TenantDomainRecord>(`/admin/domains/${id}/ssl`, { method: "PATCH", body: JSON.stringify({ sslStatus }) }),
+  updateStatus: (id: string, status: string) =>
+    request<TenantDomainRecord>(`/admin/domains/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  setPrimary: (id: string) =>
+    request<TenantDomainRecord>(`/admin/domains/${id}/primary`, { method: "PATCH" }),
+  remove: (id: string) =>
+    request<{ message: string }>(`/admin/domains/${id}`, { method: "DELETE" }),
 };
 
 // ── Audit Log API ──

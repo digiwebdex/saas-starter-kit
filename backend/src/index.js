@@ -46,6 +46,7 @@ app.use("/api/audit-logs", require("./routes/auditLogs"));
 
 // Admin routes
 app.use("/api/admin", require("./routes/admin"));
+app.use("/api/admin/domains", require("./routes/domains"));
 
 // Health check
 app.get("/api/health", (_, res) => res.json({ status: "ok", time: new Date().toISOString() }));

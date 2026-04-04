@@ -11,6 +11,7 @@ datasource db {
 model Tenant {
   id                 String   @id @default(uuid())
   name               String
+  slug               String?  @unique
   ownerId            String?
   subscriptionPlan   String   @default("free")
   subscriptionStatus String   @default("active")
@@ -37,6 +38,24 @@ model Tenant {
   vendorBills        VendorBill[]
   subscriptions      Subscription[]
   paymentRequests    PaymentRequest[]
+  domains            TenantDomain[]
+}
+
+// ── Tenant Domains ──
+model TenantDomain {
+  id                 String   @id @default(uuid())
+  tenantId           String
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  domain             String   @unique
+  wwwRedirect        String   @default("www-to-root") // "www-to-root" | "root-to-www"
+  status             String   @default("pending")     // "active" | "pending" | "error"
+  sslStatus          String   @default("none")        // "active" | "pending" | "none"
+  verificationStatus String   @default("unverified")  // "unverified" | "verifying" | "verified"
+  verificationToken  String
+  isPrimary          Boolean  @default(false)
+  lastDnsCheck       DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 // ── Users ──
