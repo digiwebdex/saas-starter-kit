@@ -1,44 +1,44 @@
 const router = require("express").Router();
-const { authenticate, prisma } = require("../middleware/auth");
+const { authenticate, requirePermission, checkPlanLimit, prisma } = require("../middleware/auth");
 
 router.use(authenticate);
 
-router.get("/", async (req, res) => {
+router.get("/", requirePermission("quotations", "view"), async (req, res) => {
   try { res.json(await prisma.quotation.findMany({ where: { tenantId: req.tenantId }, orderBy: { createdAt: "desc" } })); }
   catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.get("/:id", async (req, res) => {
+router.get("/:id", requirePermission("quotations", "view"), async (req, res) => {
   try {
     const q = await prisma.quotation.findFirst({ where: { id: req.params.id, tenantId: req.tenantId } });
     if (!q) return res.status(404).json({ message: "Not found" });
     res.json(q);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.post("/", async (req, res) => {
+router.post("/", requirePermission("quotations", "create"), checkPlanLimit("quotations"), async (req, res) => {
   try { res.status(201).json(await prisma.quotation.create({ data: { ...req.body, createdBy: req.userId, tenantId: req.tenantId } })); }
   catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", requirePermission("quotations", "edit"), async (req, res) => {
   try {
     await prisma.quotation.updateMany({ where: { id: req.params.id, tenantId: req.tenantId }, data: req.body });
     res.json(await prisma.quotation.findFirst({ where: { id: req.params.id } }));
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requirePermission("quotations", "delete"), async (req, res) => {
   try { await prisma.quotation.deleteMany({ where: { id: req.params.id, tenantId: req.tenantId } }); res.json({ success: true }); }
   catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.patch("/:id/status", async (req, res) => {
+router.patch("/:id/status", requirePermission("quotations", "edit"), async (req, res) => {
   try {
     await prisma.quotation.updateMany({ where: { id: req.params.id, tenantId: req.tenantId }, data: { status: req.body.status } });
     res.json(await prisma.quotation.findFirst({ where: { id: req.params.id } }));
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.get("/:id/versions", async (req, res) => {
+router.get("/:id/versions", requirePermission("quotations", "view"), async (req, res) => {
   try { res.json(await prisma.quotationVersion.findMany({ where: { quotationId: req.params.id }, orderBy: { versionNumber: "desc" } })); }
   catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.post("/:id/duplicate", async (req, res) => {
+router.post("/:id/duplicate", requirePermission("quotations", "create"), async (req, res) => {
   try {
     const orig = await prisma.quotation.findFirst({ where: { id: req.params.id, tenantId: req.tenantId } });
     if (!orig) return res.status(404).json({ message: "Not found" });
@@ -47,7 +47,7 @@ router.post("/:id/duplicate", async (req, res) => {
     res.status(201).json(dup);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
-router.post("/:id/convert-to-booking", async (req, res) => {
+router.post("/:id/convert-to-booking", requirePermission("quotations", "approve"), async (req, res) => {
   try {
     const q = await prisma.quotation.findFirst({ where: { id: req.params.id, tenantId: req.tenantId } });
     if (!q) return res.status(404).json({ message: "Not found" });

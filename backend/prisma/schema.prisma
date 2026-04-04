@@ -354,6 +354,8 @@ model Invoice {
   booking         Booking  @relation(fields: [bookingId], references: [id])
   clientId        String?
   client          Client?  @relation(fields: [clientId], references: [id])
+  clientName      String?
+  bookingTitle    String?
   totalAmount     Float    @default(0)
   paidAmount      Float    @default(0)
   dueAmount       Float    @default(0)
